@@ -18,6 +18,7 @@ class Config:
 class ProductionConfig(Config):
     ENV = "Production"
     DEBUG = False
+    SQLALCHEMY_DATABASE_URI = f'sqlite:///{ os.path.join(Config.PROJECT_ROOT, "prod.db") }'
 
 
 class DevelopmentConfig(Config):
