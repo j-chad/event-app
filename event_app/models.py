@@ -3,6 +3,7 @@ import string
 import uuid
 from datetime import datetime
 
+import flask
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
@@ -26,16 +27,15 @@ class User(UserMixin, Model):
     first_name = Column(db.String(40), nullable=False)
     last_name = Column(db.String(40), nullable=True)
     email = Column(db.String(100), unique=True, nullable=False)
-    email_verified = Column(db.Boolean, nullable=False)
+    email_verified = Column(db.Boolean, nullable=False, default=False)
     _password = Column(db.Binary(128), nullable=False)
+    salt = Column(db.String(32))
     created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    # FLASK-LOGIN
-
-    def __init__(self, first_name: str, email: str, password: str = None, **kwargs):
-        super().__init__(self, first_name=first_name, email=email, **kwargs)
-        if password is not None:
-            self.password = password
+    def __init__(self, first_name: str, email: str, password: str, **kwargs):
+        Model.__init__(self, first_name=first_name, email=email, **kwargs)
+        self.salt = uuid.uuid4().hex
+        self.password = password
 
     @hybrid_property
     def password(self) -> str:
@@ -51,7 +51,8 @@ class User(UserMixin, Model):
         And the password will be converted and saved appropriately.
         """
         salted_password = plain_password + self.salt
-        self._password = bcrypt.generate_password_hash(salted_password, rounds=db.app.config['BCRYPT_LOG_ROUNDS'])
+        self._password = bcrypt.generate_password_hash(salted_password,
+                                                       rounds=flask.current_app.config['BCRYPT_LOG_ROUNDS'])
 
     @hybrid_method
     def check_password(self, plain_password: str) -> bool:
@@ -59,8 +60,15 @@ class User(UserMixin, Model):
         salted_password = plain_password + self.salt
         return bcrypt.check_password_hash(self.password, salted_password)
 
+    @property
+    def full_name(self):
+        if self.last_name is not None:
+            return f"{self.first_name} {self.last_name}"
+        else:
+            return self.first_name
+
     def __repr__(self):
-        return "<User({!r})>".format(self.username)
+        return "<User {} ({!r})>".format(self.id, self.full_name)
 
 
 class Event(Model):
@@ -68,20 +76,22 @@ class Event(Model):
     id = Column(db.String(10), primary_key=True)
     name = Column(db.String(60), nullable=False)
     description = Column(db.String(200), nullable=True)
-    private = Column(db.Boolean, nullable=False)
+    private = Column(db.Boolean, nullable=False, default=False)
 
-    owner_id = reference_col(User)
+    owner_id = reference_col(User, nullable=False)
     owner = relationship('User', backref='events')
 
     def __init__(self, **kwargs):
-        super().__init__(self, **kwargs)
+        Model.__init__(self, **kwargs)
         self.id = self.generate_id()
+
+    def __repr__(self):
+        return "<User {} ({!r})>".format(self.id, self.name)
 
     @staticmethod
     def generate_id():
-        length = Event.columns.id.type.length
+        length = Event.id.type.length
         while True:
             temp_id = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(length))
             if Event.query.get(temp_id) is None:
-                break
-        return temp_id
+                return temp_id
