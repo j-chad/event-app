@@ -2,13 +2,10 @@ from typing import Any, Dict, Type
 
 import flask
 
-from .configs import Config, ProductionConfig
-from .extensions import bcrypt, db, debug_toolbar, login_manager
-from .models import User
-from .views.home import home
+from . import commands, configs, extensions, models, views
 
 
-def create_app(config_object: Type[Config] = ProductionConfig) -> flask.app.Flask:
+def create_app(config_object: Type[configs.Config] = configs.ProductionConfig) -> flask.app.Flask:
     """Application Factory
 
     Creates and initialises the application"""
@@ -19,6 +16,7 @@ def create_app(config_object: Type[Config] = ProductionConfig) -> flask.app.Flas
 
     register_extensions(app)
     register_blueprints(app)
+    register_commands(app)
     register_shellcontext(app)
 
     return app
@@ -26,18 +24,22 @@ def create_app(config_object: Type[Config] = ProductionConfig) -> flask.app.Flas
 
 def register_extensions(app: flask.app.Flask) -> None:
     """Register All Flask Extensions"""
-    bcrypt.init_app(app)
-    db.init_app(app)
-    login_manager.init_app(app)
-    debug_toolbar.init_app(app)
+    extensions.bcrypt.init_app(app)
+    extensions.db.init_app(app)
+    extensions.login_manager.init_app(app)
+    extensions.debug_toolbar.init_app(app)
 
     # Set up user loader
-    login_manager.user_loader(lambda user_id: User.query.get(int(user_id)))
+    extensions.login_manager.user_loader(lambda user_id: models.User.query.get(int(user_id)))
 
 
 def register_blueprints(app: flask.app.Flask) -> None:
     """Register Flask Blueprints"""
-    app.register_blueprint(home)
+    app.register_blueprint(views.home)
+
+
+def register_commands(app: flask.app.Flask) -> None:
+    app.cli.add_command(commands.build_database)
 
 
 def register_shellcontext(app: flask.app.Flask) -> None:
@@ -46,7 +48,10 @@ def register_shellcontext(app: flask.app.Flask) -> None:
     def shell_context() -> Dict[str, Any]:
         """Shell Context Objects"""
         return {
-            'db': db
+            'db'     : extensions.db,
+            'User'   : models.User,
+            'Event'  : models.Event,
+            'Session': models.Session
         }
 
     app.shell_context_processor(shell_context)

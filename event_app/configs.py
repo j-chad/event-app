@@ -32,3 +32,10 @@ class TestingConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
     BCRYPT_LOG_ROUNDS = 4
+
+
+config_map = {
+    "ProductionConfig" : ProductionConfig,
+    "DevelopmentConfig": DevelopmentConfig,
+    "TestingConfig"    : TestingConfig
+}
