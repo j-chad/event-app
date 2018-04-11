@@ -7,7 +7,7 @@ from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
 from .extensions import bcrypt, db
-from .util import reference_col
+from .utils import reference_col
 
 Model = db.Model
 Column = db.Column

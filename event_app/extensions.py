@@ -40,3 +40,5 @@ bcrypt = Bcrypt()
 db = SQLAlchemy(model_class=ModelMixin)
 login_manager = LoginManager()
 debug_toolbar = DebugToolbarExtension()
+
+login_manager.login_view = "users.login"

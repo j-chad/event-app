@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 
 from .extensions import bcrypt
 from .models import User
-from .util import PasswordRules
+from .utils import PasswordRules
 
 # PASSWORD SETTINGS
 p_manager = PasswordRules(

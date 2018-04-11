@@ -5,4 +5,4 @@ home = Blueprint('home', __name__)
 
 @home.route('/')
 def index():
-    return render_template("home/index.jinja")
+    return render_template("home/index_minimal.jinja")
