@@ -7,11 +7,11 @@ from .utils import PasswordRules
 
 # PASSWORD SETTINGS
 p_manager = PasswordRules(
-    uppercase=2,
-    lowercase=5,
-    digits=2,
-    special=1,
-    length=10
+    uppercase=None,
+    lowercase=None,
+    digits=None,
+    special=None,
+    length=8
 )
 
 

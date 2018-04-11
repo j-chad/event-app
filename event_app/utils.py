@@ -57,8 +57,10 @@ class PasswordRules:
                  digits: Optional[int] = None,
                  special: Optional[int] = None,
                  length: int = 10):
-        if uppercase + lowercase + digits + special > length:
-            raise ValueError("Length must be >= sum of requirements")
+        if length is not None:
+            a = lambda x: 0 if x is None else a  # Transform None to 0, so no ValueError is raise
+            if a(uppercase) + a(lowercase) + a(digits) + a(special) > length:
+                raise ValueError("Length must be >= sum of requirements")
         self.uppercase = uppercase
         self.lowercase = lowercase
         self.digits = digits
@@ -68,8 +70,8 @@ class PasswordRules:
     def validate(self, password: str, raise_error: bool = False):
         char_count = self.count_characters(password)
 
-        def test(a: int, b: int) -> bool:
-            return (a is not None) and (a > b)
+        def test(a: int, b: int, can_be_equal: bool = False) -> bool:
+            return (a is not None) and ((a >= b) if can_be_equal else (a > b))
 
         errors = []
 
@@ -89,7 +91,7 @@ class PasswordRules:
             errors.append("Need at least {} special character{}".format(
                 self.special, 's' if self.special != 1 else ''
             ))
-        if test(self.length, char_count['length']):
+        if test(self.length, char_count['length'], can_be_equal=True):
             errors.append("Password must be at least {} characters".format(self.length))
         if raise_error and errors:
             raise ValidationError(errors[0])
@@ -100,7 +102,7 @@ class PasswordRules:
 
     @staticmethod
     def count_characters(password: str) -> Counter[str]:
-        counter = collections.Counter(['uppercase', 'lowercase', 'digits', 'special'])
+        counter = collections.Counter(uppercase=0, lowercase=0, digits=0, special=0, length=len(password))
         for char in password:
             if char in PasswordRules.UPPERCASE:
                 counter["uppercase"] += 1
