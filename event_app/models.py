@@ -3,7 +3,6 @@ import string
 import uuid
 from datetime import datetime
 
-import flask
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
@@ -51,8 +50,7 @@ class User(UserMixin, Model):
         And the password will be converted and saved appropriately.
         """
         salted_password = plain_password + self.salt
-        self._password = bcrypt.generate_password_hash(salted_password,
-                                                       rounds=flask.current_app.config['BCRYPT_LOG_ROUNDS'])
+        self._password = bcrypt.generate_password_hash(salted_password)
 
     @hybrid_method
     def check_password(self, plain_password: str) -> bool:
