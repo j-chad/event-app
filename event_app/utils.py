@@ -1,26 +1,52 @@
-from typing import Counter, Optional
+from typing import Counter, Optional, Set
+from urllib.parse import urljoin, urlparse
 
 import collections
+import flask
 import wtforms
+from flask import redirect, request, url_for
 from wtforms import ValidationError
 
 from .extensions import db
 
 
+def redirect_with_next(endpoint, **values) -> flask.Response:
+    """Redirect to given endpoint unless alternative given by client"""
+    target = get_redirect_target()
+    if not target or not is_safe_url(target):
+        target = url_for(endpoint, **values)
+    return redirect(target)
+
+
+def is_safe_url(target: str) -> bool:
+    """Ensures that a url is safe to redirect to"""
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+
+
+def get_redirect_target() -> Optional[str]:
+    for target in request.values.get('next'), request.referrer:
+        if not target or not is_safe_url(target):
+            continue
+        else:
+            return target
+
+
 class PasswordRules:
-    UPPERCASE = {
+    UPPERCASE: Set[str] = {
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
         'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
         'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
         'Y', 'Z'
     }
-    LOWERCASE = {
+    LOWERCASE: Set[str] = {
         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
         'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
         'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
         'y', 'z'
     }
-    DIGITS = {
+    DIGITS: Set[str] = {
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9'
     }
