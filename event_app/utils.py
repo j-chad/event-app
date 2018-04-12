@@ -12,7 +12,7 @@ from .extensions import db
 
 def redirect_with_next(endpoint, **values) -> flask.Response:
     """Redirect to given endpoint unless alternative given by client"""
-    target = get_redirect_target()
+    target = request.values.get('next')
     if not target or not is_safe_url(target):
         target = url_for(endpoint, **values)
     return redirect(target)
@@ -23,14 +23,6 @@ def is_safe_url(target: str) -> bool:
     ref_url = urlparse(request.host_url)
     test_url = urlparse(urljoin(request.host_url, target))
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
-
-
-def get_redirect_target() -> Optional[str]:
-    for target in request.values.get('next'), request.referrer:
-        if not target or not is_safe_url(target):
-            continue
-        else:
-            return target
 
 
 class PasswordRules:

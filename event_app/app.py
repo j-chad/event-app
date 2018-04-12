@@ -30,7 +30,7 @@ def register_extensions(app: flask.app.Flask) -> None:
     extensions.debug_toolbar.init_app(app)
 
     # Set up user loader
-    extensions.login_manager.user_loader(lambda user_id: models.User.query.get(int(user_id)))
+    extensions.login_manager.user_loader(lambda token: models.User.query.filter_by(session_token=token).first())
 
 
 def register_blueprints(app: flask.app.Flask) -> None:

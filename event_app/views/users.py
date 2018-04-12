@@ -3,6 +3,7 @@ import flask_login
 from flask import Blueprint, render_template
 
 from .. import forms, models, utils
+from ..extensions import db
 
 users = Blueprint('users', __name__)
 
@@ -25,7 +26,7 @@ def register():
                            last_name=register_form.last_name.data,
                            email=register_form.email.data,
                            password=register_form.password.data)
-        user.save(commit=True)
+        db.session.add(user)
         flask_login.login_user(user)
         flask.flash("Please check your email", "info")
         return utils.redirect_with_next('home.index')

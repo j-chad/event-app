@@ -26,15 +26,19 @@ class User(UserMixin, Model):
     first_name = Column(db.String(40), nullable=False)
     last_name = Column(db.String(40), nullable=True)
     email = Column(db.String(100), unique=True, nullable=False)
-    email_verified = Column(db.Boolean, nullable=False, default=False)
+    salt = Column(db.String(32), nullable=False)
     _password = Column(db.Binary(128), nullable=False)
-    salt = Column(db.String(32))
+    email_verified = Column(db.Boolean, nullable=False, default=False)
+    session_token = Column(db.String(32), nullable=False, default=lambda: uuid.uuid4().hex)
     created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, first_name: str, email: str, password: str, **kwargs):
         Model.__init__(self, first_name=first_name, email=email, **kwargs)
         self.salt = uuid.uuid4().hex
         self.password = password
+
+    def get_id(self):
+        return self.session_token
 
     @hybrid_property
     def password(self) -> str:
