@@ -27,7 +27,7 @@ class User(UserMixin, Model):
     last_name = Column(db.String(40), nullable=True)
     email = Column(db.String(100), unique=True, nullable=False)
     salt = Column(db.String(32), nullable=False)
-    _password = Column(db.Binary(128), nullable=False)
+    _password = Column(db.LargeBinary(128), nullable=False)
     email_verified = Column(db.Boolean, nullable=False, default=False)
     session_token = Column(db.String(32), nullable=False, default=lambda: uuid.uuid4().hex)
     created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)

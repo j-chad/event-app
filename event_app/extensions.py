@@ -1,6 +1,6 @@
+import flask_login
 from flask_bcrypt import Bcrypt
 from flask_debugtoolbar import DebugToolbarExtension
-from flask_login import LoginManager
 from flask_sqlalchemy import Model, SQLAlchemy
 
 
@@ -38,7 +38,7 @@ class ModelMixin(Model):
 
 bcrypt = Bcrypt()
 db = SQLAlchemy(model_class=ModelMixin)
-login_manager = LoginManager()
+login_manager = flask_login.LoginManager()
 debug_toolbar = DebugToolbarExtension()
 
 login_manager.login_view = "users.login"

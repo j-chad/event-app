@@ -32,6 +32,7 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    WTF_CSRF_ENABLED = False
     BCRYPT_LOG_ROUNDS = 4
 
 

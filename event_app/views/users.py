@@ -27,6 +27,7 @@ def register():
                            email=register_form.email.data,
                            password=register_form.password.data)
         db.session.add(user)
+        db.session.commit()
         flask_login.login_user(user)
         flask.flash("Please check your email", "info")
         return utils.redirect_with_next('home.index')

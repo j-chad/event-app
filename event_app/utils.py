@@ -1,4 +1,4 @@
-from typing import Counter, Optional, Set
+from typing import Counter, List, Optional, Set
 from urllib.parse import urljoin, urlparse
 
 import collections
@@ -50,7 +50,7 @@ class PasswordRules:
                  special: Optional[int] = None,
                  length: int = 10):
         if length is not None:
-            a = lambda x: 0 if x is None else a  # Transform None to 0, so no ValueError is raise
+            a = lambda x: 0 if x is None else x  # Transform None to 0, so no ValueError is raise
             if a(uppercase) + a(lowercase) + a(digits) + a(special) > length:
                 raise ValueError("Length must be >= sum of requirements")
         self.uppercase = uppercase
@@ -59,31 +59,31 @@ class PasswordRules:
         self.special = special
         self.length = length
 
-    def validate(self, password: str, raise_error: bool = False):
+    def validate(self, password: str, raise_error: bool = False) -> List[str]:
         char_count = self.count_characters(password)
 
-        def test(a: int, b: int, can_be_equal: bool = False) -> bool:
-            return (a is not None) and ((a >= b) if can_be_equal else (a > b))
+        def test(a: int, b: int, less_than: bool = False) -> bool:
+            return (a is not None) and ((a < b) if less_than else (a > b))
 
         errors = []
 
-        if test(self.uppercase, char_count['uppercase']):
+        if self.uppercase is not None and (self.uppercase > char_count['uppercase']):
             errors.append("Need at least {} uppercase character{}".format(
                 self.uppercase, 's' if self.uppercase != 1 else ''
             ))
-        if test(self.lowercase, char_count['lowercase']):
+        if self.lowercase is not None and (self.lowercase > char_count['lowercase']):
             errors.append("Need at least {} lowercase character{}".format(
                 self.lowercase, 's' if self.lowercase != 1 else ''
             ))
-        if test(self.digits, char_count['digits']):
+        if self.digits is not None and (self.digits > char_count['digits']):
             errors.append("Need at least {} digit{}".format(
                 self.digits, 's' if self.digits != 1 else ''
             ))
-        if test(self.special, char_count['special']):
+        if self.special is not None and (self.special > char_count['special']):
             errors.append("Need at least {} special character{}".format(
                 self.special, 's' if self.special != 1 else ''
             ))
-        if test(self.length, char_count['length'], can_be_equal=True):
+        if self.length > len(password):
             errors.append("Password must be at least {} characters".format(self.length))
         if raise_error and errors:
             raise ValidationError(errors[0])
@@ -94,7 +94,7 @@ class PasswordRules:
 
     @staticmethod
     def count_characters(password: str) -> Counter[str]:
-        counter = collections.Counter(uppercase=0, lowercase=0, digits=0, special=0, length=len(password))
+        counter = collections.Counter(uppercase=0, lowercase=0, digits=0, special=0)
         for char in password:
             if char in PasswordRules.UPPERCASE:
                 counter["uppercase"] += 1
