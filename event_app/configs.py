@@ -3,8 +3,6 @@ import os
 
 class Config:
     """Base Configuration"""
-
-    SECRET_KEY = os.environ["EVENT_APP_SECRET"]
     BCRYPT_LOG_ROUNDS = 14
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     DEBUG_TB_TEMPLATE_EDITOR_ENABLED = True
