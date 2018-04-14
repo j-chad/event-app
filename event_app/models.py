@@ -1,8 +1,8 @@
-import random
-import string
 import uuid
 from datetime import datetime
 
+import flask
+import hashids
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
@@ -13,11 +13,6 @@ Model = db.Model
 Column = db.Column
 ForeignKey = db.ForeignKey
 relationship = db.relationship
-
-
-class Session(Model):
-    __tablename__ = 'sessions'
-    id = Column(db.String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
 
 
 class User(UserMixin, Model):
@@ -75,7 +70,7 @@ class User(UserMixin, Model):
 
 class Event(Model):
     __tablename__ = 'events'
-    id = Column(db.String(10), primary_key=True)
+    id = Column(db.Integer(), primary_key=True)
     name = Column(db.String(60), nullable=False)
     description = Column(db.String(200), nullable=True)
     private = Column(db.Boolean, nullable=False, default=False)
@@ -85,15 +80,10 @@ class Event(Model):
 
     def __init__(self, **kwargs):
         Model.__init__(self, **kwargs)
-        self.id = self.generate_id()
 
     def __repr__(self):
         return "<User {} ({!r})>".format(self.id, self.name)
 
-    @staticmethod
-    def generate_id():
-        length = Event.id.type.length
-        while True:
-            temp_id = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(length))
-            if Event.query.get(temp_id) is None:
-                return temp_id
+    @hybrid_property
+    def url_id(self):
+        return hashids.Hashids(min_length=16, salt=flask.current_app.config["HASHID_SALT"]).encode(self.id)
