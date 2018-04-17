@@ -9,6 +9,12 @@ from ..extensions import db
 users = Blueprint('users', __name__)
 
 
+def send_validation_email(user: models.User):
+    msg = flask_mail.Message("This is my subject", recipients=["chadfield.jackson@gmail.com"])
+    msg.body = "async yay"
+    tasks.send_email.queue(msg)
+
+
 @users.route('/login', methods=("GET", "POST"))
 @utils.requires_anonymous()
 def login():
@@ -32,6 +38,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         flask_login.login_user(user)
+        send_validation_email(user)
         flask.flash("Please check your email", "info")
         return utils.redirect_with_next('home.index')
     return render_template('users/register_minimal.jinja', form=register_form)

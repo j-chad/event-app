@@ -2,7 +2,7 @@ from typing import Any, Dict, Type
 
 import flask
 
-from . import commands, configs, extensions, models, views
+from . import commands, configs, extensions, models, tasks, views
 
 
 def create_app(config_object: Type[configs.Config] = configs.ProductionConfig) -> flask.app.Flask:
@@ -31,6 +31,7 @@ def register_extensions(app: flask.app.Flask) -> None:
     extensions.login_manager.init_app(app)
     extensions.mail.init_app(app)
     extensions.debug_toolbar.init_app(app)
+    extensions.redis_queue.init_app(app)
 
     # Set up user loader
     extensions.login_manager.user_loader(lambda token: models.User.query.filter_by(session_token=token).first())

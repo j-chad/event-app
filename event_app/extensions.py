@@ -43,6 +43,7 @@ db = SQLAlchemy(model_class=ModelMixin)
 login_manager = flask_login.LoginManager()
 mail = flask_mail.Mail()
 debug_toolbar = DebugToolbarExtension()
+redis_queue = RQ()
 
 login_manager.login_view = "users.login"
 login_manager.login_message = "Please log in to access this page."
