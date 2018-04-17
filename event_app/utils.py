@@ -1,13 +1,30 @@
-from typing import Counter, List, Optional, Set
+import functools
+from typing import Callable, Counter, List, Optional, Set, Union
 from urllib.parse import urljoin, urlparse
 
 import collections
 import flask
+import flask_login
 import wtforms
 from flask import redirect, request, url_for
 from wtforms import ValidationError
 
 from .extensions import db
+
+
+def requires_anonymous(endpoint: Union[str, Callable] = "home.index", msg="Already logged in"):
+    def decorator(func):
+        @functools.wraps(func)
+        def inner(*args, **kwargs):
+            if flask_login.current_user.is_authenticated:
+                flask.flash(msg, "info")
+                return flask.redirect(flask.url_for(endpoint))
+            else:
+                return func(*args, **kwargs)
+
+        return inner
+
+    return decorator
 
 
 def redirect_with_next(endpoint, **values) -> flask.Response:

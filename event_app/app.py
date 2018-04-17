@@ -29,6 +29,7 @@ def register_extensions(app: flask.app.Flask) -> None:
     extensions.bcrypt.init_app(app)
     extensions.db.init_app(app)
     extensions.login_manager.init_app(app)
+    extensions.mail.init_app(app)
     extensions.debug_toolbar.init_app(app)
 
     # Set up user loader
@@ -51,10 +52,10 @@ def register_shellcontext(app: flask.app.Flask) -> None:
     def shell_context() -> Dict[str, Any]:
         """Shell Context Objects"""
         return {
-            'db'     : extensions.db,
-            'User'   : models.User,
-            'Event'  : models.Event,
-            'Session': models.Session
+            'db'   : extensions.db,
+            'User' : models.User,
+            'Event': models.Event,
+            'tasks': tasks
         }
 
     app.shell_context_processor(shell_context)

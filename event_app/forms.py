@@ -67,3 +67,17 @@ class RegisterForm(FlaskForm):
         wtforms.validators.DataRequired(),
         p_manager
     ])
+
+
+class CreateEventForm(FlaskForm):
+    name = wtforms.StringField(validators=[
+        wtforms.validators.DataRequired(),
+        wtforms.validators.Length(max=60)
+    ])
+    description = wtforms.TextAreaField(validators=[
+        wtforms.validators.Optional(),
+        wtforms.validators.Length(max=200)
+    ])
+    private = wtforms.BooleanField(validators=[
+        wtforms.validators.DataRequired()
+    ])

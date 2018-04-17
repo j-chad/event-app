@@ -1,6 +1,8 @@
 import flask_login
+import flask_mail
 from flask_bcrypt import Bcrypt
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_rq2 import RQ
 from flask_sqlalchemy import Model, SQLAlchemy
 
 
@@ -39,6 +41,7 @@ class ModelMixin(Model):
 bcrypt = Bcrypt()
 db = SQLAlchemy(model_class=ModelMixin)
 login_manager = flask_login.LoginManager()
+mail = flask_mail.Mail()
 debug_toolbar = DebugToolbarExtension()
 
 login_manager.login_view = "users.login"

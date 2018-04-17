@@ -1,14 +1,16 @@
 import flask
 import flask_login
+import flask_mail
 from flask import Blueprint, render_template
 
-from .. import forms, models, utils
+from .. import forms, models, tasks, utils
 from ..extensions import db
 
 users = Blueprint('users', __name__)
 
 
 @users.route('/login', methods=("GET", "POST"))
+@utils.requires_anonymous()
 def login():
     login_form = forms.LoginForm()
     if login_form.validate_on_submit():
@@ -19,6 +21,7 @@ def login():
 
 
 @users.route('/register', methods=("GET", "POST"))
+@utils.requires_anonymous()
 def register():
     register_form = forms.RegisterForm()
     if register_form.validate_on_submit():
@@ -32,3 +35,15 @@ def register():
         flask.flash("Please check your email", "info")
         return utils.redirect_with_next('home.index')
     return render_template('users/register_minimal.jinja', form=register_form)
+
+
+@users.route('/logout')
+def logout():
+    flask_login.logout_user()
+    return flask.redirect(flask.url_for("home.index"))
+
+
+@users.route('/settings')
+@flask_login.login_required
+def settings():
+    return "settings"
