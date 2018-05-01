@@ -17,12 +17,14 @@ class ProductionConfig(Config):
     ENV = "Production"
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{ os.path.join(Config.PROJECT_ROOT, "prod.db") }'
+    MAIL_DEFAULT_SENDER = "Event App Notifier"
 
 
 class DevelopmentConfig(Config):
     ENV = "Development"
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{ os.path.join(Config.PROJECT_ROOT, "dev.db") }'
+    MAIL_DEFAULT_SENDER = "Event App Notifier <Development>"
 
 
 class TestingConfig(Config):

@@ -6,6 +6,7 @@ from . import app, configs, extensions
 @click.command()
 @click.argument('config', default="DevelopmentConfig")
 def build_database(config):
+    """Builds the database."""
     config_obj = configs.config_map.get(config)
     if config_obj is not None:
         with app.create_app(config_obj).app_context():
