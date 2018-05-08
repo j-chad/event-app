@@ -1,3 +1,4 @@
+# coding=utf-8
 import wtforms
 from flask_wtf import FlaskForm
 
@@ -6,6 +7,7 @@ from .models import User
 from .utils import PasswordRules
 
 # PASSWORD SETTINGS
+# noinspection PyArgumentEqualDefault
 p_manager = PasswordRules(
     uppercase=None,
     lowercase=None,

@@ -1,3 +1,4 @@
+# coding=utf-8
 from flask.helpers import get_debug_flag
 
 from event_app.app import create_app

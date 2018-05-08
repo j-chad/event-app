@@ -1,3 +1,4 @@
+# coding=utf-8
 import click
 
 from . import app, configs, extensions
@@ -5,7 +6,7 @@ from . import app, configs, extensions
 
 @click.command()
 @click.argument('config', default="DevelopmentConfig")
-def build_database(config):
+def build_database(config: str) -> None:
     """Builds the database."""
     config_obj = configs.config_map.get(config)
     if config_obj is not None:

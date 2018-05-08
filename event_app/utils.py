@@ -1,8 +1,9 @@
+# coding=utf-8
+import collections
 import functools
 from typing import Callable, Counter, List, Optional, Set, Union
 from urllib.parse import urljoin, urlparse
 
-import collections
 import flask
 import flask_login
 import wtforms
@@ -77,11 +78,8 @@ class PasswordRules:
         self.length = length
 
     def validate(self, password: str, raise_error: bool = False) -> List[str]:
+
         char_count = self.count_characters(password)
-
-        def test(a: int, b: int, less_than: bool = False) -> bool:
-            return (a is not None) and ((a < b) if less_than else (a > b))
-
         errors = []
 
         if self.uppercase is not None and (self.uppercase > char_count['uppercase']):

@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Non-Tests" pattern="file[event-app]:tests/*" />
+</component>
