@@ -8,6 +8,11 @@ class Config:
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     DEBUG_TB_TEMPLATE_EDITOR_ENABLED = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAIL_SERVER = "smtp.gmail.com"
+    MAIL_PORT = 465
+    MAIL_USERNAME = 'event.app.notifier@gmail.com'
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
 
     APP_DIR = os.path.abspath(os.path.dirname(__file__))
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.path.pardir))
