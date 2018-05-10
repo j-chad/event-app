@@ -53,12 +53,12 @@ def register():
 
 @users.route('/activate/<uuid:token>')
 def activate_account(token):
-    user_id: int = redis_store.get('USER:VERIFICATION_TOKEN#{}'.format(token))
+    user_id: int = int(redis_store.get('USER:VERIFICATION_TOKEN#{}'.format(token)))
     if user_id is None:
         flask.abort(404)
     else:
         user: models.User = models.User.query.get(user_id)
-        if user_id is None:
+        if user is None:
             flask.abort(404)
         else:
             user.email_verified = True
