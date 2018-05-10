@@ -33,7 +33,7 @@ def register_extensions(app: flask.app.Flask) -> None:
     extensions.mail.init_app(app)
     extensions.debug_toolbar.init_app(app)
     extensions.redis_queue.init_app(app)
-
+    extensions.redis_store.init_app(app)
     # Set up user loader
     extensions.login_manager.user_loader(lambda token: models.User.query.filter_by(session_token=token).first())
 
@@ -57,7 +57,8 @@ def register_shellcontext(app: flask.app.Flask) -> None:
             'db'   : extensions.db,
             'User' : models.User,
             'Event': models.Event,
-            'tasks': tasks
+            'tasks': tasks,
+            'mail': extensions.mail
         }
 
     app.shell_context_processor(shell_context)

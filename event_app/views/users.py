@@ -1,18 +1,20 @@
 # coding=utf-8
+from uuid import uuid4
+
 import flask
 import flask_login
 import flask_mail
 from flask import Blueprint, render_template
 
 from .. import forms, models, tasks, utils
-from ..extensions import db
+from ..extensions import db, redis_store
 
 users = Blueprint('users', __name__)
 
 
-def send_validation_email(user: models.User):
+def send_validation_email(user: models.User, token: str):
     msg = flask_mail.Message("This is my subject", recipients=["chadfield.jackson@gmail.com"])
-    msg.body = "async yay"
+    msg.html = flask.render_template('email/verification.jinja', user=user, token=token)
     tasks.send_email.queue(msg)
 
 
@@ -39,10 +41,30 @@ def register():
         db.session.add(user)
         db.session.commit()
         flask_login.login_user(user)
-        send_validation_email(user)
+        token = str(uuid4())
+        redis_store.set('USER:VERIFICATION_TOKEN#{}'.format(token), user.id,
+                        ex=flask.current_app.config['VERIFICATION_TOKEN_EXPIRY'],
+                        nx=True)
+        send_validation_email(user, token)
         flask.flash("Please check your email", "info")
         return utils.redirect_with_next('home.index')
     return render_template('users/register_minimal.jinja', form=register_form)
+
+
+@users.route('/activate/<uuid:token>')
+def activate_account(token):
+    user_id: int = redis_store.get('USER:VERIFICATION_TOKEN#{}'.format(token))
+    if user_id is None:
+        flask.abort(404)
+    else:
+        user: models.User = models.User.query.get(user_id)
+        if user_id is None:
+            flask.abort(404)
+        else:
+            user.email_verified = True
+            db.session.commit()
+            flask.flash("Email Verified", "success")
+            return flask.redirect(flask.url_for('home.index'))
 
 
 @users.route('/logout')
