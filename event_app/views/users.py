@@ -7,13 +7,13 @@ import flask_mail
 from flask import Blueprint, render_template
 
 from .. import forms, models, tasks, utils
-from ..extensions import db, redis_store
+from ..extensions import db, redis_store, limiter
 
 users = Blueprint('users', __name__)
 
 
 def send_validation_email(user: models.User, token: str):
-    msg = flask_mail.Message("This is my subject", recipients=["chadfield.jackson@gmail.com"])
+    msg = flask_mail.Message("This is my subject", recipients=[user.email])
     msg.html = flask.render_template('email/verification.jinja', user=user, token=token)
     tasks.send_email.queue(msg)
 
@@ -65,6 +65,19 @@ def activate_account(token):
             db.session.commit()
             flask.flash("Email Verified", "success")
             return flask.redirect(flask.url_for('home.index'))
+
+
+@users.route('/activate/resend', methods=["GET"])  # TODO: Change To POST
+@flask_login.login_required
+@limiter.limit("1/hour", key_func=lambda: flask_login.current_user.email)
+def resend_activation_email():
+    user: models.User = flask_login.current_user
+    token = str(uuid4())
+    redis_store.set('USER:VERIFICATION_TOKEN#{}'.format(token), user.id,
+                    ex=flask.current_app.config['VERIFICATION_TOKEN_EXPIRY'],
+                    nx=True)
+    send_validation_email(user, token)
+    return "OK"
 
 
 @users.route('/logout')

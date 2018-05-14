@@ -20,6 +20,8 @@
             {{ utils.wtf_error(form.email) }}
             {{ form.password(placeholder=form.password.label.text, required=True) }}
             {{ utils.wtf_error(form.password) }}
+            {{ form.recaptcha }}
+            {{ utils.wtf_error(form.recaptcha) }}
             <input type="submit" value="Submit">
         </form>
     </body>

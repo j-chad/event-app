@@ -34,6 +34,7 @@ def register_extensions(app: flask.app.Flask) -> None:
     extensions.debug_toolbar.init_app(app)
     extensions.redis_queue.init_app(app)
     extensions.redis_store.init_app(app)
+    extensions.limiter.init_app(app)
     # Set up user loader
     extensions.login_manager.user_loader(lambda token: models.User.query.filter_by(session_token=token).first())
 

@@ -9,6 +9,11 @@
     </head>
     <body>
         <h1>{{ current_user.full_name }}</h1>
+        {% if not current_user.email_verified %}
+            Email Is Not Verified
+            <a href="{{ url_for("users.resend_activation_email") }}">Resend Activation Email</a>
+        {% endif %}
         <a href="{{ url_for("users.settings") }}">Settings</a>
+        <a href="{{ url_for("users.logout") }}">Logout</a>
     </body>
 </html>

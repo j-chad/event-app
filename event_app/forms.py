@@ -1,6 +1,6 @@
 # coding=utf-8
 import wtforms
-from flask_wtf import FlaskForm
+from flask_wtf import FlaskForm, RecaptchaField
 
 from .extensions import bcrypt
 from .models import User
@@ -69,6 +69,7 @@ class RegisterForm(FlaskForm):
         wtforms.validators.DataRequired(),
         p_manager
     ])
+    recaptcha = RecaptchaField()
 
 
 class CreateEventForm(FlaskForm):
