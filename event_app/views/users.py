@@ -52,7 +52,7 @@ def register():
     return render_template('users/register_minimal.jinja', form=register_form)
 
 
-@users.route('/activate/<uuid:token>')
+@users.route('/verify/<uuid:token>')
 def activate_account(token):
     user_id: int = int(redis_store.get('USER:VERIFICATION_TOKEN#{}'.format(token)))
     if user_id is None:
@@ -68,7 +68,7 @@ def activate_account(token):
             return flask.redirect(flask.url_for('home.index'))
 
 
-@users.route('/activate/resend', methods=["GET"])  # TODO: Change To POST
+@users.route('/verify/resend', methods=["GET"])  # TODO: Change To POST
 @flask_login.login_required
 @limiter.limit("1/hour", key_func=lambda: flask_login.current_user.email)
 def resend_activation_email():
