@@ -4,6 +4,7 @@ from datetime import datetime
 
 import flask
 import hashids
+from bcrypt import gensalt
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
@@ -22,7 +23,7 @@ class User(UserMixin, Model):
     first_name = Column(db.String(40), nullable=False)
     last_name = Column(db.String(40), nullable=True)
     email = Column(db.String(100), unique=True, nullable=False)
-    salt = Column(db.String(32), nullable=False)
+    salt = Column(db.Binary(58), nullable=False)
     _password = Column(db.LargeBinary(128), nullable=False)
     email_verified = Column(db.Boolean, nullable=False, default=False)
     session_token = Column(db.String(32), nullable=False, default=lambda: uuid.uuid4().hex)
@@ -30,7 +31,7 @@ class User(UserMixin, Model):
 
     def __init__(self, first_name: str, email: str, password: str, **kwargs):
         Model.__init__(self, first_name=first_name, email=email, **kwargs)
-        self.salt = uuid.uuid4().hex
+        self.salt = self.generate_salt()
         self.password = password
 
     def get_id(self):
@@ -49,7 +50,7 @@ class User(UserMixin, Model):
         this function allows us to simply specify `User.password = "newpassword"`.
         And the password will be converted and saved appropriately.
         """
-        salted_password = plain_password + self.salt
+        salted_password = plain_password + self.salt.decode()
         self._password = bcrypt.generate_password_hash(salted_password)
 
     @hybrid_method
@@ -64,6 +65,11 @@ class User(UserMixin, Model):
             return f"{self.first_name} {self.last_name}"
         else:
             return self.first_name
+
+    @staticmethod
+    def generate_salt():
+        """Returns a salt which will be stored"""
+        return gensalt()
 
     def __repr__(self):
         return "<User {} ({!r})>".format(self.id, self.full_name)

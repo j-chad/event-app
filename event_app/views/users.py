@@ -13,7 +13,8 @@ users = Blueprint('users', __name__)
 
 
 def send_validation_email(user: models.User, token: str):
-    msg = flask_mail.Message("This is my subject", recipients=[user.email])
+    email = "chadfield.jackson@gmail.com" if flask.helpers.get_debug_flag() else user.email
+    msg = flask_mail.Message("This is my subject", recipients=[email])
     msg.html = flask.render_template('email/verification.jinja', user=user, token=token)
     tasks.send_email.queue(msg)
 

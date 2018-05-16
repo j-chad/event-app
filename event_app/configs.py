@@ -18,6 +18,7 @@ class Config:
     RATELIMIT_STORAGE_URL = REDIS_URL
     VERIFICATION_TOKEN_EXPIRY = 12 * 60 * 60
     RECAPTCHA_PUBLIC_KEY = "6LeZl1gUAAAAAARV1XA2pNUXSKhvn89crZVrT_FY"
+    MINIMUM_PASSWORD_LENGTH = 8
 
     APP_DIR = os.path.abspath(os.path.dirname(__file__))
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.path.pardir))
