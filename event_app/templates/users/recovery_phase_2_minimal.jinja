@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<form action="{{ url_for("users.recovery_change_password", token=token) }}" method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.email(placeholder=form.email.label.text, maxlength=100, autofocus=true, required=true) }}
+    {{ utils.wtf_error(form.email) }}
+    {{ form.first_name(placeholder=form.first_name.label.text, maxlength=40, required=true) }}
+    {{ utils.wtf_error(form.first_name) }}
+    {{ form.password() }}
+    {{ utils.wtf_error(form.password) }}
+    {{ form.confirm_password() }}
+    {{ form.recaptcha() }}
+    <input type="submit" value="Submit">
+</form>
+</body>
+</html>

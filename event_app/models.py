@@ -19,10 +19,9 @@ relationship = db.relationship
 
 class User(UserMixin, Model):
     __tablename__ = 'users'
-    id = Column(db.Integer, primary_key=True)
+    email = Column(db.String(254), primary_key=True)
     first_name = Column(db.String(40), nullable=False)
     last_name = Column(db.String(40), nullable=True)
-    email = Column(db.String(100), unique=True, nullable=False)
     salt = Column(db.Binary(58), nullable=False)
     _password = Column(db.LargeBinary(128), nullable=False)
     email_verified = Column(db.Boolean, nullable=False, default=False)

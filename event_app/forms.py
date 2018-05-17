@@ -1,6 +1,9 @@
 # coding=utf-8
+from typing import Union
+
 import wtforms
 from flask_wtf import FlaskForm, RecaptchaField
+from wtforms import ValidationError
 
 from .extensions import bcrypt
 from .models import User
@@ -30,7 +33,7 @@ class LoginForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         # noinspection PyCallByClass
         FlaskForm.__init__(self, *args, **kwargs)
-        self.user = None
+        self.user: Union[User, None] = None
 
     def validate(self) -> bool:
         rv = FlaskForm.validate(self)
@@ -63,13 +66,52 @@ class RegisterForm(FlaskForm):
     email = wtforms.StringField(validators=[
         wtforms.validators.DataRequired(),
         wtforms.validators.Email(),
-        wtforms.validators.Length(max=100)
+        wtforms.validators.Length(max=254)
     ])
     password = wtforms.PasswordField(validators=[
         wtforms.validators.DataRequired(),
         p_manager
     ])
     recaptcha = RecaptchaField()
+
+
+class RecoveryForm(FlaskForm):
+    email = wtforms.StringField(validators=[
+        wtforms.validators.DataRequired(),
+        wtforms.validators.Email(),
+        wtforms.validators.length(max=254)
+    ])
+    recaptcha = RecaptchaField()
+
+    def __init__(self, *args, **kwargs):
+        # noinspection PyCallByClass
+        FlaskForm.__init__(self, *args, **kwargs)
+        self.user: Union[User, None] = None
+
+    def validate_email(self, field):
+        self.user = User.query.get(field.data)
+        if self.user is None:
+            raise ValidationError("No Such User Exists")
+
+
+class RecoveryPhase2Form(FlaskForm):
+    email = wtforms.StringField(validators=[
+        wtforms.validators.DataRequired(),
+        wtforms.validators.Email(),
+        wtforms.validators.length(max=254)
+    ])
+    first_name = wtforms.StringField(validators=[
+        wtforms.validators.DataRequired(),
+        wtforms.validators.length(max=40)
+    ])
+    password = wtforms.PasswordField(validators=[
+        wtforms.validators.DataRequired(),
+        wtforms.validators.EqualTo('confirm_password', message="Passwords Must Match")
+    ])
+    confirm_password = wtforms.PasswordField(validators=[
+        wtforms.validators.DataRequired()
+    ])
+    recaptch = RecaptchaField()
 
 
 class CreateEventForm(FlaskForm):

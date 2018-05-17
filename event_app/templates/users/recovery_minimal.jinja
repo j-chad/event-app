@@ -1,0 +1,21 @@
+{% import 'macros.jinja' as utils %}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Account Recovery</title>
+</head>
+<body>
+<form action="{{ url_for("users.recovery") }}" method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.email(placeholder=form.email.label.text, maxlength=100, autofocus=True, required=True) }}
+    {{ utils.wtf_error(form.email) }}
+    {{ form.recaptcha() }}
+    <input type="submit" value="Submit">
+</form>
+</body>
+</html>

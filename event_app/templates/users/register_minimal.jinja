@@ -31,7 +31,7 @@
             {{ utils.wtf_error(form.first_name) }}
             {{ form.first_name(maxlength=40, placeholder=form.last_name.label.text) }}
             {{ utils.wtf_error(form.last_name) }}
-            {{ form.email(maxlength=100, placeholder=form.email.label.text, required=True) }}
+            {{ form.email(maxlength=254, placeholder=form.email.label.text, required=True) }}
             {{ utils.wtf_error(form.email) }}
             {{ form.password(placeholder=form.password.label.text, required=True, id="password_input") }}
             {{ utils.wtf_error(form.password) }}
