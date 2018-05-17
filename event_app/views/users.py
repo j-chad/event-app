@@ -1,10 +1,12 @@
 # coding=utf-8
+from typing import Union
 from uuid import uuid4
 
 import flask
 import flask_login
 import flask_mail
 from flask import Blueprint, render_template
+from flask_limiter.util import get_remote_address
 
 from .. import forms, models, tasks, utils
 from ..extensions import db, redis_store, limiter
@@ -23,11 +25,22 @@ def send_validation_email(user: models.User, token: str):
 @utils.requires_anonymous()
 def login():
     login_form = forms.LoginForm()
-    if login_form.validate_on_submit():
-        flask_login.login_user(login_form.user)
-        flask.flash("Logged In Successfully", "success")
-        return utils.redirect_with_next('home.index')
-    return render_template('users/login_minimal.jinja', form=login_form)
+    if flask.request.method == "POST":
+        attempts: Union[bytes, None] = redis_store.get('USER:LOGIN_FAILURES#{}'.format(get_remote_address()))
+        if attempts is not None and (int(attempts) >= flask.current_app.config["LOCKDOWN_AFTER_N_PASSWORD_ATTEMPTS"]):
+            return render_template('users/login_minimal.jinja', form=login_form, lockout=True)
+        elif login_form.validate():
+            # Reset Attempt Count
+            redis_store.delete('USER:LOGIN_FAILURES#{}'.format(get_remote_address()))
+            flask_login.login_user(login_form.user)
+            flask.flash("Logged In Successfully", "success")
+            return utils.redirect_with_next('home.index')
+        else:
+            redis_store.incr('USER:LOGIN_FAILURES#{}'.format(get_remote_address()))
+            # Reset Expiry Time
+            redis_store.expire('USER:LOGIN_FAILURES#{}'.format(get_remote_address()),
+                               flask.current_app.config["LOCKDOWN_FOR_N_SECONDS"])
+        return render_template('users/login_minimal.jinja', form=login_form, lockout=False)
 
 
 @users.route('/register', methods=("GET", "POST"))
@@ -79,6 +92,12 @@ def resend_activation_email():
                     nx=True)
     send_validation_email(user, token)
     return "OK"
+
+
+@users.route('/recovery', methods=['GET', 'POST'])
+@utils.requires_anonymous()
+def recovery():
+    pass
 
 
 @users.route('/logout')

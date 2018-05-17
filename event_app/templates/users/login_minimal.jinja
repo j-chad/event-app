@@ -10,6 +10,11 @@
         <title>Event App | Login</title>
     </head>
     <body>
+    {% if lockout %}
+        <h1>You Have Been Locked Out From Logging In.</h1>
+        <h2>If You Are Having Trouble Accessing Your Account Go To <a href="{{ url_for('users.recovery') }}">Account
+            Recovery</a></h2>
+    {% endif %}
         <form method="POST" action="{{ url_for('users.login') }}">
             {{ form.hidden_tag() }}
             {{ form.email(placeholder=form.email.label.text, maxlength=100, autofocus=True, required=True) }}
