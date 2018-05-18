@@ -1,6 +1,6 @@
 # coding=utf-8
 from secrets import token_urlsafe
-from typing import Union
+from typing import Union, Optional
 
 import flask
 import flask_login
@@ -47,7 +47,7 @@ def login():
             # Reset Expiry Time
             redis_store.expire('USER:LOGIN_FAILURES#{}'.format(get_remote_address()),
                                flask.current_app.config["LOCKDOWN_FOR_N_SECONDS"])
-        return render_template('users/login_minimal.jinja', form=login_form, lockout=False)
+    return render_template('users/login_minimal.jinja', form=login_form, lockout=False)
 
 
 @users.route('/register', methods=("GET", "POST"))
@@ -74,11 +74,11 @@ def register():
 
 @users.route('/verify/<token>')
 def activate_account(token):
-    user_email: str = redis_store.get('USER:VERIFICATION_TOKEN#{}'.format(token))
+    user_email: Optional[bytes] = redis_store.get('USER:VERIFICATION_TOKEN#{}'.format(token))
     if user_email is None:
         flask.abort(404)
     else:
-        user: models.User = models.User.query.get(user_email)
+        user: models.User = models.User.query.get(user_email.decode())
         if user is None or user.email_verified:
             flask.abort(404)
         else:
@@ -117,29 +117,30 @@ def recovery():  # TODO: Implement Lockout
     return flask.render_template("users/recovery_minimal.jinja", form=form)
 
 
-@users.route('/recovery/<token>')
+@users.route('/recovery/<token>', methods=['GET', 'POST'])
 @utils.requires_anonymous()
 def recovery_change_password(token):
     form = forms.RecoveryPhase2Form()
-    user_email: str = redis_store.get('USER:RECOVERY_TOKEN#{}'.format(token))
-    user: models.User = models.User.query.get(user_email)
-    if user_email is None or user is None:
+    user_email: Optional[bytes] = redis_store.get('USER:RECOVERY_TOKEN#{}'.format(token))
+    if user_email is None:
         flask.abort(404)
-    else:
-        if flask.request.method == "POST":
-            if form.validate() \
-                    and form.email.data == user_email \
-                    and form.first_name.data.lower().strip() == user.first_name.lower().strip():
-                redis_store.delete('USER:RECOVERY_TOKEN#{}'.format(token))
-                user.password = form.password.data
-                flask.flash("Password Has Been Reset", "success")
-                flask_login.login_user(user)
-                return flask.redirect(flask.url_for("home.index"))
-            else:
-                # TODO: Implement Lockout
-                pass
-        return flask.render_template('users/recovery_phase_2_minimal.jinja', form=form, token=token)
-
+    user: models.User = models.User.query.get(user_email.decode())
+    if user is None:
+        flask.abort(404)
+    if flask.request.method == "POST":
+        if form.validate() \
+                and form.email.data == user_email.decode() \
+                and form.first_name.data.lower().strip() == user.first_name.lower().strip():
+            redis_store.delete('USER:RECOVERY_TOKEN#{}'.format(token))
+            user.password = form.password.data
+            db.session.commit()
+            flask.flash("Password Has Been Reset", "success")
+            flask_login.login_user(user)
+            return flask.redirect(flask.url_for("home.index"))
+        else:
+            # TODO: Implement Lockout
+            pass
+    return flask.render_template('users/recovery_phase_2_minimal.jinja', form=form, token=token)
 
 
 @users.route('/logout')

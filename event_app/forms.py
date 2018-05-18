@@ -111,7 +111,7 @@ class RecoveryPhase2Form(FlaskForm):
     confirm_password = wtforms.PasswordField(validators=[
         wtforms.validators.DataRequired()
     ])
-    recaptch = RecaptchaField()
+    recaptcha = RecaptchaField()
 
 
 class CreateEventForm(FlaskForm):

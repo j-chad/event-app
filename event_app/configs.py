@@ -20,6 +20,7 @@ class Config:
     RECOVERY_TOKEN_EXPIRY = 20 * 60  # 20 Minutes
     RECAPTCHA_PUBLIC_KEY = "6LeZl1gUAAAAAARV1XA2pNUXSKhvn89crZVrT_FY"
     MINIMUM_PASSWORD_LENGTH = 8
+    RATELIMIT_KEY_PREFIX = "RATELIMITER#"
 
     LOCKDOWN_AFTER_N_PASSWORD_ATTEMPTS = 10
     LOCKDOWN_FOR_N_SECONDS = 30 * 60  # 30 Minutes
@@ -41,6 +42,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{ os.path.join(Config.PROJECT_ROOT, "dev.db") }'
     MAIL_DEFAULT_SENDER = "Event App Notifier <Development>"
+    RATELIMIT_ENABLED = False
 
 
 class TestingConfig(Config):
@@ -50,6 +52,7 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
     WTF_CSRF_ENABLED = False
     BCRYPT_LOG_ROUNDS = 4
+    RATELIMIT_ENABLED = False
 
 
 config_map = {

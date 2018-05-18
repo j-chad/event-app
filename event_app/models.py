@@ -55,7 +55,7 @@ class User(UserMixin, Model):
     @hybrid_method
     def check_password(self, plain_password: str) -> bool:
         """Checks If The User Entered The Right Password"""
-        salted_password = plain_password + self.salt
+        salted_password = plain_password + self.salt.decode()
         return bcrypt.check_password_hash(self.password, salted_password)
 
     @property
@@ -71,7 +71,7 @@ class User(UserMixin, Model):
         return gensalt()
 
     def __repr__(self):
-        return "<User {} ({!r})>".format(self.id, self.full_name)
+        return "<User {!r}>".format(self.email, self.full_name)
 
 
 class Event(Model):
@@ -81,7 +81,7 @@ class Event(Model):
     description = Column(db.String(200), nullable=True)
     private = Column(db.Boolean, nullable=False, default=False)
 
-    owner_id = reference_col(User, nullable=False)
+    owner_id = reference_col(User, pk_name="email", nullable=False)
     owner = relationship('User', backref='events')
 
     def __init__(self, **kwargs):
