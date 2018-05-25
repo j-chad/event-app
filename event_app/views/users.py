@@ -16,14 +16,14 @@ users = Blueprint('users', __name__)
 
 def send_validation_email(user: models.User, validation_token: str):
     email = "chadfield.jackson@gmail.com" if flask.helpers.get_debug_flag() else user.email
-    msg = flask_mail.Message("This is my subject", recipients=[email])
+    msg = flask_mail.Message("Account Verification", recipients=[email])
     msg.html = flask.render_template('email/verification.jinja', user=user, token=validation_token)
     tasks.send_email.queue(msg)
 
 
 def send_recovery_email(user: models.User, recovery_token: str):
     email = "chadfield.jackson@gmail.com" if flask.helpers.get_debug_flag() else user.email
-    msg = flask_mail.Message("This is my subject", recipients=[email])
+    msg = flask_mail.Message("Account Recovery", recipients=[email])
     msg.html = flask.render_template('email/recovery.jinja', user=user, token=recovery_token)
     tasks.send_email.queue(msg)
 

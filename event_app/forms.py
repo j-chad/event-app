@@ -7,17 +7,6 @@ from wtforms import ValidationError
 
 from .extensions import bcrypt
 from .models import User
-from .utils import PasswordRules
-
-# PASSWORD SETTINGS
-# noinspection PyArgumentEqualDefault
-p_manager = PasswordRules(
-    uppercase=None,
-    lowercase=None,
-    digits=None,
-    special=None,
-    length=8
-)
 
 
 class LoginForm(FlaskForm):
@@ -69,8 +58,7 @@ class RegisterForm(FlaskForm):
         wtforms.validators.Length(max=254)
     ])
     password = wtforms.PasswordField(validators=[
-        wtforms.validators.DataRequired(),
-        p_manager
+        wtforms.validators.DataRequired()
     ])
     recaptcha = RecaptchaField()
 

@@ -1,0 +1,23 @@
+{% import 'macros.jinja' as utils %}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Event App | Create Event</title>
+</head>
+<body>
+<form action="{{ url_for("events.create_event") }}" method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.name(maxlength=60, required=True, placeholder=form.name.label.text, autofocus=True) }}
+    {{ utils.wtf_error(form.name) }}<br/>
+    {{ form.description(maxlength=200, placeholder=form.description.label.text) }}
+    {{ utils.wtf_error(form.description) }}<br/>
+    {{ form.private.label.text }}{{ form.private(required=True) }}<br/>
+    <input type="submit" value="Create">
+</form>
+</body>
+</html>

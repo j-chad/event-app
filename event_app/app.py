@@ -43,6 +43,7 @@ def register_blueprints(app: flask.app.Flask) -> None:
     """Register Flask Blueprints"""
     app.register_blueprint(views.home)
     app.register_blueprint(views.users)
+    app.register_blueprint(views.events)
 
 
 def register_commands(app: flask.app.Flask) -> None:

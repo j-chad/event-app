@@ -33,6 +33,7 @@ class Config:
 class ProductionConfig(Config):
     ENV = "Production"
     DEBUG = False
+    SERVER_NAME = ""
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{ os.path.join(Config.PROJECT_ROOT, "prod.db") }'
     MAIL_DEFAULT_SENDER = "Event App Notifier"
 
@@ -53,6 +54,8 @@ class TestingConfig(Config):
     WTF_CSRF_ENABLED = False
     BCRYPT_LOG_ROUNDS = 4
     RATELIMIT_ENABLED = False
+    RQ_ASYNC = False
+    MAIL_DEFAULT_SENDER = "Event App Notifier <Testing>"
 
 
 config_map = {

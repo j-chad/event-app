@@ -68,15 +68,15 @@ class TestUsersView(TestCase):
             self.assertTrue(flask_login.current_user.is_anonymous)
             self.assertTemplateUsed('users/register_minimal.jinja')
 
-    def test_register_page_POST_invalid_password(self):
+    def test_register_page_POST_no_password(self):
         with self.client as c:
             a = RegisterForm()
             c.post(flask.url_for('users.register'), data={
                 a.first_name.name: "Jackson",
                 a.last_name.name : "Chadfield",
-                a.email.name     : "chadfield.jacksongmail.com",
+                a.email.name: "chadfield.jackson@gmail.com",
             }, follow_redirects=False)
-            self.assertIsNone(models.User.query.filter_by(email="chadfield.jacksongmail.com").first())
+            self.assertIsNone(models.User.query.filter_by(email="chadfield.jackson@gmail.com").first())
             self.assertTrue(flask_login.current_user.is_anonymous)
             self.assertTemplateUsed('users/register_minimal.jinja')
 

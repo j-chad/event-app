@@ -20,6 +20,8 @@ relationship = db.relationship
 class User(UserMixin, Model):
     __tablename__ = 'users'
     email = Column(db.String(254), primary_key=True)
+    subscribed_events = relationship("Subscription", back_populates="user")
+
     first_name = Column(db.String(40), nullable=False)
     last_name = Column(db.String(40), nullable=True)
     salt = Column(db.Binary(58), nullable=False)
@@ -77,12 +79,13 @@ class User(UserMixin, Model):
 class Event(Model):
     __tablename__ = 'events'
     id = Column(db.Integer(), primary_key=True)
+    owner_id = reference_col(User, pk_name="email", nullable=False)
+    owner = relationship('User', backref='events')
+    users = relationship("Subscription", back_populates="event")
+
     name = Column(db.String(60), nullable=False)
     description = Column(db.String(200), nullable=True)
     private = Column(db.Boolean, nullable=False, default=False)
-
-    owner_id = reference_col(User, pk_name="email", nullable=False)
-    owner = relationship('User', backref='events')
 
     def __init__(self, **kwargs):
         Model.__init__(self, **kwargs)
@@ -90,6 +93,24 @@ class Event(Model):
     def __repr__(self):
         return "<User {} ({!r})>".format(self.id, self.name)
 
-    @hybrid_property
+    @property
     def url_id(self):
-        return hashids.Hashids(min_length=16, salt=flask.current_app.config["HASHID_SALT"]).encode(self.id)
+        encoder = hashids.Hashids(min_length=10, salt=flask.current_app.config["HASHID_SALT"])
+        return encoder.encode(self.id)
+
+    @staticmethod
+    def fetch_from_url_token(token: str):
+        decoder = hashids.Hashids(min_length=10, salt=flask.current_app.config["HASHID_SALT"])
+        id = decoder.decode(token)
+        return Event.query.get(id)
+
+
+class Subscription(Model):
+    __tablename__ = 'subscriptions'
+    user_id = db.Column(db.String(254), db.ForeignKey('users.email'), primary_key=True)
+    user = relationship("User", back_populates="subscribed_events")
+    event_id = db.Column(db.Integer(), db.ForeignKey('events.id'), primary_key=True)
+    event = relationship("Event", back_populates="users")
+
+    email = db.Column(db.Boolean, nullable=False, default=False)
+    web_push = db.Column(db.Boolean, nullable=False, default=False)
