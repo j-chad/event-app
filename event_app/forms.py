@@ -111,6 +111,4 @@ class CreateEventForm(FlaskForm):
         wtforms.validators.Optional(),
         wtforms.validators.Length(max=200)
     ])
-    private = wtforms.BooleanField(validators=[
-        wtforms.validators.DataRequired()
-    ])
+    private = wtforms.BooleanField()

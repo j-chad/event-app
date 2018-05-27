@@ -9,5 +9,35 @@
 </head>
 <body>
 <a href="{{ url_for("events.create_event") }}">Create</a>
+<br/>
+<h1>Owned Events</h1>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Private</th>
+        <th>Description</th>
+    </tr>
+    {% for event in owned %}
+        <tr>
+            <td><a href="{{ url_for('events.view_event', token=event.url_id) }}">{{ event.name }}</a></td>
+            <td>{{ event.private }}</td>
+            <td>{{ event.description }}</td>
+        </tr>
+    {% endfor %}
+</table>
+<h1>Unowned Events</h1>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+    </tr>
+    {% for event in unowned %}
+        <tr>
+            <td><a href="{{ url_for('events.view_event', token=event.url_id) }}">{{ event.name }}</a></td>
+            <td>{{ event.private }}</td>
+            <td>{{ event.description }}</td>
+        </tr>
+    {% endfor %}
+</table>
 </body>
 </html>

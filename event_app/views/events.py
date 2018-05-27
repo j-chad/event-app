@@ -9,10 +9,13 @@ from ..extensions import db
 events = flask.Blueprint('events', __name__)
 
 
-@events.route('/event')
+@events.route('/events')
 @login_required
 def home() -> flask.Response:
-    return flask.render_template("events/index_minimal.jinja", events=current_user.subscribed_events)
+    unowned = models.Event.query.filter(models.Event.owner != current_user).all()
+    return flask.render_template("events/index_minimal.jinja",
+                                 subscribed=current_user.subscribed_events,
+                                 owned=current_user.events, unowned=unowned)
 
 
 @events.route('/event/create', methods=("GET", "POST"))
@@ -36,4 +39,8 @@ def view_event(token):
     event: models.Event = models.Event.fetch_from_url_token(token)
     if event is None:
         flask.abort(404)
-    return flask.render_template("events/event_detail_minimal.jinja", event=event)
+
+    subscribed: bool = models.Subscription.query.get((current_user.email, event.id)) is not None
+    owner: bool = event in current_user.events
+
+    return flask.render_template("events/event_detail_minimal.jinja", event=event, subscribed=subscribed, owner=owner)

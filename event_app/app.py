@@ -44,6 +44,7 @@ def register_blueprints(app: flask.app.Flask) -> None:
     app.register_blueprint(views.home)
     app.register_blueprint(views.users)
     app.register_blueprint(views.events)
+    app.register_blueprint(views.ajax)
 
 
 def register_commands(app: flask.app.Flask) -> None:
@@ -57,8 +58,7 @@ def register_shellcontext(app: flask.app.Flask) -> None:
         """Shell Context Objects"""
         return {
             'db'   : extensions.db,
-            'User' : models.User,
-            'Event': models.Event,
+            'models': models,
             'tasks': tasks,
             'mail': extensions.mail
         }

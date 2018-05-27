@@ -16,7 +16,7 @@
     {{ utils.wtf_error(form.name) }}<br/>
     {{ form.description(maxlength=200, placeholder=form.description.label.text) }}
     {{ utils.wtf_error(form.description) }}<br/>
-    {{ form.private.label.text }}{{ form.private(required=True) }}<br/>
+    {{ form.private.label.text }}{{ form.private() }}<br/>
     <input type="submit" value="Create">
 </form>
 </body>

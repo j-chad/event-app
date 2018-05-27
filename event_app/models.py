@@ -91,7 +91,7 @@ class Event(Model):
         Model.__init__(self, **kwargs)
 
     def __repr__(self):
-        return "<User {} ({!r})>".format(self.id, self.name)
+        return "<Event {} ({!r})>".format(self.id, self.name)
 
     @property
     def url_id(self):
