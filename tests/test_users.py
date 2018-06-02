@@ -80,6 +80,16 @@ class TestUsersView(TestCase):
             self.assertTrue(flask_login.current_user.is_anonymous)
             self.assertTemplateUsed('users/register_minimal.jinja')
 
+    def test_register_page_email_sent(self):
+        with self.client as c:
+            a = RegisterForm()
+            c.post(flask.url_for('users.register'), data={
+                a.first_name.name: "Jackson",
+                a.last_name.name: "Chadfield",
+                a.email.name: "chadfield.jackson@gmail.com",
+            }, follow_redirects=False)
+            self.assertEqual(flask.g.outbox[0].subject, "Account Verification")
+
     def test_login_page_GET(self):
         response = self.client.get(flask.url_for('users.login'))
         self.assert200(response)

@@ -4,6 +4,7 @@ import os
 
 class Config:
     """Base Configuration"""
+    SERVER_NAME = ""
     BCRYPT_LOG_ROUNDS = 14
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     DEBUG_TB_TEMPLATE_EDITOR_ENABLED = False
@@ -34,14 +35,12 @@ class ProductionConfig(Config):
     ENV = "Production"
     DEBUG = False
     SERVER_NAME = ""
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{ os.path.join(Config.PROJECT_ROOT, "prod.db") }'
     MAIL_DEFAULT_SENDER = "Event App Notifier"
 
 
 class DevelopmentConfig(Config):
     ENV = "Development"
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{ os.path.join(Config.PROJECT_ROOT, "dev.db") }'
     MAIL_DEFAULT_SENDER = "Event App Notifier <Development>"
     RATELIMIT_ENABLED = False
 

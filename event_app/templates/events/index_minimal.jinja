@@ -25,6 +25,27 @@
         </tr>
     {% endfor %}
 </table>
+<h1>Subscribed Events</h1>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Private</th>
+        <th>Description</th>
+        <th>Email</th>
+        <th>Push Notification</th>
+    </tr>
+    {% for subscription in subscribed %}
+        <tr>
+            <td>
+                <a href="{{ url_for('events.view_event', token=subscription.event.url_id) }}">{{ subscription.event.name }}</a>
+            </td>
+            <td>{{ subscription.event.private }}</td>
+            <td>{{ subscription.event.description }}</td>
+            <td><input type="checkbox" {% if subscription.email %}checked{% endif %}></td>
+            <td><input type="checkbox" {% if subscription.web_push %}checked{% endif %}></td>
+        </tr>
+    {% endfor %}
+</table>
 <h1>Unowned Events</h1>
 <table>
     <tr>

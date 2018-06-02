@@ -1,4 +1,5 @@
 # coding=utf-8
+import enum
 import functools
 from typing import Callable, Union
 from urllib.parse import urljoin, urlparse
@@ -10,6 +11,15 @@ from flask import redirect, request, url_for
 from .extensions import db
 
 
+@enum.unique
+class MessageTypes(enum.Enum):
+    TEXT = enum.auto()
+    # LOCATION = enum.auto()
+    # IMAGE = enum.auto()
+    # FILE = enum.auto()
+    # DATETIME = enum.auto()
+
+
 def requires_anonymous(endpoint: Union[str, Callable] = "home.index", msg="Already logged in"):
     def decorator(func):
         @functools.wraps(func)
@@ -19,9 +29,7 @@ def requires_anonymous(endpoint: Union[str, Callable] = "home.index", msg="Alrea
                 return flask.redirect(flask.url_for(endpoint))
             else:
                 return func(*args, **kwargs)
-
         return inner
-
     return decorator
 
 

@@ -1,4 +1,5 @@
 # coding=utf-8
+from typing import List
 
 import flask
 from flask_login import login_required, current_user
@@ -42,5 +43,11 @@ def view_event(token):
 
     subscribed: bool = models.Subscription.query.get((current_user.email, event.id)) is not None
     owner: bool = event in current_user.events
+    messages: List[models.Message] = models.Message.query.filter_by(event=event).order_by(
+        models.Message.timestamp).all()
 
-    return flask.render_template("events/event_detail_minimal.jinja", event=event, subscribed=subscribed, owner=owner)
+    return flask.render_template("events/event_detail_minimal.jinja",
+                                 event=event,
+                                 subscribed=subscribed,
+                                 owner=owner,
+                                 messages=messages)

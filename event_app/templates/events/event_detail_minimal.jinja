@@ -7,6 +7,24 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Event App | {{ event.name }}</title>
     <script>
+        {% if owner %}
+            function add_message() {
+                var button = document.getElementById('message_add_button');
+                var text = document.getElementById('message_input').value;
+                var data = JSON.stringify({'message': text});
+                button.disabled = true;
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState === 4 && this.status === 200) {
+                        button.disabled = false;
+                        location.reload();
+                    }
+                };
+                xhttp.open("POST", "{{ url_for('ajax.event_add_message') }}", true);
+                xhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhttp.send('token={{ event.url_id }}&type=text&data=' + data);
+            }
+        {% endif %}
         function toggle_subscription() {
             var button = document.getElementById('toggle_subscription');
             button.disabled = true;
@@ -34,6 +52,24 @@
 {% if not owner %}
     <input type="button" value="{% if subscribed %}Unsubscribe{% else %}Subscribe{% endif %}" id="toggle_subscription"
            onclick="toggle_subscription()">
+{% else %}
+    Add Message <textarea id="message_input" cols="30" rows="10" maxlength="280"></textarea>
+    <input type="button" onclick="add_message()" value="Submit" id="message_add_button">
 {% endif %}
+<h1>Messages</h1>
+<table>
+    <tr>
+        <th>Type</th>
+        <th>Date</th>
+        <th>Data</th>
+    </tr>
+    {% for message in messages %}
+        <tr>
+            <td>{{ message.type }}</td>
+            <td>{{ message.timestamp }}</td>
+            <td>{{ message.data }}</td>
+        </tr>
+    {% endfor %}
+</table>
 </body>
 </html>

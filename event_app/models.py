@@ -9,7 +9,7 @@ from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
 from .extensions import bcrypt, db
-from .utils import reference_col
+from .utils import reference_col, MessageTypes
 
 Model = db.Model
 Column = db.Column
@@ -78,7 +78,7 @@ class User(UserMixin, Model):
 
 class Event(Model):
     __tablename__ = 'events'
-    id = Column(db.Integer(), primary_key=True)
+    id = Column(db.Integer, primary_key=True)
     owner_id = reference_col(User, pk_name="email", nullable=False)
     owner = relationship('User', backref='events')
     users = relationship("Subscription", back_populates="event")
@@ -109,8 +109,19 @@ class Subscription(Model):
     __tablename__ = 'subscriptions'
     user_id = db.Column(db.String(254), db.ForeignKey('users.email'), primary_key=True)
     user = relationship("User", back_populates="subscribed_events")
-    event_id = db.Column(db.Integer(), db.ForeignKey('events.id'), primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'), primary_key=True)
     event = relationship("Event", back_populates="users")
 
     email = db.Column(db.Boolean, nullable=False, default=False)
     web_push = db.Column(db.Boolean, nullable=False, default=False)
+
+
+class Message(Model):
+    __tablename__ = 'message'
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+    event = relationship("Event", backref="messages")
+
+    timestamp = db.Column(db.DateTime, default=datetime.now)
+    type = db.Column(db.Enum(MessageTypes))
+    data = db.Column(db.JSON)
