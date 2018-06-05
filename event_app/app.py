@@ -49,6 +49,7 @@ def register_blueprints(app: flask.app.Flask) -> None:
 
 def register_commands(app: flask.app.Flask) -> None:
     app.cli.add_command(commands.build_database)
+    app.cli.add_command(commands.populate_database)
 
 
 def register_shellcontext(app: flask.app.Flask) -> None:

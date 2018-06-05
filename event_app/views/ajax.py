@@ -11,29 +11,35 @@ from ..utils import MessageTypes
 ajax = flask.Blueprint('ajax', __name__, url_prefix="/ajax")
 
 
-@ajax.route('/event/toggle_subscription', methods=("POST",))
+@ajax.route('/event/update_subscription', methods=("POST",))
 @login_required
-def toggle_event_subscription():
-    token: str = flask.request.form['token']
-    event: models.Event = models.Event.fetch_from_url_token(token)
+def update_event_subscription():
+    data: dict = flask.request.json
+    event: models.Event = models.Event.fetch_from_url_token(data['token'])
     if event is None:
         flask.abort(404)
 
-    # TODO: implement subscription options. For now, just assume email.
-    # email = flask.request.form['email']
-    # web_push = flask.request.form['web_push']
-    # print(email, web_push)
+    email: bool = bool(data['email'])
+    push: bool = bool(data['push'])
 
     if event in current_user.events:
-        return flask.jsonify(error="cannot subscribe to own event"), 400
+        return flask.jsonify(error="Cannot subscribe to own event"), 400
     subscription: models.Subscription = models.Subscription.query.get((current_user.email, event.id))
-    if subscription is None:
-        sub = models.Subscription(user=current_user, event=event, email=True, web_push=False)
-        db.session.add(sub)
-        response = flask.jsonify(subscribed=True)
-    else:
+
+    if email is False and push is False:
+        if subscription is None:
+            return flask.jsonify(email=False, push=False)  # Already Unsubscribed - Update Client
         db.session.delete(subscription)
-        response = flask.jsonify(subscribed=False)
+        response = flask.jsonify(email=False, push=False)  # Unsubscribe
+    else:
+        if subscription is None:
+            sub = models.Subscription(user=current_user, event=event, email=email, web_push=push)
+            db.session.add(sub)
+            response = flask.jsonify(email=email, push=push)  # Create Subscription
+        else:
+            subscription.web_push = push
+            subscription.email = email
+            response = flask.jsonify(email=email, push=push)
     db.session.commit()
     return response
 
@@ -62,3 +68,24 @@ def event_add_message():
     tasks.notify.queue(message, event)
 
     return "Ok", 200
+
+
+@ajax.route('/user/save_webpush', methods=("POST",))
+@login_required
+def save_web_push_data():
+    data = flask.request.json
+    try:
+        endpoint = data['endpoint']
+        p256dh = data['keys']['p256dh']
+        auth = data['keys']['auth']
+    except KeyError:
+        flask.abort(400)
+
+    # noinspection PyUnboundLocalVariable
+    token = models.WebPushToken(user=current_user,
+                                endpoint=endpoint,
+                                p256dh=p256dh,
+                                auth=auth)
+    db.session.add(token)
+    db.session.commit()
+    return 'Ok', 200

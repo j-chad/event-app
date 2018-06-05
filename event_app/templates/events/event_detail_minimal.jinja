@@ -24,34 +24,107 @@
                 xhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 xhttp.send('token={{ event.url_id }}&type=text&data=' + data);
             }
-        {% endif %}
-        function toggle_subscription() {
-            var button = document.getElementById('toggle_subscription');
-            button.disabled = true;
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState === 4 && this.status === 200) {
-                    var response = JSON.parse(this.responseText);
-                    if (response['subscribed']) {
-                        button.value = "Unsubscribe";
-                    } else {
-                        button.value = "Subscribe";
+        {% else %}
+            function urlBase64ToUint8Array(base64String) {
+                const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                const base64 = (base64String + padding)
+                    .replace(/-/g, '+')
+                    .replace(/_/g, '/')
+                ;
+                const rawData = window.atob(base64);
+                return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+            }
+
+            function registerWorker() {
+                navigator.serviceWorker.register('/service-worker.js');
+                return navigator.serviceWorker.ready;
+            }
+
+            function subscribeUserToPush() {
+                return registerWorker()
+                    .then(function (registration) {
+                        const subscribeOptions = {
+                            userVisibleOnly: true,
+                            applicationServerKey: urlBase64ToUint8Array('{{ config.WEB_PUSH_PUBLIC_KEY }}')
+                        };
+
+                        return registration.pushManager.subscribe(subscribeOptions);
+                    })
+                    .then(function (pushSubscription) {
+                        return JSON.stringify(pushSubscription);
+                    });
+            }
+
+            function saveSubscription() {
+                subscribeUserToPush().then(function (data) {
+                    return fetch('{{ url_for('ajax.save_web_push_data') }}', {
+                        method: "POST",
+                        credentials: 'same-origin',
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: data
+                    });
+                }).then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Bad status code from server.')
                     }
-                    button.disabled = false;
+                });
+            }
+
+            function update_subscription() {
+                var button = document.getElementById('update_subscription');
+                button.disabled = true;
+                var subscribed = button.classList.contains("subscribed");
+
+                var data;
+                if (subscribed) {
+                    data = {
+                        "token": "{{ event.url_id }}",
+                        "email": false,
+                        "push": false
+                    };
+                } else {
+                    data = {
+                        "token": "{{ event.url_id }}",
+                        "email": true,
+                        "push": true
+                    };
+                    saveSubscription();
                 }
-            };
-            xhttp.open("POST", "{{ url_for('ajax.toggle_event_subscription') }}", true);
-            xhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhttp.send('token={{ event.url_id }}');
-        }
+                return fetch('{{ url_for('ajax.update_event_subscription') }}', {
+                    method: "POST",
+                    credentials: 'same-origin',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                }).then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Bad status code from server.')
+                    } else {
+                        response.json().then(function (response_data) {
+                            if (response_data['email'] || response_data['push']) {
+                                button.value = "Unsubscribe";
+                                button.classList.add("subscribed");
+                            } else {
+                                button.value = "Subscribe";
+                                button.classList.remove("subscribed");
+                            }
+                            button.disabled = false;
+                        });
+                    }
+                });
+            }
+        {% endif %}
     </script>
 </head>
 <body>
 <h1>{{ event.name }}</h1>
 <h2>{{ event.description }}</h2>
 {% if not owner %}
-    <input type="button" value="{% if subscribed %}Unsubscribe{% else %}Subscribe{% endif %}" id="toggle_subscription"
-           onclick="toggle_subscription()">
+    <input type="button" value="{% if subscribed %}Unsubscribe{% else %}Subscribe{% endif %}" id="update_subscription"
+           onclick="update_subscription()"{% if subscribed %} class="subscribed"{% endif %}>
 {% else %}
     Add Message <textarea id="message_input" cols="30" rows="10" maxlength="280"></textarea>
     <input type="button" onclick="add_message()" value="Submit" id="message_add_button">

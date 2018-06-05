@@ -4,7 +4,6 @@ import os
 
 class Config:
     """Base Configuration"""
-    SERVER_NAME = ""
     BCRYPT_LOG_ROUNDS = 14
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     DEBUG_TB_TEMPLATE_EDITOR_ENABLED = False
@@ -42,6 +41,8 @@ class DevelopmentConfig(Config):
     ENV = "Development"
     DEBUG = True
     MAIL_DEFAULT_SENDER = "Event App Notifier <Development>"
+    SEND_EMAILS = False
+    SERVER_NAME = "vent.local:8000"
     RATELIMIT_ENABLED = False
 
 

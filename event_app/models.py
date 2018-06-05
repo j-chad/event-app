@@ -21,6 +21,7 @@ class User(UserMixin, Model):
     __tablename__ = 'users'
     email = Column(db.String(254), primary_key=True)
     subscribed_events = relationship("Subscription", back_populates="user")
+    webpush_tokens = relationship('WebPushToken')
 
     first_name = Column(db.String(40), nullable=False)
     last_name = Column(db.String(40), nullable=True)
@@ -107,21 +108,31 @@ class Event(Model):
 
 class Subscription(Model):
     __tablename__ = 'subscriptions'
-    user_id = db.Column(db.String(254), db.ForeignKey('users.email'), primary_key=True)
+    user_id = Column(db.String(254), ForeignKey('users.email'), primary_key=True)
     user = relationship("User", back_populates="subscribed_events")
-    event_id = db.Column(db.Integer, db.ForeignKey('events.id'), primary_key=True)
+    event_id = Column(db.Integer, ForeignKey('events.id'), primary_key=True)
     event = relationship("Event", back_populates="users")
 
-    email = db.Column(db.Boolean, nullable=False, default=False)
-    web_push = db.Column(db.Boolean, nullable=False, default=False)
+    email = Column(db.Boolean, nullable=False, default=False)
+    web_push = Column(db.Boolean, nullable=False, default=False)
+
+
+class WebPushToken(Model):
+    __tablename__ = 'webpush_tokens'
+    endpoint = Column(db.String(512), primary_key=True)
+    user_id = Column(db.String(254), ForeignKey('users.email'), nullable=False, primary_key=True)
+
+    user = relationship("User", back_populates="webpush_tokens")
+    p256dh = Column(db.String(100), nullable=False)
+    auth = Column(db.String(30), nullable=False)
 
 
 class Message(Model):
     __tablename__ = 'message'
-    id = db.Column(db.Integer, primary_key=True)
-    event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+    id = Column(db.Integer, primary_key=True)
+    event_id = Column(db.Integer, ForeignKey('events.id'))
     event = relationship("Event", backref="messages")
 
-    timestamp = db.Column(db.DateTime, default=datetime.now)
-    type = db.Column(db.Enum(MessageTypes))
-    data = db.Column(db.JSON)
+    timestamp = Column(db.DateTime, default=datetime.now)
+    type = Column(db.Enum(MessageTypes))
+    data = Column(db.JSON)

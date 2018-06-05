@@ -112,3 +112,7 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 *.lnk
+*.pem
+*.sh
+*.cnf
+*.key
