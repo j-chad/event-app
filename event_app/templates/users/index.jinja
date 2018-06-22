@@ -1,0 +1,67 @@
+{% extends "global.jinja" %}
+{% import 'macros.jinja' as macros %}
+
+{% macro card(card, class=None) %}
+    <div class="card{% if class is not none %} {{ class }}{% endif %}">
+        <h3>{{ card.title }}</h3>
+        {{ card.body }}
+        {% if card.actions|length != 0 %}
+            <div class="actions">
+                {% for action in card.actions %}
+                    <a href="{{ action.url }}" class="button">{{ action.title }}</a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% block title %}Vent | Dashboard{% endblock %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users/index.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}
+
+{% block nav_items %}
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('home.index') }}">Dashboard</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('events.home') }}">Events</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.settings') }}">Settings</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.logout') }}">Logout</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="wrapper">
+            <div class="left">
+                <h1>Hello, {{ current_user.first_name }}</h1>
+                <h2>You have <strong>3</strong> unread messages</h2>
+            </div>
+            <div class="right">
+                {% for insight in insights['warning'] %}
+                    {{ card(insight, "warning") }}
+                {% endfor %}
+                {% for insight in insights['standard'] %}
+                    {{ card(insight, "standard") }}
+                {% endfor %}
+                {% for insight in insights['low'] %}
+                    {{ card(insight, "low") }}
+                {% endfor %}
+                {% for insight in insights['tips'] %}
+                    {{ card(insight, "tip") }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

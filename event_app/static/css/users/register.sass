@@ -1,0 +1,33 @@
+@import ../global
+
+main
+    .wrapper
+        width: 100%
+        height: calc(100vh - #{$nav-height})
+        display: flex
+        justify-content: center
+        align-items: center
+        padding-bottom: $footer-height
+
+        .form
+            padding: 5rem
+            text-align: center
+            width: 35rem
+            background-color: rgba($grey, 0.9)
+            border-radius: 1.5rem
+
+            form input
+                background-color: rgba(white, 0.5)
+
+            form div.error
+                padding: 0.3rem
+                border-top-right-radius: 0.4rem
+                border-top-left-radius: 0.4rem
+                background-color: $red
+                color: $white
+                font-weight: bold
+                & + input
+                    border-top-left-radius: 0
+                    border-top-right-radius: 0
+                    border: 0.3rem solid $red
+                    border-top-style: none

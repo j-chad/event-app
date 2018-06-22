@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+    {% block head %}
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>{% block title %}Vent{% endblock %}</title>
+
+        {# TODO: Add files @ Root #}
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+        <link rel="manifest" href="/site.webmanifest">
+        <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#da532c">
+        <meta name="msapplication-TileColor" content="#da532c">
+        <meta name="theme-color" content="#da8b2c">
+
+        {% block stylesheets %}
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+            <link rel="stylesheet" href="https://cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/milligram.css') }}">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.css"
+                  integrity="sha256-He3QEBKoL/nMXlVsoM7S2C2kjFQqS5L+mgA+F8LpG+U="
+                  crossorigin="anonymous">
+        {% endblock %}
+        {% block scripts %}
+            <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+                    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+                    crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
+                    integrity="sha256-yNbKY1y6h2rbVcQtf0b8lq4a+xpktyFc3pSYoGAY1qQ="
+                    crossorigin="anonymous"></script>
+            <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js"
+                    integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe"
+                    crossorigin="anonymous"></script>
+
+            <script type="text/javascript">
+                toastr.options = {
+                    "closeButton": false,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                };
+
+                var categoryOrder = ["error", "warning", "success", "info"];
+
+                $(document).ready(function () {
+                    var messages = {
+                        {%- with errors = get_flashed_messages(category_filter=["error"]) %}
+                            error: {{ errors }},
+                        {%- endwith %}
+                        {%- with warning = get_flashed_messages(category_filter=["warning"]) %}
+                            warning: {{ warning }},
+                        {%- endwith %}
+                        {%- with success = get_flashed_messages(category_filter=["success"]) %}
+                            success: {{ success }},
+                        {%- endwith %}
+                        {%- with info = get_flashed_messages(category_filter=["info"]) %}
+                            info: {{ info }}
+                        {%- endwith %}
+                    };
+
+                    categoryOrder.forEach(function (category) {
+                        var data = messages[category];
+                        for (var k in data) {
+                            if (data.hasOwnProperty(k)) {
+                                var message = data[k];
+                                if (message.title !== undefined) {
+                                    toastr[category](message.body, message.title);
+                                } else {
+                                    toastr[category](message.body);
+                                }
+                            }
+                        }
+                    });
+                });
+
+                function openNav() {
+                    $('nav.navigation .side-nav').css("width", "100%");
+                }
+
+                function closeNav() {
+                    $('nav.navigation .side-nav').css("width", "0");
+                }
+            </script>
+        {% endblock %}
+    {% endblock %}
+</head>
+<body>
+{% block body %}
+    <div class="content-wrapper">
+        <nav class="navigation">
+            <section class="container nav-bar">
+                <a class="navigation-title" href="{{ url_for('home.index') }}">
+                    <h1>Vent</h1>
+                </a>
+                <ul class="navigation-list float-right">
+                    {% block nav_items %}
+                    {% endblock %}
+                    <li class="navigation-item sidebar-button">
+                        <a class="navigation-link" onclick="openNav()"><i class="fas fa-bars"></i></a>
+                    </li>
+                </ul>
+            </section>
+            <section class="side-nav">
+                <ul>
+                    <li class="navigation-item close-sidenav">
+                        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><i
+                                class="far fa-times-circle"></i></a>
+                    </li>
+                    {{ self.nav_items() }}
+                </ul>
+            </section>
+        </nav>
+        <main>
+            {% block content %}
+            {% endblock %}
+        </main>
+        <footer>
+            Jackson Chadfield 2018 <a href="https://github.com/j-chad/event-app"><img
+                src="{{ url_for('static', filename="img/mark-github.svg") }}" alt=""></a>
+        </footer>
+    </div>
+{% endblock %}
+</body>
+</html>

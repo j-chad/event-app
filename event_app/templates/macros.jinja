@@ -7,3 +7,9 @@
         </ul>
     {% endif %}
 {% endmacro %}
+
+{% macro form_error(field) %}
+    {% if field.errors %}
+        <div class="error">{{ field.errors[0] }}</div>
+    {% endif %}
+{% endmacro %}

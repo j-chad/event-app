@@ -1,0 +1,109 @@
+{% extends "global.jinja" %}
+{% import 'macros.jinja' as macros %}
+
+{% block title %}Vent | Register{% endblock %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users/register.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    <script>
+        function clear_errors() {
+            $('#sign-up-form div.error').remove();
+        }
+
+        function add_error(element, text) {
+            element.before("<div class=\"error\">" + text + "</div>");
+        }
+
+        $(document).ready(function () {
+            var form = $('#sign-up-form');
+            form.on('submit', function (event) {
+
+                clear_errors();
+                var data = form.serializeArray().reduce(function (obj, item) {
+                    obj[item.name] = item.value;
+                    return obj;
+                }, {});
+
+                var valid = true;
+
+                //Validate First Name
+                if (!(data['first_name'].length > 0)) {
+                    add_error($("#first_name"), "Required");
+                    valid = false;
+                } else if (data['first_name'].length > 40) {
+                    add_error($("#first_name"), "Maximum 40 Characters");
+                    valid = false;
+                }
+
+                //Validate Last Name
+                if (data['last_name'].length > 40) {
+                    add_error($("#last_name"), "Maximum 40 Characters");
+                    valid = false;
+                }
+
+                //Validate Email
+                const email_regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                if (!email_regex.test(data['email'])) {
+                    add_error($("#email"), "Please Enter A Valid Email");
+                    valid = false;
+                } else if (data['email'].length > 254) {
+                    add_error($("#email"), "Woah, that's a rather large email!");
+                    valid = false;
+                }
+
+                //Validate Password
+                if (data['password'].length < 8) {
+                    add_error($("#password"), "Minimum 8 Characters");
+                    valid = false;
+                } else if (data["password"] !== data["confirm_password"]) {
+                    add_error($("#password"), "Passwords Must Match!");
+                    valid = false;
+                }
+
+                if (valid) {
+                    return true;
+                } else {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block nav_items %}
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.login') }}">Login</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.register') }}">Register</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="wrapper">
+        <div class="form">
+            <h1>Register</h1>
+            <form id="sign-up-form" novalidate method="POST" action="{{ url_for('users.register') }}">
+                {{ macros.form_error(form.first_name) }}
+                {{ form.first_name(id="first_name", placeholder="First Name", required=True, maxlength=40) }}<br>
+                {{ macros.form_error(form.last_name) }}
+                {{ form.last_name(id="last_name", placeholder="Last Name (optional)", maxlength=40) }}<br>
+                {{ macros.form_error(form.email) }}
+                {{ form.email(id="email", type="email", placeholder="Email", required=True, maxlength=254) }}<br>
+                {{ macros.form_error(form.password) }}
+                {{ form.password(id="password", placeholder="Password", required=True, minlength=8, pattern=".{8,}") }}<br>
+                {{ macros.form_error(form.confirm_password) }}
+                {{ form.confirm_password(id="confirm_password", placeholder="Confirm Password", required=True, minlength=8, pattern=".{8,}") }}<br>
+                {{ form.hidden_tag() }}
+                <button class="button">Sign Up</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -12,8 +12,8 @@ from .models import User
 class LoginForm(FlaskForm):
     email = wtforms.StringField(validators=[
         wtforms.validators.DataRequired(),
-        wtforms.validators.Email(),
-        wtforms.validators.Length(max=100)
+        wtforms.validators.Email(message="Please Enter A Valid Email"),
+        wtforms.validators.Length(max=254, message="Please Enter A Valid Email")
     ])
     password = wtforms.PasswordField(validators=[
         wtforms.validators.DataRequired()
@@ -39,28 +39,39 @@ class LoginForm(FlaskForm):
                 self.user = user
                 return True
             else:
-                self.password.errors.append("Unknown Username Or Password")
+                self.password.errors.append("Invalid Username Or Password")
                 return False
+
+
+# noinspection PyPep8Naming
+def EmailNotUsed(form: FlaskForm, field: wtforms.Field):
+    if User.query.get(field.data) is not None:
+        raise ValidationError("Already Linked To An Account")
 
 
 class RegisterForm(FlaskForm):
     first_name = wtforms.StringField(validators=[
         wtforms.validators.DataRequired(),
-        wtforms.validators.Length(max=40)
+        wtforms.validators.Length(max=40, message="Maximum 40 Characters")
     ])
     last_name = wtforms.StringField(validators=[
         wtforms.validators.Optional(),
-        wtforms.validators.Length(max=40)
+        wtforms.validators.Length(max=40, message="Maximum 40 Characters")
     ])
     email = wtforms.StringField(validators=[
         wtforms.validators.DataRequired(),
-        wtforms.validators.Email(),
-        wtforms.validators.Length(max=254)
+        wtforms.validators.Email(message="Please Enter A Valid Email"),
+        wtforms.validators.Length(max=254, message="Woah, that's a rather large email!"),
+        EmailNotUsed
     ])
     password = wtforms.PasswordField(validators=[
-        wtforms.validators.DataRequired()
+        wtforms.validators.DataRequired(),
+        wtforms.validators.Length(min=8, message="Minimum 8 Characters")
     ])
-    recaptcha = RecaptchaField()
+    confirm_password = wtforms.PasswordField(validators=[
+        wtforms.validators.DataRequired(),
+        wtforms.validators.EqualTo('password', message="Passwords must match!")
+    ])
 
 
 class RecoveryForm(FlaskForm):

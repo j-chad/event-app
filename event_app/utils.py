@@ -8,8 +8,6 @@ import flask
 import flask_login
 from flask import redirect, request, url_for
 
-from .extensions import db
-
 
 @enum.unique
 class MessageTypes(enum.Enum):
@@ -20,23 +18,25 @@ class MessageTypes(enum.Enum):
     # DATETIME = enum.auto()
 
 
-def requires_anonymous(endpoint: Union[str, Callable] = "home.index", msg="Already logged in"):
+def requires_anonymous(endpoint: Union[str, Callable] = "home.index", msg="You are already logged in"):
     def decorator(func):
         @functools.wraps(func)
         def inner(*args, **kwargs):
             if flask_login.current_user.is_authenticated:
-                flask.flash(msg, "info")
+                flask.flash({"body": msg}, "info")
                 return flask.redirect(flask.url_for(endpoint))
             else:
                 return func(*args, **kwargs)
+
         return inner
+
     return decorator
 
 
-def redirect_with_next(endpoint, **values) -> flask.Response:
+def redirect_with_next(endpoint: str, **values) -> flask.Response:
     """Redirect to given endpoint unless alternative given by client"""
-    target = request.values.get('next')
-    if not target or not is_safe_url(target):
+    target = request.values.get("next")
+    if target is None or is_safe_url(target) is False:
         target = url_for(endpoint, **values)
     return redirect(target)
 
@@ -48,13 +48,5 @@ def is_safe_url(target: str) -> bool:
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
-def reference_col(table: db.Model, nullable: bool = False, pk_name: str = 'id', **kwargs) -> db.Column:
-    """Column that adds primary key foreign key reference.
-    Usage: ::
-        category_id = reference_col('category')
-        category = relationship('Category', backref='categories')
-    """
-    return db.Column(
-        db.ForeignKey('{0}.{1}'.format(table.__tablename__, pk_name)),
-        nullable=nullable, **kwargs
-    )
+def get_unread_messages(user: "models.User"):
+    pass

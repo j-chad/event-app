@@ -27,7 +27,7 @@ class TestUsersView(TestCase):
         response = self.client.get(flask.url_for('users.register'))
         self.assert200(response)
         self.assertTrue(flask_login.current_user.is_anonymous)
-        self.assertTemplateUsed('users/register_minimal.jinja')
+        self.assertTemplateUsed('users/register.jinja')
 
     def test_register_page_POST_success(self):
         with self.client as c:
@@ -54,7 +54,7 @@ class TestUsersView(TestCase):
             }, follow_redirects=False)
             self.assertIsNone(models.User.query.filter_by(email="chadfield.jacksongmail.com").first())
             self.assertTrue(flask_login.current_user.is_anonymous)
-            self.assertTemplateUsed('users/register_minimal.jinja')
+            self.assertTemplateUsed('users/register.jinja')
 
     def test_register_page_POST_invalid_first_name(self):
         with self.client as c:
@@ -66,7 +66,7 @@ class TestUsersView(TestCase):
             }, follow_redirects=False)
             self.assertIsNone(models.User.query.filter_by(email="chadfield.jackson@gmail.com").first())
             self.assertTrue(flask_login.current_user.is_anonymous)
-            self.assertTemplateUsed('users/register_minimal.jinja')
+            self.assertTemplateUsed('users/register.jinja')
 
     def test_register_page_POST_no_password(self):
         with self.client as c:
@@ -78,7 +78,7 @@ class TestUsersView(TestCase):
             }, follow_redirects=False)
             self.assertIsNone(models.User.query.filter_by(email="chadfield.jackson@gmail.com").first())
             self.assertTrue(flask_login.current_user.is_anonymous)
-            self.assertTemplateUsed('users/register_minimal.jinja')
+            self.assertTemplateUsed('users/register.jinja')
 
     def test_register_page_email_sent(self):
         with self.client as c:
@@ -94,7 +94,7 @@ class TestUsersView(TestCase):
         response = self.client.get(flask.url_for('users.login'))
         self.assert200(response)
         self.assertTrue(flask_login.current_user.is_anonymous)
-        self.assertTemplateUsed('users/login_minimal.jinja')
+        self.assertTemplateUsed('users/login.jinja')
 
     def test_login_page_POST_success(self):
         with self.client as c:
@@ -121,7 +121,7 @@ class TestUsersView(TestCase):
             }, follow_redirects=False)
             self.assertIsNone(models.User.query.filter_by(email="chadfield.jacksongmail.com").first())
             self.assertTrue(flask_login.current_user.is_anonymous)
-            self.assertTemplateUsed('users/login_minimal.jinja')
+            self.assertTemplateUsed('users/login.jinja')
 
     def test_login_page_POST_invalid_password(self):
         with self.client as c:
@@ -135,11 +135,11 @@ class TestUsersView(TestCase):
                 }, follow_redirects=False)
                 self.assertIsNone(models.User.query.filter_by(email="chadfield.jacksongmail.com").first())
                 self.assertTrue(flask_login.current_user.is_anonymous)
-                self.assertTemplateUsed('users/login_minimal.jinja')
+                self.assertTemplateUsed('users/login.jinja')
             with self.subTest("no password"):
                 c.post(flask.url_for('users.login'), data={
                     a.email.name: "chadfield.jackson@gmail.com"
                 }, follow_redirects=False)
                 self.assertIsNone(models.User.query.filter_by(email="chadfield.jacksongmail.com").first())
                 self.assertTrue(flask_login.current_user.is_anonymous)
-                self.assertTemplateUsed('users/login_minimal.jinja')
+                self.assertTemplateUsed('users/login.jinja')

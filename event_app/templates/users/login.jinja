@@ -1,0 +1,100 @@
+{% extends "global.jinja" %}
+{% import "macros.jinja" as macros %}
+
+{% block title %}Vent | Login{% endblock %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users/login.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    <script>
+        function clear_errors() {
+            $('#login-form div.error').remove();
+        }
+
+        function add_error(element, text) {
+            element.before("<div class=\"error\">" + text + "</div>");
+        }
+
+        $(document).ready(function () {
+            var form = $('#login-form');
+            form.on('submit', function (event) {
+
+                clear_errors();
+                var data = form.serializeArray().reduce(function (obj, item) {
+                    obj[item.name] = item.value;
+                    return obj;
+                }, {});
+
+                var valid = true;
+
+                //Validate Email
+                const email_regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                if (!email_regex.test(data['email'])) {
+                    add_error($("#email"), "Please Enter A Valid Email");
+                    valid = false;
+                } else if (data['email'].length > 254) {
+                    add_error($("#email"), "Woah, that's a rather large email!");
+                    valid = false;
+                }
+
+                //Validate Password
+                if (data['password'].length === 0) {
+                    add_error($("#password"), "This Field Is Required");
+                    valid = false;
+                } else if (data['password'].length < 8) {
+                    add_error($("#password"), "Invalid Password");
+                    valid = false;
+                }
+
+                if (valid) {
+                    return true;
+                } else {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block nav_items %}
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.login') }}">Login</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.register') }}">Register</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="wrapper">
+        {% if lockout %}
+            <div class="lockout-error">
+                <h1>You Have Been Locked Out</h1>
+                <h2>Try again later <span class="or">OR</span> <a href="{{ url_for("users.recovery") }}">Recover
+                    Account</a></h2>
+            </div>
+        {% else %}
+            <div class="form">
+                <h1>Login</h1>
+                <form id="login-form" novalidate method="POST" action="{{ url_for('users.login') }}">
+                    {{ macros.form_error(form.email) }}
+                    {{ form.email(id="email", type="email", placeholder="Email", required=True, maxlength=254) }}<br>
+                    {{ macros.form_error(form.password) }}
+                    {{ form.password(id="password", placeholder="Password", required=True, minlength=8, pattern=".{8,}") }}<br>
+                    {{ form.hidden_tag() }}
+                    {% set target = request.values.get("next") %}
+                    {% if target is not none %}
+                        <input type="hidden" name="next" value="{{ target|e }}">
+                    {% endif %}
+                    <button class="button">Login</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

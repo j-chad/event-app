@@ -1,0 +1,139 @@
+{% extends "global.jinja" %}
+
+{% block title %}Vent{% endblock %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home/index.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    <!--suppress JSUnusedGlobalSymbols -->
+    <script type="text/javascript">
+        function clear_errors() {
+            $('#sign-up-form div.error').remove();
+        }
+
+        function add_error(element, text) {
+            element.before("<div class=\"error\">" + text + "</div>");
+        }
+
+        $(document).ready(function () {
+            var form = $('#sign-up-form');
+            form.on('submit', function (event) {
+                event.preventDefault();
+
+                clear_errors();
+                var data = form.serializeArray().reduce(function (obj, item) {
+                    obj[item.name] = item.value;
+                    return obj;
+                }, {});
+
+                var valid = true;
+
+                //Validate First Name
+                if (!(data['first_name'].length > 0)) {
+                    add_error($("#first_name"), "Required");
+                    valid = false;
+                } else if (data['first_name'].length > 40) {
+                    add_error($("#first_name"), "Maximum 40 Characters");
+                    valid = false;
+                }
+
+                //Validate Last Name
+                if (data['last_name'].length > 40) {
+                    add_error($("#last_name"), "Maximum 40 Characters");
+                    valid = false;
+                }
+
+                //Validate Email
+                const email_regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                if (!email_regex.test(data['email'])) {
+                    add_error($("#email"), "Please Enter A Valid Email");
+                    valid = false;
+                } else if (data['email'].length > 254) {
+                    add_error($("#email"), "Woah, that's a rather large email!");
+                    valid = false;
+                }
+
+                //Validate Password
+                if (data['password'].length < 8) {
+                    add_error($("#password"), "Minimum 8 Characters");
+                    valid = false;
+                } else if (data["password"] !== data["confirm_password"]) {
+                    add_error($("#password"), "Passwords Must Match!");
+                    valid = false;
+                }
+
+                if (valid) {
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ url_for('ajax.register_user') }}",
+                        data: form.serialize(),
+                        datatype: 'json',
+                        success: function (response) {
+                            if (response['status'] === "success") {
+                                alert("Success");
+                            } else {
+                                var errors = response['errors'];
+                                $.each(errors, function (id, e) {
+                                    if (id !== "main") {
+                                        if (e.length >= 1) {
+                                            add_error($("#sign-up-form > #" + id), e[0]);
+                                        }
+                                    } else {
+                                        if (e.length >= 1) alert(e[0]);
+                                    }
+                                })
+                            }
+                        }
+                    });
+                }
+
+                return false;
+            })
+        })
+    </script>
+{% endblock %}
+
+{% block nav_items %}
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.login') }}">Login</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.register') }}">Register</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="inner container">
+        <section class="float-left">
+            <section>
+                <h1>Welcome!</h1>
+                This website is designed to help you;
+                With one of the most active and largest organising app,
+                you can now suggest and review from other organizers.
+                Get instant notifications and join in with the vents!
+            </section>
+            <section class="img">
+                <img src="{{ url_for('static', filename='img/home/h4.jpg') }}" alt="">
+            </section>
+        </section>
+        <aside class="form float-right">
+            <h1>Vent Now!</h1>
+            <form id="sign-up-form" novalidate>
+                {{ form.first_name(id="first_name", placeholder="First Name", required=True, maxlength=40) }}<br>
+                {{ form.last_name(id="last_name", placeholder="Last Name (optional)", maxlength=40) }}<br>
+                {{ form.email(id="email", type="email", placeholder="Email", required=True, maxlength=254) }}<br>
+                {{ form.password(id="password", placeholder="Password", required=True, minlength=8, pattern=".{8,}") }}<br>
+                {{ form.confirm_password(id="confirm_password", placeholder="Confirm Password", required=True, minlength=8, pattern=".{8,}") }}<br>
+                {{ form.hidden_tag() }}
+                <button class="button">Sign Up</button>
+                <a class="button button-outline" href="{{ url_for('users.login') }}">Or Log In</a>
+            </form>
+        </aside>
+        <div class="clear"></div>
+    </div>
+{% endblock %}

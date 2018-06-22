@@ -1,14 +1,51 @@
 # coding=utf-8
 import json
+from secrets import token_urlsafe
 
 import flask
+import flask_login
 from flask_login import login_required, current_user
 
-from .. import models, tasks
-from ..extensions import db
+from .. import models, tasks, utils, forms
+from ..extensions import db, redis_store
 from ..utils import MessageTypes
+from ..views.users import send_validation_email
 
 ajax = flask.Blueprint('ajax', __name__, url_prefix="/ajax")
+
+
+@ajax.route('/user/register', methods=("POST",))
+@utils.requires_anonymous()
+def register_user():
+    register_form = forms.RegisterForm()
+    if register_form.validate_on_submit():
+        user = models.User(first_name=register_form.first_name.data,
+                           last_name=register_form.last_name.data,
+                           email=register_form.email.data,
+                           password=register_form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flask_login.login_user(user)
+        token = str(token_urlsafe())
+        redis_store.set('USER:VERIFICATION_TOKEN#{}'.format(token), user.email,
+                        ex=flask.current_app.config['VERIFICATION_TOKEN_EXPIRY'],
+                        nx=True)
+        send_validation_email(user, token)
+        flask.flash({"body": "Please check your email"}, "info")
+        payload = {"status": "success"}
+    else:
+        payload = {
+            "status": "error",
+            "errors": {
+                "f_name": register_form.first_name.errors,
+                "l_name": register_form.last_name.errors,
+                "email": register_form.email.errors,
+                "password": register_form.password.errors,
+                "confirm": register_form.confirm_password.errors,
+                "main": []
+            }
+        }
+    return flask.jsonify(payload)
 
 
 @ajax.route('/event/update_subscription', methods=("POST",))

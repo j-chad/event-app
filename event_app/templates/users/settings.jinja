@@ -1,0 +1,30 @@
+{% extends "global.jinja" %}
+
+{% block title %}Vent | Settings{% endblock %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users/settings.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}
+
+{% block nav_items %}
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('home.index') }}">Dashboard</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('events.home') }}">Events</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.settings') }}">Settings</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.logout') }}">Logout</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+{% endblock %}

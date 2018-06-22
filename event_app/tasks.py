@@ -22,7 +22,7 @@ def send_push_notification(token: models.WebPushToken, data: Union[dict, list]):
     with flask.current_app.app_context():
         print("Token: {}".format(token))
         try:
-            a = pywebpush.webpush(
+            pywebpush.webpush(
                 subscription_info={
                     "endpoint": token.endpoint,
                     "keys": {
@@ -36,7 +36,6 @@ def send_push_notification(token: models.WebPushToken, data: Union[dict, list]):
                 },
                 data=json.dumps(data)
             )
-            print(a.status_code, ":", a.content)
         except pywebpush.WebPushException as e:
             print(e)
             if e.response is not None:

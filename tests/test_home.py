@@ -18,4 +18,4 @@ class TestHomeView(TestCase):
             response = self.client.get(flask.url_for('home.index'))
         self.assert200(response)
         self.assertTrue(flask_login.current_user.is_anonymous)
-        self.assertTemplateUsed('home/index_minimal.jinja')
+        self.assertTemplateUsed('home/index.jinja')

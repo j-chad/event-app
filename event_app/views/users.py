@@ -30,6 +30,53 @@ def send_recovery_email(user: models.User, recovery_token: str):
         tasks.send_email.queue(msg)
 
 
+def generate_insights(user: models.User):
+    # noinspection PyListCreation
+    insights = {
+        "warning": [],
+        "standard": [],
+        "low": [],
+        "tips": []
+    }
+
+    # Email Not Verified
+    if not user.email_verified:
+        insights["warning"].append({
+            "title": "Email Not Verified",
+            "classes": ("urgent",),
+            "body": "In order for you to subscribe or create an event, you must verify your email.",
+            "actions": [
+                {
+                    "title": "Resend Email",
+                    "url": flask.url_for("users.resend_activation_email")
+                }
+            ]
+        })
+
+    if len(user.subscribed_events) == 0:
+        insights["low"].append({
+            "title": "Subscribe To An Event",
+            "body": """
+                Looks like you haven't yet subscribed to an event. 
+                When you subscribe to an event, recent updates will appear here.
+            """
+        })
+
+    return insights
+
+
+def dashboard() -> flask.Response:
+    """Index View For Logged In User
+
+    Called from home.index, treat as ordinary route
+    """
+    insights = generate_insights(flask_login.current_user)
+    return flask.render_template("users/index.jinja",
+                                 insights=insights,
+                                 subscribed=flask_login.current_user.subscribed_events,
+                                 owned=flask_login.current_user.events)
+
+
 @users.route('/login', methods=("GET", "POST"))
 @utils.requires_anonymous()
 def login():
@@ -37,19 +84,19 @@ def login():
     if flask.request.method == "POST":
         attempts: Union[bytes, None] = redis_store.get('USER:LOGIN_FAILURES#{}'.format(get_remote_address()))
         if attempts is not None and (int(attempts) >= flask.current_app.config["LOCKDOWN_AFTER_N_PASSWORD_ATTEMPTS"]):
-            return render_template('users/login_minimal.jinja', form=login_form, lockout=True)
+            return render_template('users/login.jinja', form=login_form, lockout=True)
         elif login_form.validate():
             # Reset Attempt Count
             redis_store.delete('USER:LOGIN_FAILURES#{}'.format(get_remote_address()))
             flask_login.login_user(login_form.user)
-            flask.flash("Logged In Successfully", "success")
+            flask.flash({"body": "Logged In Successfully"}, "success")
             return utils.redirect_with_next('home.index')
         else:
             redis_store.incr('USER:LOGIN_FAILURES#{}'.format(get_remote_address()))
             # Reset Expiry Time
             redis_store.expire('USER:LOGIN_FAILURES#{}'.format(get_remote_address()),
                                flask.current_app.config["LOCKDOWN_FOR_N_SECONDS"])
-    return render_template('users/login_minimal.jinja', form=login_form, lockout=False)
+    return render_template('users/login.jinja', form=login_form, lockout=False)
 
 
 @users.route('/register', methods=("GET", "POST"))
@@ -69,9 +116,9 @@ def register():
                         ex=flask.current_app.config['VERIFICATION_TOKEN_EXPIRY'],
                         nx=True)
         send_validation_email(user, token)
-        flask.flash("Please check your email", "info")
+        flask.flash({"body": "Please check your email"}, "info")
         return utils.redirect_with_next('home.index')
-    return render_template('users/register_minimal.jinja', form=register_form)
+    return render_template('users/register.jinja', form=register_form)
 
 
 @users.route('/verify/<token>')
@@ -87,7 +134,7 @@ def activate_account(token):
             redis_store.delete('USER:VERIFICATION_TOKEN#{}'.format(token))
             user.email_verified = True
             db.session.commit()
-            flask.flash("Email Verified", "success")
+            flask.flash({"body": "Email Verified"}, "success")
             return flask.redirect(flask.url_for('home.index'))
 
 
@@ -114,12 +161,12 @@ def recovery():  # TODO: Implement Lockout
                         ex=flask.current_app.config['RECOVERY_TOKEN_EXPIRY'],
                         nx=True)
         send_recovery_email(form.user, token)
-        flask.flash("Recovery Email Has Been Sent", "success")
+        flask.flash({"body": "Recovery Email Has Been Sent"}, "info")
         return flask.redirect(flask.url_for("home.index"))
     return flask.render_template("users/recovery_minimal.jinja", form=form)
 
 
-@users.route('/recovery/<token>', methods=['GET', 'POST'])
+@users.route('/recovery/<token>', methods=['GET', 'POST'])  # TODO: Remove GET
 @utils.requires_anonymous()
 def recovery_change_password(token):
     form = forms.RecoveryPhase2Form()
@@ -136,7 +183,7 @@ def recovery_change_password(token):
             redis_store.delete('USER:RECOVERY_TOKEN#{}'.format(token))
             user.password = form.password.data
             db.session.commit()
-            flask.flash("Password Has Been Reset", "success")
+            flask.flash({"body": "Password Has Been Reset"}, "success")
             flask_login.login_user(user)
             return flask.redirect(flask.url_for("home.index"))
         else:
@@ -146,7 +193,7 @@ def recovery_change_password(token):
 
 
 @users.route('/logout')
-def logout():
+def logout():  # TODO: Only POST
     flask_login.logout_user()
     return flask.redirect(flask.url_for("home.index"))
 
@@ -154,4 +201,4 @@ def logout():
 @users.route('/settings')
 @flask_login.login_required
 def settings():
-    return "settings"
+    return flask.render_template('users/settings.jinja')

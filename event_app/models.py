@@ -6,10 +6,11 @@ import flask
 import hashids
 from bcrypt import gensalt
 from flask_login import UserMixin
+from sqlalchemy.dialects.mysql import DECIMAL, JSON
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
 from .extensions import bcrypt, db
-from .utils import reference_col, MessageTypes
+from .utils import MessageTypes
 
 Model = db.Model
 Column = db.Column
@@ -80,12 +81,15 @@ class User(UserMixin, Model):
 class Event(Model):
     __tablename__ = 'events'
     id = Column(db.Integer, primary_key=True)
-    owner_id = reference_col(User, pk_name="email", nullable=False)
+    owner_id = Column(db.String(254), ForeignKey("users.email"), nullable=False)
     owner = relationship('User', backref='events')
     users = relationship("Subscription", back_populates="event")
 
     name = Column(db.String(60), nullable=False)
     description = Column(db.String(200), nullable=True)
+    time = Column(db.DateTime, nullable=True, default=None)
+    latitude = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -90 < latitude < 90
+    longitude = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -180 < longitude < 180
     private = Column(db.Boolean, nullable=False, default=False)
 
     def __init__(self, **kwargs):
@@ -93,6 +97,10 @@ class Event(Model):
 
     def __repr__(self):
         return "<Event {} ({!r})>".format(self.id, self.name)
+
+    @hybrid_property
+    def location_enabled(self):
+        return (self.latitude is not None) and (self.longitude is not None)
 
     @property
     def url_id(self):
@@ -120,7 +128,7 @@ class Subscription(Model):
 class WebPushToken(Model):
     __tablename__ = 'webpush_tokens'
     endpoint = Column(db.String(512), primary_key=True)
-    user_id = Column(db.String(254), ForeignKey('users.email'), nullable=False, primary_key=True)
+    user_id = Column(db.String(254), ForeignKey('users.email'), primary_key=True)
 
     user = relationship("User", back_populates="webpush_tokens")
     p256dh = Column(db.String(100), nullable=False)
@@ -135,4 +143,4 @@ class Message(Model):
 
     timestamp = Column(db.DateTime, default=datetime.now)
     type = Column(db.Enum(MessageTypes))
-    data = Column(db.JSON)
+    data = Column(JSON)

@@ -1,0 +1,128 @@
+//variables
+$red: #FF4136
+$orange: #FF851B
+$black: #111111
+$white: #FFFFFF
+$silver: #DDDDDD
+$grey: #AAAAAA
+$yellow: #FFDC00
+$blue: #0074D9
+$teal: #39CCCC
+$lime: #01FF70
+$green: #2ECC40
+
+$transition-time: 1ms
+$nav-height: 7rem
+$footer-height: 4rem
+
+// Stylesheet
+.navigation .navigation-link, .navigation .navigation-title, .navigation .title
+    display: inline
+    font-size: 2rem
+    line-height: $nav-height
+    padding: 0
+    text-decoration: none
+
+html, body
+    height: 100%
+
+body
+
+    .content-wrapper
+        min-height: 100%
+        position: relative
+
+        nav.navigation
+            height: $nav-height
+            background-color: $orange
+
+            .side-nav
+                height: 100%
+                width: 0
+                position: fixed
+                z-index: 1000
+                top: 0
+                left: 0
+                overflow-x: hidden
+                padding-top: 5rem
+                transition: 0.5s
+                background-color: $orange
+
+                ul
+                    list-style: none
+                    margin: 0
+
+                    .navigation-item
+                        text-align: center
+
+                        &.close-sidenav
+                            font-size: 5rem
+
+                        a
+                            text-decoration: none
+                            color: $white
+                            transition: color $transition-time
+
+                            &:hover
+                                color: $silver
+
+            section.container
+                height: $nav-height
+                max-width: 80rem
+
+                a.navigation-title
+                    line-height: $nav-height
+                    font-size: 4.6rem
+
+                    h1
+                        margin: 0
+                        padding: 0
+                        line-height: $nav-height
+                        display: inline
+                        color: $white
+
+                ul.navigation-list
+                    list-style: none
+                    margin: 0
+
+                    .navigation-item
+                        float: left
+                        margin-bottom: 0
+                        margin-left: 2.5rem
+                        position: relative
+
+                        &.sidebar-button
+                            font-size:
+                            display: none
+
+                        a
+                            text-decoration: none
+                            display: inline
+                            line-height: $nav-height
+                            color: $white
+                            transition: color $transition-time
+
+                            &:hover
+                                color: $silver
+        main
+            width: 100%
+
+        footer
+            width: 100%
+            height: $footer-height
+            background-color: $orange
+            color: $white
+            text-align: center
+            line-height: $footer-height
+            position: absolute
+            bottom: 0
+            left: 0
+
+@media(max-width: 650px)
+    nav
+        .nav-bar
+            .navigation-list
+                .navigation-item:not(.sidebar-button)
+                    display: none
+                .navigation-item.sidebar-button
+                    display: list-item !important
