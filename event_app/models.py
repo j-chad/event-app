@@ -1,4 +1,5 @@
 # coding=utf-8
+import math
 import uuid
 from datetime import datetime
 
@@ -6,6 +7,7 @@ import flask
 import hashids
 from bcrypt import gensalt
 from flask_login import UserMixin
+from sqlalchemy import func
 from sqlalchemy.dialects.mysql import DECIMAL, JSON
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
@@ -31,6 +33,9 @@ class User(UserMixin, Model):
     email_verified = Column(db.Boolean, nullable=False, default=False)
     session_token = Column(db.String(32), nullable=False, default=lambda: uuid.uuid4().hex)
     created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    latitude = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -π/2 < latitude < π/2
+    longitude = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -π  < longitude < π
 
     def __init__(self, first_name: str, email: str, password: str, **kwargs):
         Model.__init__(self, first_name=first_name, email=email, **kwargs)
@@ -69,6 +74,15 @@ class User(UserMixin, Model):
         else:
             return self.first_name
 
+    @hybrid_property
+    def location_enabled(self):
+        return (self.latitude is not None) and (self.longitude is not None)
+
+    # noinspection PyComparisonWithNone
+    @location_enabled.expression
+    def location_enabled(self):
+        return (self.latitude != None) & (self.longitude != None)
+
     @staticmethod
     def generate_salt():
         """Returns a salt which will be stored"""
@@ -88,9 +102,11 @@ class Event(Model):
     name = Column(db.String(60), nullable=False)
     description = Column(db.String(200), nullable=True)
     time = Column(db.DateTime, nullable=True, default=None)
-    latitude = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -90 < latitude < 90
-    longitude = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -180 < longitude < 180
+    latitude = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -π/2 < latitude < π/2
+    longitude = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -π  < longitude < π
     private = Column(db.Boolean, nullable=False, default=False)
+
+    created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, **kwargs):
         Model.__init__(self, **kwargs)
@@ -101,6 +117,31 @@ class Event(Model):
     @hybrid_property
     def location_enabled(self):
         return (self.latitude is not None) and (self.longitude is not None)
+
+    # noinspection PyComparisonWithNone
+    @location_enabled.expression
+    def location_enabled(self):
+        return (self.latitude != None) & (self.longitude != None)
+
+    @hybrid_method
+    def distance_from(self, latitude, longitude):
+        return math.acos(
+            math.cos(self.latitude)
+            * math.cos(latitude)
+            * math.cos(self.longitude - longitude)
+            + math.sin(self.latitude)
+            * math.sin(latitude)
+        ) * 6371
+
+    @distance_from.expression
+    def distance_from(self, latitude, longitude):
+        return func.acos(
+            func.cos(self.latitude)
+            * func.cos(latitude)
+            * func.cos(self.longitude - longitude)
+            + func.sin(self.latitude)
+            * func.sin(latitude)
+        ) * 6371
 
     @property
     def url_id(self):

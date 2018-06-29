@@ -62,6 +62,18 @@ def generate_insights(user: models.User):
             """
         })
 
+    if not user.location_enabled:
+        insights["warning"].append({
+            "title": "Add Your Location",
+            "body": "Add your home location so we can show you nearby events!",
+            "actions": [
+                {
+                    "title": "Settings",
+                    "url": flask.url_for("users.settings")
+                }
+            ]
+        })
+
     return insights
 
 

@@ -10,9 +10,9 @@ from ..extensions import db
 events = flask.Blueprint('events', __name__)
 
 
-@events.route('/events')
+@events.route('/discover')
 @login_required
-def home() -> flask.Response:
+def discover() -> flask.Response:
     unowned = models.Event.query.filter(models.Event.owner != current_user).all()
     return flask.render_template("events/index_minimal.jinja",
                                  subscribed=current_user.subscribed_events,
