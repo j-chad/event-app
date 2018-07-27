@@ -1,5 +1,5 @@
 # coding=utf-8
-import json
+import decimal
 from secrets import token_urlsafe
 
 import flask
@@ -98,7 +98,7 @@ def event_add_message():
         flask.abort(400)  # If not valid event token
 
     # noinspection PyUnboundLocalVariable
-    message = models.Message(event=event, type=type_, data=data)
+    message = models.EventMessage(event=event, type=type_, data=data)
     db.session.add(message)
     db.session.commit()
 

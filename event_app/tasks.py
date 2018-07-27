@@ -51,7 +51,7 @@ def send_push_notification(token: models.WebPushToken, data: Union[dict, list]):
 
 # noinspection PyUnboundLocalVariable
 @redis_queue.job
-def notify(message: models.Message, event: models.Event):  # TODO: get rid of event, replace with message.event
+def notify(message: models.EventMessage, event: models.Event):  # TODO: get rid of event, replace with message.event
     with flask.current_app.app_context():
         db.session.add_all([message, event])  # Feels kinda hacky. But It Works So Eh.
         subscribers: List[models.Subscription] = event.users

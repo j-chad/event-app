@@ -11,11 +11,10 @@ from flask import redirect, request, url_for
 
 @enum.unique
 class MessageTypes(enum.Enum):
-    TEXT = enum.auto()
-    # LOCATION = enum.auto()
-    # IMAGE = enum.auto()
-    # FILE = enum.auto()
-    # DATETIME = enum.auto()
+    TEXT = 0
+    # LOCATION = 1
+    # IMAGE = 2
+    # FILE = 3
 
 
 def requires_anonymous(endpoint: Union[str, Callable] = "home.index", msg="You are already logged in"):
@@ -48,5 +47,5 @@ def is_safe_url(target: str) -> bool:
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
 
 
-def get_unread_messages(user: "models.User"):
+def get_unread_messages(user):
     pass

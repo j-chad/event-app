@@ -2,9 +2,12 @@
 import math
 import uuid
 from datetime import datetime
+from decimal import Decimal
+from typing import List, Any, Dict
 
 import flask
 import hashids
+import jinja2
 from bcrypt import gensalt
 from flask_login import UserMixin
 from sqlalchemy import func
@@ -22,20 +25,20 @@ relationship = db.relationship
 
 class User(UserMixin, Model):
     __tablename__ = 'users'
-    email = Column(db.String(254), primary_key=True)
-    subscribed_events = relationship("Subscription", back_populates="user")
-    webpush_tokens = relationship('WebPushToken')
+    email: str = Column(db.String(254), primary_key=True)
+    subscribed_events: List['Subscription'] = relationship("Subscription", back_populates="user")
+    webpush_tokens: List['WebPushToken'] = relationship('WebPushToken')
 
-    first_name = Column(db.String(40), nullable=False)
-    last_name = Column(db.String(40), nullable=True)
+    first_name: str = Column(db.String(40), nullable=False)
+    last_name: str = Column(db.String(40), nullable=True)
     salt = Column(db.Binary(58), nullable=False)
     _password = Column(db.LargeBinary(128), nullable=False)
-    email_verified = Column(db.Boolean, nullable=False, default=False)
-    session_token = Column(db.String(32), nullable=False, default=lambda: uuid.uuid4().hex)
-    created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    email_verified: bool = Column(db.Boolean, nullable=False, default=False)
+    session_token: str = Column(db.String(32), nullable=False, default=lambda: uuid.uuid4().hex)
+    created_at: datetime = Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    latitude = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -π/2 < latitude < π/2
-    longitude = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -π  < longitude < π
+    latitude: Decimal = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -90 < latitude < 90
+    longitude: Decimal = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -180  < longitude < 180
 
     def __init__(self, first_name: str, email: str, password: str, **kwargs):
         Model.__init__(self, first_name=first_name, email=email, **kwargs)
@@ -68,19 +71,19 @@ class User(UserMixin, Model):
         return bcrypt.check_password_hash(self.password, salted_password)
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         if self.last_name is not None:
             return f"{self.first_name} {self.last_name}"
         else:
             return self.first_name
 
     @hybrid_property
-    def location_enabled(self):
+    def location_enabled(self) -> bool:
         return (self.latitude is not None) and (self.longitude is not None)
 
     # noinspection PyComparisonWithNone
     @location_enabled.expression
-    def location_enabled(self):
+    def location_enabled(self) -> bool:
         return (self.latitude != None) & (self.longitude != None)
 
     @staticmethod
@@ -94,19 +97,19 @@ class User(UserMixin, Model):
 
 class Event(Model):
     __tablename__ = 'events'
-    id = Column(db.Integer, primary_key=True)
-    owner_id = Column(db.String(254), ForeignKey("users.email"), nullable=False)
-    owner = relationship('User', backref='events')
-    users = relationship("Subscription", back_populates="event")
+    id: int = Column(db.Integer, primary_key=True)
+    owner_id: str = Column(db.String(254), ForeignKey("users.email"), nullable=False)
+    owner: User = relationship('User', backref='events')
+    users: List["Subscription"] = relationship("Subscription", back_populates="event")
 
-    name = Column(db.String(60), nullable=False)
-    description = Column(db.String(200), nullable=True)
-    time = Column(db.DateTime, nullable=True, default=None)
-    latitude = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -π/2 < latitude < π/2
-    longitude = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -π  < longitude < π
-    private = Column(db.Boolean, nullable=False, default=False)
+    name: str = Column(db.String(60), nullable=False)
+    description: str = Column(db.String(200), nullable=True)
+    start: datetime = Column(db.DateTime, nullable=True, default=None)
+    latitude: Decimal = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -90 < latitude < 90
+    longitude: Decimal = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -180  < longitude < 180
+    private: bool = Column(db.Boolean, nullable=False, default=False)
 
-    created_at = Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at: datetime = Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, **kwargs):
         Model.__init__(self, **kwargs)
@@ -115,41 +118,41 @@ class Event(Model):
         return "<Event {} ({!r})>".format(self.id, self.name)
 
     @hybrid_property
-    def location_enabled(self):
+    def location_enabled(self) -> bool:
         return (self.latitude is not None) and (self.longitude is not None)
 
     # noinspection PyComparisonWithNone
     @location_enabled.expression
-    def location_enabled(self):
+    def location_enabled(self) -> bool:
         return (self.latitude != None) & (self.longitude != None)
 
     @hybrid_method
-    def distance_from(self, latitude, longitude):
+    def distance_from(self, latitude: Decimal, longitude: Decimal) -> float:
         return math.acos(
-            math.cos(self.latitude)
-            * math.cos(latitude)
-            * math.cos(self.longitude - longitude)
-            + math.sin(self.latitude)
-            * math.sin(latitude)
+            math.cos(math.radians(self.latitude))
+            * math.cos(math.radians(latitude))
+            * math.cos(math.radians(self.longitude) - math.radians(longitude))
+            + math.sin(math.radians(self.latitude))
+            * math.sin(math.radians(latitude))
         ) * 6371
 
     @distance_from.expression
-    def distance_from(self, latitude, longitude):
+    def distance_from(self, latitude: Decimal, longitude: Decimal) -> float:
         return func.acos(
-            func.cos(self.latitude)
-            * func.cos(latitude)
-            * func.cos(self.longitude - longitude)
-            + func.sin(self.latitude)
-            * func.sin(latitude)
+            func.cos(func.radians(self.latitude))
+            * func.cos(func.radians(latitude))
+            * func.cos(func.radians(self.longitude) - func.radians(longitude))
+            + func.sin(func.radians(self.latitude))
+            * func.sin(func.radians(latitude))
         ) * 6371
 
     @property
-    def url_id(self):
+    def url_id(self) -> str:
         encoder = hashids.Hashids(min_length=10, salt=flask.current_app.config["HASHID_SALT"])
         return encoder.encode(self.id)
 
     @staticmethod
-    def fetch_from_url_token(token: str):
+    def fetch_from_url_token(token: str) -> 'Event':
         decoder = hashids.Hashids(min_length=10, salt=flask.current_app.config["HASHID_SALT"])
         id = decoder.decode(token)
         return Event.query.get(id)
@@ -157,31 +160,66 @@ class Event(Model):
 
 class Subscription(Model):
     __tablename__ = 'subscriptions'
-    user_id = Column(db.String(254), ForeignKey('users.email'), primary_key=True)
-    user = relationship("User", back_populates="subscribed_events")
-    event_id = Column(db.Integer, ForeignKey('events.id'), primary_key=True)
-    event = relationship("Event", back_populates="users")
+    user_id: str = Column(db.String(254), ForeignKey('users.email'), primary_key=True)
+    user: User = relationship("User", back_populates="subscribed_events")
+    event_id: int = Column(db.Integer, ForeignKey('events.id'), primary_key=True)
+    event: Event = relationship("Event", back_populates="users")
 
-    email = Column(db.Boolean, nullable=False, default=False)
-    web_push = Column(db.Boolean, nullable=False, default=False)
+    email: bool = Column(db.Boolean, nullable=False, default=False)
+    web_push: bool = Column(db.Boolean, nullable=False, default=False)
 
 
 class WebPushToken(Model):
     __tablename__ = 'webpush_tokens'
-    endpoint = Column(db.String(512), primary_key=True)
-    user_id = Column(db.String(254), ForeignKey('users.email'), primary_key=True)
+    endpoint: str = Column(db.String(512), primary_key=True)
+    user_id: str = Column(db.String(254), ForeignKey('users.email'), primary_key=True)
 
-    user = relationship("User", back_populates="webpush_tokens")
-    p256dh = Column(db.String(100), nullable=False)
-    auth = Column(db.String(30), nullable=False)
+    user: User = relationship("User", back_populates="webpush_tokens")
+    p256dh: str = Column(db.String(100), nullable=False)
+    auth: str = Column(db.String(30), nullable=False)
 
 
-class Message(Model):
+class EventMessage(Model):
     __tablename__ = 'message'
-    id = Column(db.Integer, primary_key=True)
-    event_id = Column(db.Integer, ForeignKey('events.id'))
-    event = relationship("Event", backref="messages")
+    id: int = Column(db.Integer, primary_key=True)
+    event_id: int = Column(db.Integer, ForeignKey('events.id'))
+    event: Event = relationship("Event", backref="messages")
 
-    timestamp = Column(db.DateTime, default=datetime.now)
-    type = Column(db.Enum(MessageTypes))
-    data = Column(JSON)
+    question = relationship("Question", uselist=False, backref="answer")
+    timestamp: datetime = Column(db.DateTime, default=datetime.now)
+    type: MessageTypes = Column(db.Enum(MessageTypes))
+    data: Dict[str, Any] = Column(JSON)
+
+    def render(self, class_=None) -> str:
+        """Renders the message for display"""
+
+        if class_ is None:
+            class_ = []
+
+        if self.type is MessageTypes.TEXT:
+            data = jinja2.escape(self.data['message'])
+            class_.append('text')
+            return f"<div class='{' '.join(class_)}' data-timestamp={self.timestamp.isoformat()}>{data}</div>"
+
+
+class Answer(Model):
+    __tablename__ = "answer"
+    id: int = Column(db.Integer, primary_key=True)
+    event_id: int = Column(db.Integer, ForeignKey('events.id'))
+    event: Event = relationship("Event", backref="messages")
+
+    question = relationship("Question", uselist=False, backref="answer")
+    timestamp: datetime = Column(db.DateTime, default=datetime.now)
+    text: str = Column(db.String, nullable=False)
+
+
+class Question(Model):
+    __tablename__ = 'question'
+    id: int = Column(db.Integer, primary_key=True)
+    event_id: int = Column(db.Integer, ForeignKey('events.id'))
+    event: Event = relationship("Event", backref="questions")
+
+    answer_id = Column(db.Integer, ForeignKey('answer.id'), nullable=True, default=None, unique=True)
+    answer: EventMessage = relationship('Answer')
+
+    text: str = Column(db.String, nullable=False)

@@ -11,6 +11,7 @@
     <orderEntry type="library" name="popper" level="application" />
     <orderEntry type="library" name="toastr" level="application" />
     <orderEntry type="library" name="all" level="application" />
+    <orderEntry type="library" name="leaflet" level="application" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_FOLDERS">

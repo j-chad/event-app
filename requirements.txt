@@ -1,3 +1,4 @@
+faker
 pywebpush
 amqp==2.2.2
 bcrypt==3.1.4
