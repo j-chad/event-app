@@ -1,0 +1,102 @@
+{% extends "global.jinja" %}
+
+{% block title %}Vent | Discover{% endblock %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/events/discover.css') }}">
+    {% if events != None %}
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+              integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+              crossorigin=""/>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    {% if events != None %}
+        <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+                integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+                crossorigin=""></script>
+        <script type="text/javascript">
+
+
+            var map;
+            var eventMarkers = {};
+            var prevCoords = L.latLng({{ current_user.latitude }}, {{ current_user.longitude }});
+            $(document).ready(function () {
+                map = L.map('eventMap');
+                {%- if current_user.location_enabled -%}
+                    console.log('Defaulting To Users Set Location');
+                    map.setView([{{ current_user.latitude }}, {{ current_user.longitude }}], 13);
+                {% else %}
+                    console.log('No Location Set, Attempting To Locate');
+                    map.locate({setView: true});
+                {% endif %}
+                L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a></div>',
+                    maxZoom: 18,
+                    minZoom: 2,
+                    id: 'mapbox.streets',
+                    accessToken: "{{ config['MAPBOX_ACCESS_TOKEN'] }}"
+                }).addTo(map);
+
+                {% for event in events %}
+                    eventMarkers["{{ event.url_id }}"] = L.marker([{{ event.latitude }}, {{ event.longitude }}]).bindPopup("{{ event.distance_from(current_user.latitude, current_user.longitude) }}").addTo(map);
+                {% endfor %}
+
+                map.on('mouseup', function (event) {
+                    prevCoords = map.getCenter();
+                });
+            });
+
+            function viewEvent(node) {
+                var id = node.dataset.id;
+                map.flyTo(eventMarkers[id].getLatLng());
+            }
+
+            function restoreView() {
+                map.flyTo(prevCoords);
+            }
+        </script>
+    {% endif %}
+{% endblock %}
+
+{% block nav_items %}
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('home.index') }}">Dashboard</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('events.discover') }}">Discover</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.settings') }}">Settings</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.logout') }}">Logout</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    {% if events != None %}
+        <div id="eventMap"></div>
+    {% endif %}
+    <div class="container">
+        {% if events != None %}
+            <div class="category">
+                <h2>{{ events|length }} Nearby Event{% if events|length != 1 %}s{% endif %}</h2>
+                {% for i in events %}
+                    <div class="card" data-id="{{ i.url_id }}" onmouseover="viewEvent(this);"
+                         onmouseout="restoreView();">
+                        <h3>{{ i.name }}</h3>
+                        <div class="description">{{ i.description }}</div>
+                        <div class="actions"><a href="{{ url_for('events.view_event', token=i.url_id) }}">View</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <h1>There are no events nearby!</h1>
+        {% endif %}
+    </div>
+{% endblock %}

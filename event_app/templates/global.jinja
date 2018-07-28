@@ -18,7 +18,8 @@
         <meta name="theme-color" content="#da8b2c">
 
         {% block stylesheets %}
-            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+            <link rel="stylesheet"
+                  href="https://fonts.googleapis.com/css?family=Roboto+Slab:300,300italic,700,700italic">
             <link rel="stylesheet" href="https://cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
             <link rel="stylesheet" href="{{ url_for('static', filename='css/milligram.css') }}">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.css"
@@ -58,6 +59,7 @@
                 var categoryOrder = ["error", "warning", "success", "info"];
 
                 $(document).ready(function () {
+                    navigator.serviceWorker.register('/service-worker.js');
                     var messages = {
                         {%- with errors = get_flashed_messages(category_filter=["error"]) %}
                             error: {{ errors }},
@@ -129,10 +131,10 @@
             {% block content %}
             {% endblock %}
         </main>
-        <footer>
+        <!--<footer>
             Jackson Chadfield 2018 <a href="https://github.com/j-chad/event-app"><img
                 src="{{ url_for('static', filename="img/mark-github.svg") }}" alt=""></a>
-        </footer>
+        </footer>-->
     </div>
 {% endblock %}
 </body>

@@ -213,4 +213,7 @@ def logout():  # TODO: Only POST
 @users.route('/settings')
 @flask_login.login_required
 def settings():
-    return flask.render_template('users/settings.jinja')
+    return flask.render_template('users/settings.jinja',
+                                 latitude=flask_login.current_user.latitude,
+                                 longitude=flask_login.current_user.longitude
+                                 )

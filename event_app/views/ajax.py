@@ -126,3 +126,44 @@ def save_web_push_data():
     db.session.add(token)
     db.session.commit()
     return 'Ok', 200
+
+
+@ajax.route('/user/settings/update_location', methods=("POST",))
+@login_required
+def update_location():
+    latitude = decimal.Decimal(flask.request.form['lat'])
+    longitude = decimal.Decimal(flask.request.form['lng'])
+    if -90 <= latitude <= 90 and -180 <= longitude <= 180:
+        current_user.latitude = latitude
+        current_user.longitude = longitude
+        db.session.commit()
+        return "Ok", 200
+    else:
+        flask.abort(400)
+
+
+@ajax.route('/events')
+def get_events():
+    lat = decimal.Decimal(flask.request.args['lat'])
+    lng = decimal.Decimal(flask.request.args['lng'])
+
+    events = models.Event.query.filter_by(
+        models.Event.distance_from(lat, lng) <= flask.current_app.config['EVENT_MAXIMUM_DISTANCE']
+    ).order_by(
+        models.Event.distance_from(lat, lng),
+        models.Event.time
+    ).all()
+
+    return_value = []
+    for event in events:
+        return_value.append({
+            'name': event.name,
+            'coords': {
+                'lat': event.latitude,
+                'lng': event.longitude
+            },
+            'owner': {
+                'name': event.owner.full_name,
+            }
+        })
+    return flask.jsonify(return_value)

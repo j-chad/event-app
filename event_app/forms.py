@@ -123,3 +123,7 @@ class CreateEventForm(FlaskForm):
         wtforms.validators.Length(max=200)
     ])
     private = wtforms.BooleanField()
+    datetime = wtforms.DateTimeField(validators=[
+        wtforms.validators.Optional()
+    ])
+    longitude = wtforms.HiddenField()
