@@ -185,7 +185,6 @@ class EventMessage(Model):
     event_id: int = Column(db.Integer, ForeignKey('events.id'))
     event: Event = relationship("Event", backref="messages")
 
-    question = relationship("Question", uselist=False, backref="answer")
     timestamp: datetime = Column(db.DateTime, default=datetime.now)
     type: MessageTypes = Column(db.Enum(MessageTypes))
     data: Dict[str, Any] = Column(JSON)
@@ -206,11 +205,11 @@ class Answer(Model):
     __tablename__ = "answer"
     id: int = Column(db.Integer, primary_key=True)
     event_id: int = Column(db.Integer, ForeignKey('events.id'))
-    event: Event = relationship("Event", backref="messages")
+    event: Event = relationship("Event", backref="answers")
 
-    question = relationship("Question", uselist=False, backref="answer")
+    question = relationship("Question", uselist=False, back_populates="answer")
     timestamp: datetime = Column(db.DateTime, default=datetime.now)
-    text: str = Column(db.String, nullable=False)
+    text: str = Column(db.String(300), nullable=False)
 
 
 class Question(Model):
@@ -222,4 +221,4 @@ class Question(Model):
     answer_id = Column(db.Integer, ForeignKey('answer.id'), nullable=True, default=None, unique=True)
     answer: EventMessage = relationship('Answer')
 
-    text: str = Column(db.String, nullable=False)
+    text: str = Column(db.String(100), nullable=False)
