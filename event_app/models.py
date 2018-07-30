@@ -12,6 +12,7 @@ from bcrypt import gensalt
 from flask_login import UserMixin
 from sqlalchemy import func
 from sqlalchemy.dialects.mysql import DECIMAL, JSON
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
 from .extensions import bcrypt, db
@@ -23,8 +24,14 @@ ForeignKey = db.ForeignKey
 relationship = db.relationship
 
 
-class User(UserMixin, Model):
-    __tablename__ = 'users'
+# noinspection PyMethodParameters,PyUnresolvedReferences
+class CommonMixin:
+    @declared_attr
+    def __tablename__(cls) -> str:
+        return cls.__name__.lower()
+
+
+class User(CommonMixin, UserMixin, Model):
     email: str = Column(db.String(254), primary_key=True)
     subscribed_events: List['Subscription'] = relationship("Subscription", back_populates="user")
     webpush_tokens: List['WebPushToken'] = relationship('WebPushToken')
@@ -91,14 +98,10 @@ class User(UserMixin, Model):
         """Returns a salt which will be stored"""
         return gensalt()
 
-    def __repr__(self):
-        return "<User {!r}>".format(self.email, self.full_name)
 
-
-class Event(Model):
-    __tablename__ = 'events'
+class Event(CommonMixin, Model):
     id: int = Column(db.Integer, primary_key=True)
-    owner_id: str = Column(db.String(254), ForeignKey("users.email"), nullable=False)
+    owner_id: str = Column(db.String(254), ForeignKey("user.email"), nullable=False)
     owner: User = relationship('User', backref='events')
     users: List["Subscription"] = relationship("Subscription", back_populates="event")
 
@@ -110,12 +113,6 @@ class Event(Model):
     private: bool = Column(db.Boolean, nullable=False, default=False)
 
     created_at: datetime = Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
-    def __init__(self, **kwargs):
-        Model.__init__(self, **kwargs)
-
-    def __repr__(self):
-        return "<Event {} ({!r})>".format(self.id, self.name)
 
     @hybrid_property
     def location_enabled(self) -> bool:
@@ -158,31 +155,28 @@ class Event(Model):
         return Event.query.get(id)
 
 
-class Subscription(Model):
-    __tablename__ = 'subscriptions'
-    user_id: str = Column(db.String(254), ForeignKey('users.email'), primary_key=True)
+class Subscription(CommonMixin, Model):
+    user_id: str = Column(db.String(254), ForeignKey('user.email'), primary_key=True)
     user: User = relationship("User", back_populates="subscribed_events")
-    event_id: int = Column(db.Integer, ForeignKey('events.id'), primary_key=True)
+    event_id: int = Column(db.Integer, ForeignKey('event.id'), primary_key=True)
     event: Event = relationship("Event", back_populates="users")
 
     email: bool = Column(db.Boolean, nullable=False, default=False)
     web_push: bool = Column(db.Boolean, nullable=False, default=False)
 
 
-class WebPushToken(Model):
-    __tablename__ = 'webpush_tokens'
+class WebPushToken(CommonMixin, Model):
     endpoint: str = Column(db.String(512), primary_key=True)
-    user_id: str = Column(db.String(254), ForeignKey('users.email'), primary_key=True)
+    user_id: str = Column(db.String(254), ForeignKey('user.email'), primary_key=True)
 
     user: User = relationship("User", back_populates="webpush_tokens")
     p256dh: str = Column(db.String(100), nullable=False)
     auth: str = Column(db.String(30), nullable=False)
 
 
-class EventMessage(Model):
-    __tablename__ = 'message'
+class EventMessage(CommonMixin, Model):
     id: int = Column(db.Integer, primary_key=True)
-    event_id: int = Column(db.Integer, ForeignKey('events.id'))
+    event_id: int = Column(db.Integer, ForeignKey('event.id'))
     event: Event = relationship("Event", backref="messages")
 
     timestamp: datetime = Column(db.DateTime, default=datetime.now)
@@ -201,10 +195,9 @@ class EventMessage(Model):
             return f"<div class='{' '.join(class_)}' data-timestamp={self.timestamp.isoformat()}>{data}</div>"
 
 
-class Answer(Model):
-    __tablename__ = "answer"
+class Answer(CommonMixin, Model):
     id: int = Column(db.Integer, primary_key=True)
-    event_id: int = Column(db.Integer, ForeignKey('events.id'))
+    event_id: int = Column(db.Integer, ForeignKey('event.id'))
     event: Event = relationship("Event", backref="answers")
 
     question = relationship("Question", uselist=False, back_populates="answer")
@@ -212,13 +205,13 @@ class Answer(Model):
     text: str = Column(db.String(300), nullable=False)
 
 
-class Question(Model):
-    __tablename__ = 'question'
+class Question(CommonMixin, Model):
     id: int = Column(db.Integer, primary_key=True)
-    event_id: int = Column(db.Integer, ForeignKey('events.id'))
+    event_id: int = Column(db.Integer, ForeignKey('event.id'))
     event: Event = relationship("Event", backref="questions")
 
     answer_id = Column(db.Integer, ForeignKey('answer.id'), nullable=True, default=None, unique=True)
     answer: EventMessage = relationship('Answer')
 
+    timestamp: datetime = Column(db.DateTime, default=datetime.now)
     text: str = Column(db.String(100), nullable=False)
