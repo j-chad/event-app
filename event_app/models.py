@@ -24,11 +24,18 @@ ForeignKey = db.ForeignKey
 relationship = db.relationship
 
 
-# noinspection PyMethodParameters,PyUnresolvedReferences
+# noinspection PyMethodParameters,PyUnresolvedReferences,PyReturnFromInit
 class CommonMixin:
     @declared_attr
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
+
+    @declared_attr
+    def __init__(cls):
+        def inner(*args, **kwargs):
+            Model.__init__(*args, **kwargs)
+
+        return inner
 
 
 class User(CommonMixin, UserMixin, Model):
