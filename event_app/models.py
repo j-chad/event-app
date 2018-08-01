@@ -1,9 +1,10 @@
 # coding=utf-8
+import enum
 import math
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
 import flask
 import hashids
@@ -16,12 +17,19 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
 
 from .extensions import bcrypt, db
-from .utils import MessageTypes
 
 Model = db.Model
 Column = db.Column
 ForeignKey = db.ForeignKey
 relationship = db.relationship
+
+
+@enum.unique
+class MessageTypes(enum.Enum):
+    TEXT = 0
+    # LOCATION = 1
+    # IMAGE = 2
+    # FILE = 3
 
 
 # noinspection PyMethodParameters,PyUnresolvedReferences,PyReturnFromInit
@@ -54,6 +62,10 @@ class User(CommonMixin, UserMixin, Model):
     latitude: Decimal = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -90 < latitude < 90
     longitude: Decimal = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -180  < longitude < 180
 
+    _email_notify: bool = Column(db.Boolean, nullable=False, default=True)
+    web_push_notify: bool = Column(db.Boolean, nullable=False, default=True)
+
+    # noinspection PyMissingConstructor
     def __init__(self, first_name: str, email: str, password: str, **kwargs):
         Model.__init__(self, first_name=first_name, email=email, **kwargs)
         self.salt = self.generate_salt()
@@ -61,6 +73,15 @@ class User(CommonMixin, UserMixin, Model):
 
     def get_id(self):
         return self.session_token
+
+    @hybrid_property
+    def email_notify(self) -> bool:
+        """email_notify is only true if email is verified"""
+        return self._email_notify and self.email_verified
+
+    @email_notify.setter
+    def email_notify(self, setting: bool):
+        self._email_notify = setting
 
     @hybrid_property
     def password(self) -> str:
@@ -133,21 +154,21 @@ class Event(CommonMixin, Model):
     @hybrid_method
     def distance_from(self, latitude: Decimal, longitude: Decimal) -> float:
         return math.acos(
-            math.cos(math.radians(self.latitude))
-            * math.cos(math.radians(latitude))
-            * math.cos(math.radians(self.longitude) - math.radians(longitude))
-            + math.sin(math.radians(self.latitude))
-            * math.sin(math.radians(latitude))
+                math.cos(math.radians(self.latitude))
+                * math.cos(math.radians(latitude))
+                * math.cos(math.radians(self.longitude) - math.radians(longitude))
+                + math.sin(math.radians(self.latitude))
+                * math.sin(math.radians(latitude))
         ) * 6371
 
     @distance_from.expression
     def distance_from(self, latitude: Decimal, longitude: Decimal) -> float:
         return func.acos(
-            func.cos(func.radians(self.latitude))
-            * func.cos(func.radians(latitude))
-            * func.cos(func.radians(self.longitude) - func.radians(longitude))
-            + func.sin(func.radians(self.latitude))
-            * func.sin(func.radians(latitude))
+                func.cos(func.radians(self.latitude))
+                * func.cos(func.radians(latitude))
+                * func.cos(func.radians(self.longitude) - func.radians(longitude))
+                + func.sin(func.radians(self.latitude))
+                * func.sin(func.radians(latitude))
         ) * 6371
 
     @property
@@ -168,8 +189,11 @@ class Subscription(CommonMixin, Model):
     event_id: int = Column(db.Integer, ForeignKey('event.id'), primary_key=True)
     event: Event = relationship("Event", back_populates="users")
 
-    email: bool = Column(db.Boolean, nullable=False, default=False)
-    web_push: bool = Column(db.Boolean, nullable=False, default=False)
+    last_viewed: datetime = Column(db.DateTime, default=datetime.utcnow)
+
+    def update(self):
+        self.last_viewed = datetime.utcnow()
+        db.session.commit()
 
 
 class WebPushToken(CommonMixin, Model):
@@ -186,7 +210,7 @@ class EventMessage(CommonMixin, Model):
     event_id: int = Column(db.Integer, ForeignKey('event.id'))
     event: Event = relationship("Event", backref="messages")
 
-    timestamp: datetime = Column(db.DateTime, default=datetime.now)
+    timestamp: datetime = Column(db.DateTime, default=datetime.utcnow, index=True)
     type: MessageTypes = Column(db.Enum(MessageTypes))
     data: Dict[str, Any] = Column(JSON)
 
@@ -208,7 +232,8 @@ class Answer(CommonMixin, Model):
     event: Event = relationship("Event", backref="answers")
 
     question = relationship("Question", uselist=False, back_populates="answer")
-    timestamp: datetime = Column(db.DateTime, default=datetime.now)
+    private = Column(db.Boolean, default=False, nullable=False)
+    timestamp: datetime = Column(db.DateTime, default=datetime.utcnow, nullable=False)
     text: str = Column(db.String(300), nullable=False)
 
 
@@ -220,5 +245,5 @@ class Question(CommonMixin, Model):
     answer_id = Column(db.Integer, ForeignKey('answer.id'), nullable=True, default=None, unique=True)
     answer: EventMessage = relationship('Answer')
 
-    timestamp: datetime = Column(db.DateTime, default=datetime.now)
+    timestamp: datetime = Column(db.DateTime, default=datetime.utcnow)
     text: str = Column(db.String(100), nullable=False)

@@ -46,9 +46,42 @@
         <div class="wrapper">
             <div class="left">
                 <h1>Hello, {{ current_user.first_name }}</h1>
-                <h2>You have <strong>3</strong> unread messages</h2>
+                <h2>You have <strong>{{ unread_messages.total }}</strong> unread message
+                    {%- if unread_messages.total != 1 %}s{% endif %}
+                    {% if owned|length >= 1 %}
+                        and <strong>{{ unanswered_questions }}</strong> unanswered
+                        question{% if unanswered_questions != 1 %}s{% endif -%}
+                    {% endif %}</h2>
+                <hr>
+                <div class="owned-events card">
+                    <h3>My Events</h3>
+                    <ul>
+                        {% for event in owned %}
+                            <li>
+                                <a href="{{ url_for('events.view_event', token=event.url_id) }}">
+                                    <span>{{ event.name }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="subscribed-events card">
+                    <h3>Subscribed Events</h3>
+                    <ul>
+                        {% for subscription in subscribed %}
+                            <li>
+                                <a href="{{ url_for('events.view_event', token=subscription.event.url_id) }}">
+                                    <span>{{ subscription.event.name }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
             <div class="right">
+                <a href="{{ url_for('events.create_event') }}">
+                    <div class="create-event"></div>
+                </a>
                 {% for insight in insights['warning'] %}
                     {{ card(insight, "warning") }}
                 {% endfor %}

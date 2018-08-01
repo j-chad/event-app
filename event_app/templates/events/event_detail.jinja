@@ -1,0 +1,118 @@
+{% extends "global.jinja" %}
+
+{% block title %}Vent | {{ event.name }}{% endblock %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/events/event_detail.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        {% if owner %}
+            function changeMessageType(node) {
+
+            }
+        {% else %}
+            const subscribeOptions = {
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array('{{ config.WEB_PUSH_PUBLIC_KEY }}')
+            };
+
+            function toggleSubscription() {
+                $.post('{{ url_for('ajax.update_subscription') }}',
+                    {token: "{{ event.url_id }}"},
+                    'json'
+                ).done(function (data) {
+                    if (data['subscription'] === true) {
+                        saveSubscription().then(function () {
+                            window.location.reload();
+                        });
+                    } else {
+                        window.location.reload(); // Reload for now due to errors with no-message
+                    }
+                }).fail(function () {
+                    toastr['error']("Something Went Wrong - Try Again Later");
+                });
+            }
+        {% endif %}
+    </script>
+{% endblock %}
+
+{% block nav_items %}
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('home.index') }}">Dashboard</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('events.discover') }}">Discover</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.settings') }}">Settings</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.logout') }}">Logout</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="details">
+            <div class="event-title">
+                <h1>{{ event.name }}</h1>
+                {% if not owner %}
+                    <button type="button" onclick="toggleSubscription();">{% if subscribed %}Unsubscribe{% else %}
+                        Subscribe{% endif %}</button>
+                    <button type="button">View On Map</button>
+                {% else %}
+                    <a href="edit">
+                        <button type="button">Edit</button>
+                    </a>
+                {% endif %}
+            </div>
+            <p>{{ event.description }}</p>
+            {# Q&A #}
+        </div>
+    </div>
+    <hr>
+    <div class="messages container">
+        {% if messages|length == 0 and not owner %}
+            {% if not subscribed %}
+                <h2 class="no-messages">There are no messages, <span>subscribe</span> to stay updated!</h2>
+            {% else %}
+                <h2 class="no-messages">Keep tuned for updates here!</h2>
+            {% endif %}
+        {% else %}
+            {% for message in messages %}
+                {% if loop.first or (message.timestamp - loop.previtem.timestamp) >= config['MESSAGE_BREAK_AFTER_DELTA'] %}
+                    <span class="timestamp">{{ message.timestamp.strftime('%d %B %Y') }}</span><br>
+                {% endif %}
+                {{ message.render(class_=["msg"]) }}
+                <br>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <hr>
+    {% if owner %}
+        <div class="add-message">
+            <form action="{{ url_for('ajax.event_add_message') }}" method="POST">
+                <h3>Add Message</h3>
+                <input type="hidden" name="token" value="{{ event.url_id }}">
+                <select name="type" id="type-select" onchange="changeMessageType(this);">
+                    <option selected value="{{ message_types.TEXT.value }}">Text</option>
+                </select>
+                <textarea id="message-text" name="message"></textarea>
+                <input type="submit" value="Add Message">
+            </form>
+        </div>
+    {% else %}
+        <div class="add-question">
+            <form action="{{ url_for('ajax.event_add_question') }}" method="POST">
+                <h3>Ask a Question!</h3>
+                <input type="hidden" name="token" value="{{ event.url_id }}">
+                <textarea id="message-text" name="message" maxlength="100"></textarea>
+                <input type="submit" value="Add Question">
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}

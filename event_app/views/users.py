@@ -1,6 +1,6 @@
 # coding=utf-8
 from secrets import token_urlsafe
-from typing import Union, Optional
+from typing import Optional, Union
 
 import flask
 import flask_login
@@ -9,7 +9,7 @@ from flask import Blueprint, render_template
 from flask_limiter.util import get_remote_address
 
 from .. import forms, models, tasks, utils
-from ..extensions import db, redis_store, limiter
+from ..extensions import db, limiter, redis_store
 
 users = Blueprint('users', __name__)
 
@@ -77,16 +77,22 @@ def generate_insights(user: models.User):
     return insights
 
 
+# noinspection PyComparisonWithNone
 def dashboard() -> flask.Response:
     """Index View For Logged In User
 
     Called from home.index, treat as ordinary route
     """
+    unanswered_questions = models.Question.query.filter(models.Question.answer == None, models.Question.event.has(
+        owner=flask_login.current_user)).count()
+    unread_messages = utils.get_unread_messages(flask_login.current_user, count=True)
     insights = generate_insights(flask_login.current_user)
     return flask.render_template("users/index.jinja",
                                  insights=insights,
                                  subscribed=flask_login.current_user.subscribed_events,
-                                 owned=flask_login.current_user.events)
+                                 owned=flask_login.current_user.events,
+                                 unanswered_questions=unanswered_questions,
+                                 unread_messages=unread_messages)
 
 
 @users.route('/login', methods=("GET", "POST"))
@@ -116,6 +122,7 @@ def login():
 def register():
     register_form = forms.RegisterForm()
     if register_form.validate_on_submit():
+        print("Validated")
         user = models.User(first_name=register_form.first_name.data,
                            last_name=register_form.last_name.data,
                            email=register_form.email.data,

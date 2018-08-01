@@ -4,11 +4,11 @@ from secrets import token_urlsafe
 
 import flask
 import flask_login
-from flask_login import login_required, current_user
+from flask_login import current_user, login_required
 
-from .. import models, tasks, utils, forms
+from event_app.models import MessageTypes
+from .. import forms, models, tasks, utils
 from ..extensions import db, redis_store
-from ..utils import MessageTypes
 from ..views.users import send_validation_email
 
 ajax = flask.Blueprint('ajax', __name__, url_prefix="/ajax")
@@ -50,35 +50,24 @@ def register_user():
 
 @ajax.route('/event/update_subscription', methods=("POST",))
 @login_required
-def update_event_subscription():
-    data: dict = flask.request.json
-    event: models.Event = models.Event.fetch_from_url_token(data['token'])
+def update_subscription():
+    event: models.Event = models.Event.fetch_from_url_token(flask.request.form['token'])
     if event is None:
         flask.abort(404)
-
-    email: bool = bool(data['email'])
-    push: bool = bool(data['push'])
 
     if event in current_user.events:
         return flask.jsonify(error="Cannot subscribe to own event"), 400
     subscription: models.Subscription = models.Subscription.query.get((current_user.email, event.id))
 
-    if email is False and push is False:
-        if subscription is None:
-            return flask.jsonify(email=False, push=False)  # Already Unsubscribed - Update Client
-        db.session.delete(subscription)
-        response = flask.jsonify(email=False, push=False)  # Unsubscribe
+    # Toggle Subscription
+    if subscription is None:
+        sub = models.Subscription(user=current_user, event=event)
+        db.session.add(sub)
     else:
-        if subscription is None:
-            sub = models.Subscription(user=current_user, event=event, email=email, web_push=push)
-            db.session.add(sub)
-            response = flask.jsonify(email=email, push=push)  # Create Subscription
-        else:
-            subscription.web_push = push
-            subscription.email = email
-            response = flask.jsonify(email=email, push=push)
+        db.session.delete(subscription)
+
     db.session.commit()
-    return response
+    return flask.jsonify(subscribed=(subscription is None))
 
 
 @ajax.route('/event/add_message', methods=("POST",))
@@ -86,16 +75,20 @@ def update_event_subscription():
 def event_add_message():
     token: str = flask.request.form['token']
     try:
-        type_: MessageTypes = {'text': MessageTypes.TEXT}[flask.request.form['type']]
-    except KeyError:  # If not valid type
-        flask.abort(400)
-    try:
-        data: dict = json.loads(flask.request.form['data'])
-    except ValueError:  # If not valid JSON
+        type_: MessageTypes = MessageTypes(int(flask.request.form['type']))
+        print(type)
+    except (KeyError, ValueError):  # If not valid type
         flask.abort(400)
     event: models.Event = models.Event.fetch_from_url_token(token)
     if event is None:
         flask.abort(400)  # If not valid event token
+    else:
+        if event.owner != flask_login.current_user:
+            flask.abort(403)
+
+    # noinspection PyUnboundLocalVariable
+    if type_ is MessageTypes.TEXT:
+        data = {"message": flask.request.form['message']}
 
     # noinspection PyUnboundLocalVariable
     message = models.EventMessage(event=event, type=type_, data=data)
@@ -107,25 +100,47 @@ def event_add_message():
     return "Ok", 200
 
 
+@ajax.route('/event/add_question', methods=("POST",))
+@login_required
+def event_add_question():
+    token: str = flask.request.form['token']
+    event: models.Event = models.Event.fetch_from_url_token(token)
+    if event is None:
+        flask.abort(400)
+    else:
+        if event.owner == flask_login.current_user:
+            flask.abort(400)
+
+    question = models.Question(event=event, text=flask.request.form['message'])
+    db.session.add(question)
+    db.session.commit()
+
+    tasks.notify.queue(question, event)
+    return "Ok"
+
+
 @ajax.route('/user/save_webpush', methods=("POST",))
 @login_required
-def save_web_push_data():
+def save_web_push():
+    print('Saved New Webpush')
     data = flask.request.json
     try:
         endpoint = data['endpoint']
         p256dh = data['keys']['p256dh']
         auth = data['keys']['auth']
     except KeyError:
-        flask.abort(400)
+        return flask.abort(400)
 
-    # noinspection PyUnboundLocalVariable
+    if models.WebPushToken.query.get(endpoint) is not None:
+        return "Not Saved", 202
+
     token = models.WebPushToken(user=current_user,
                                 endpoint=endpoint,
                                 p256dh=p256dh,
                                 auth=auth)
     db.session.add(token)
     db.session.commit()
-    return 'Ok', 200
+    return 'Ok', 201
 
 
 @ajax.route('/user/settings/update_location', methods=("POST",))
@@ -148,10 +163,10 @@ def get_events():
     lng = decimal.Decimal(flask.request.args['lng'])
 
     events = models.Event.query.filter_by(
-        models.Event.distance_from(lat, lng) <= flask.current_app.config['EVENT_MAXIMUM_DISTANCE']
+            models.Event.distance_from(lat, lng) <= flask.current_app.config['EVENT_MAXIMUM_DISTANCE']
     ).order_by(
-        models.Event.distance_from(lat, lng),
-        models.Event.time
+            models.Event.distance_from(lat, lng),
+            models.Event.time
     ).all()
 
     return_value = []

@@ -3,7 +3,7 @@ from typing import Any, Dict, Type
 
 import flask
 
-from . import commands, configs, extensions, models, tasks, views
+from . import commands, configs, extensions, models, tasks, utils, views
 
 
 def create_app(config_object: Type[configs.Config] = configs.ProductionConfig) -> flask.app.Flask:
@@ -61,7 +61,8 @@ def register_shellcontext(app: flask.app.Flask) -> None:
             'db'   : extensions.db,
             'models': models,
             'tasks': tasks,
-            'mail': extensions.mail
+            'mail': extensions.mail,
+            'utils': utils
         }
 
     app.shell_context_processor(shell_context)

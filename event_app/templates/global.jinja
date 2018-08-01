@@ -59,7 +59,7 @@
                 var categoryOrder = ["error", "warning", "success", "info"];
 
                 $(document).ready(function () {
-                    navigator.serviceWorker.register('/service-worker.js');
+                    saveSubscription();
                     var messages = {
                         {%- with errors = get_flashed_messages(category_filter=["error"]) %}
                             error: {{ errors }},
@@ -89,6 +89,53 @@
                         }
                     });
                 });
+
+                function urlBase64ToUint8Array(base64String) {
+                    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                    const base64 = (base64String + padding)
+                        .replace(/-/g, '+')
+                        .replace(/_/g, '/')
+                    ;
+                    const rawData = window.atob(base64);
+                    return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+                }
+
+                function registerWorker() {
+                    navigator.serviceWorker.register('/service-worker.js');
+                    return navigator.serviceWorker.ready;
+                }
+
+                function subscribeUserToPush() {
+                    return registerWorker()
+                        .then(function (registration) {
+                            const subscribeOptions = {
+                                userVisibleOnly: true,
+                                applicationServerKey: urlBase64ToUint8Array('{{ config.WEB_PUSH_PUBLIC_KEY }}')
+                            };
+
+                            return registration.pushManager.subscribe(subscribeOptions);
+                        })
+                        .then(function (pushSubscription) {
+                            return JSON.stringify(pushSubscription);
+                        });
+                }
+
+                function saveSubscription() {
+                    return subscribeUserToPush().then(function (data) {
+                        return fetch('{{ url_for('ajax.save_web_push') }}', {
+                            method: "POST",
+                            credentials: 'same-origin',
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: data
+                        });
+                    }).then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Bad status code from server.')
+                        }
+                    });
+                }
 
                 function openNav() {
                     $('nav.navigation .side-nav').css("width", "100%");

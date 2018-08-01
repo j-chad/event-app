@@ -29,7 +29,7 @@ class Config:
 
     EVENT_MAXIMUM_DISTANCE = 50  # Km
 
-    MESSAGE_BREAK_AFTER_DELTA = datetime.timedelta(seconds=1)
+    MESSAGE_BREAK_AFTER_DELTA = datetime.timedelta(days=1)
 
     APP_DIR = os.path.abspath(os.path.dirname(__file__))
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.path.pardir))

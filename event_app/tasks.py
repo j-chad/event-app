@@ -7,8 +7,8 @@ import flask_mail
 import pywebpush
 
 from . import models
-from .extensions import mail, redis_queue, db
-from .utils import MessageTypes
+from .extensions import db, mail, redis_queue
+from .models import MessageTypes
 
 
 @redis_queue.job
@@ -51,16 +51,50 @@ def send_push_notification(token: models.WebPushToken, data: Union[dict, list]):
 
 # noinspection PyUnboundLocalVariable
 @redis_queue.job
-def notify(message: models.EventMessage, event: models.Event):  # TODO: get rid of event, replace with message.event
+def notify(message: Union[models.EventMessage, models.Question],
+           event: models.Event):  # TODO: get rid of event, replace with message.event
     with flask.current_app.app_context():
         db.session.add_all([message, event])  # Feels kinda hacky. But It Works So Eh.
-        subscribers: List[models.Subscription] = event.users
 
-        if message.type is MessageTypes.TEXT:
-            email_subject = "Event Update: {}".format(event.name)
+        if type(message) is models.EventMessage:
+            subscribers: List[models.Subscription] = event.users
+
+            if message.type is MessageTypes.TEXT:
+                email_subject = "Event Update: {}".format(event.name)
+                email_body = "{} : {}".format(message.data['message'], message.timestamp)
+                push_data = {
+                    "title": event.name,
+                    'options': {
+                        "timestamp": message.timestamp.timestamp(),
+                        "tag": "message-group-{}".format(message.event.id),
+                        "body": message.data["message"],
+                        "actions": [
+                            {
+                                "action": "view-event",
+                                "title": "View Event"
+                            }
+                        ],
+                        "renotify": True
+                    }
+                }  # Possible XSS Attack Vector
+
+            for subscription in subscribers:
+                if subscription.user.email_notify is True:
+                    email_message = flask_mail.Message(subject=email_subject,
+                                                       recipients=[subscription.user.email],
+                                                       html=flask.render_template("email/text_notification.jinja",
+                                                                                  text=email_body,
+                                                                                  event=event))
+                    send_email.queue(email_message)
+                if subscription.user.web_push_notify is True:
+                    for token in subscription.user.webpush_tokens:
+                        send_push_notification.queue(token, push_data)
+
+        elif type(message) is models.Question:
+            email_subject = "New Question: {}".format(event.name)
             email_body = "{} : {}".format(message.data['message'], message.timestamp)
             push_data = {
-                "title": event.name,
+                "title": 'New Question: {}'.format(event.name),
                 'options': {
                     "timestamp": message.timestamp.timestamp(),
                     "tag": "message-group-{}".format(message.event.id),
@@ -74,15 +108,13 @@ def notify(message: models.EventMessage, event: models.Event):  # TODO: get rid 
                     "renotify": True
                 }
             }  # Possible XSS Attack Vector
-
-        for subscription in subscribers:
-            if subscription.email is True:
+            if event.owner.email_notify is True:
                 email_message = flask_mail.Message(subject=email_subject,
-                                                   recipients=[subscription.user.email],
+                                                   recipients=[event.owner.email],
                                                    html=flask.render_template("email/text_notification.jinja",
                                                                               text=email_body,
                                                                               event=event))
                 send_email.queue(email_message)
-            if subscription.web_push is True:
-                for token in subscription.user.webpush_tokens:
+            if event.owner.web_push_notify is True:
+                for token in event.owner.webpush_tokens:
                     send_push_notification.queue(token, push_data)
