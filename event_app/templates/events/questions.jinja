@@ -1,0 +1,109 @@
+{% extends "global.jinja" %}
+
+{% block title %}Vent | {{ event.name }}{% endblock %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/events/questions.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $(document).ready(function () {
+            $('.question input.submit').on('click', function (e) {
+                e.target.disabled = true;
+
+                var id = e.target.dataset.id;
+
+                var private_ = $('#private-' + id).prop("checked");
+                var reply = $('#reply-' + id).val();
+                var question = $('#question-' + id);
+                var question_id = question.data('id');
+
+                var data;
+                if (private_) {
+                    data = {
+                        "reply": reply,
+                        "private": 'on',
+                        "question": question_id
+                    }
+                } else {
+                    data = {
+                        "reply": reply,
+                        "question": question_id
+                    }
+                }
+
+                if (reply.trim().length === 0) {
+                    //Error
+                    e.target.disabled = false;
+                } else {
+                    $.post("{{ url_for('ajax.event_add_answer') }}", data)
+                        .done(function () {
+                            question.remove();
+                        }).fail(function () {
+                        e.target.disabled = false;
+                    });
+                }
+
+                console.log(private_, reply)
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block nav_items %}
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('home.index') }}">Dashboard</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('events.discover') }}">Discover</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.settings') }}">Settings</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="#" onclick="$('#logout-form').submit();">Logout</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="details">
+            <div class="event-title">
+                <h1>{{ event.name }}</h1>
+                <a href="{{ url_for('events.view_event', token=event.url_id) }}">
+                    <button type="button">Messages</button>
+                </a>
+            </div>
+            <p>{{ event.description }}</p>
+            {# Q&A #}
+        </div>
+    </div>
+    <hr>
+    <div class="questions container">
+        {% if questions|length == 0 %}
+            <h2 class="no-questions">There are currently no questions!</h2>
+        {% else %}
+            {% for question in questions %}
+                <div class="question" id="question-{{ loop.index }}" data-id="{{ question.id }}">
+                    <div class="body">
+                        {{ question.text }}
+                    </div>
+                    <div class="controls">
+                        <div class="group private">
+                            <label for="private-{{ loop.index }}">Private</label>
+                            <input id="private-{{ loop.index }}" type="checkbox" name="private">
+                        </div>
+                        <div class="group reply">
+                            <label for="reply-{{ loop.index }}">Reply</label>
+                            <input type="text" id="reply-{{ loop.index }}">
+                        </div>
+                        <input data-id="{{ loop.index }}" class="submit" type="button" value="Submit">
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endblock %}

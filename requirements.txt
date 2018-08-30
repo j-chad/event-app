@@ -1,3 +1,6 @@
+Pillow
+bleach
+markdown
 faker
 pywebpush
 amqp==2.2.2

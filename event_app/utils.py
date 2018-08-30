@@ -1,13 +1,19 @@
 # coding=utf-8
 import functools
+import os
+import uuid
 from typing import Callable, Dict, Union
 from urllib.parse import urljoin, urlparse
 
 import flask
 import flask_login
+from PIL import Image
 from flask import redirect, request, url_for
+from markdown import markdown
+from werkzeug.datastructures import FileStorage
 
 from . import models
+from .extensions import cleaner
 
 
 def requires_anonymous(endpoint: Union[str, Callable] = "home.index", msg="You are already logged in"):
@@ -57,3 +63,23 @@ def get_unread_messages(user: models.User, count: bool = False) -> Union[
         if count:
             messages['total'] += quantity
     return messages
+
+
+def markdownify(text):
+    return cleaner.clean(markdown(text))
+
+
+def save_image(img: FileStorage) -> str:
+    directory = os.path.join(flask.current_app.static_folder, flask.current_app.config['UPLOAD_FOLDER'])
+    filename = f"{uuid.uuid4()}.jpeg"
+    save_location = os.path.join(directory, filename)
+
+    # Process Image - Maybe Move To Task?
+    with Image.open(img.stream) as img_handle:
+        if img_handle.height < 100 or img_handle.width < 100:
+            raise ValueError("Image Too Small")
+        else:
+            img_handle.thumbnail((800, img_handle.height), Image.LANCZOS)
+            img_handle = img_handle.convert(mode="RGB")  # JPEG has no alpha channel
+            img_handle.save(save_location, optimize=True, quality=75)
+    return filename

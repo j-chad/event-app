@@ -2,8 +2,9 @@
 from typing import Any, Dict, Type
 
 import flask
+import flask_login
 
-from . import commands, configs, extensions, models, tasks, utils, views
+from . import commands, configs, extensions, forms, models, tasks, utils, views
 
 
 def create_app(config_object: Type[configs.Config] = configs.ProductionConfig) -> flask.app.Flask:
@@ -21,6 +22,13 @@ def create_app(config_object: Type[configs.Config] = configs.ProductionConfig) -
     register_blueprints(app)
     register_commands(app)
     register_shellcontext(app)
+
+    @app.context_processor
+    def template_context():
+        return {
+            'user': flask_login.current_user,
+            'channel': views.get_channel() if flask_login.current_user.is_authenticated else None
+        }
 
     return app
 
@@ -45,6 +53,7 @@ def register_blueprints(app: flask.app.Flask) -> None:
     app.register_blueprint(views.users)
     app.register_blueprint(views.events)
     app.register_blueprint(views.ajax)
+    app.register_blueprint(views.sse, url_prefix='/stream')
 
 
 def register_commands(app: flask.app.Flask) -> None:
@@ -58,11 +67,12 @@ def register_shellcontext(app: flask.app.Flask) -> None:
     def shell_context() -> Dict[str, Any]:
         """Shell Context Objects"""
         return {
-            'db'   : extensions.db,
+            'db': extensions.db,
             'models': models,
             'tasks': tasks,
             'mail': extensions.mail,
-            'utils': utils
+            'utils': utils,
+            'forms': forms
         }
 
     app.shell_context_processor(shell_context)

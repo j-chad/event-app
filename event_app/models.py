@@ -1,14 +1,14 @@
 # coding=utf-8
 import enum
 import math
+import os
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Set
 
 import flask
 import hashids
-import jinja2
 from bcrypt import gensalt
 from flask_login import UserMixin
 from sqlalchemy import func
@@ -26,9 +26,9 @@ relationship = db.relationship
 
 @enum.unique
 class MessageTypes(enum.Enum):
-    TEXT = 0
+    TEXT = 'text'
+    IMAGE = 'image'
     # LOCATION = 1
-    # IMAGE = 2
     # FILE = 3
 
 
@@ -42,12 +42,19 @@ class CommonMixin:
     def __init__(cls):
         def inner(*args, **kwargs):
             Model.__init__(*args, **kwargs)
-
         return inner
+
+    def jsonify(self, columns: Optional[Set[str]] = None):
+        if columns is None:
+            columns = self.__table__.columns
+        else:
+            columns = set(self.__table__.columns).intersection(columns)
+        return json.dumps({c.name: getattr(model, c.name) for c in columns})
 
 
 class User(CommonMixin, UserMixin, Model):
-    email: str = Column(db.String(254), primary_key=True)
+    id: int = Column(db.Integer, primary_key=True)
+    email: str = Column(db.String(254), unique=True, nullable=False)
     subscribed_events: List['Subscription'] = relationship("Subscription", back_populates="user")
     webpush_tokens: List['WebPushToken'] = relationship('WebPushToken')
 
@@ -129,9 +136,9 @@ class User(CommonMixin, UserMixin, Model):
 
 class Event(CommonMixin, Model):
     id: int = Column(db.Integer, primary_key=True)
-    owner_id: str = Column(db.String(254), ForeignKey("user.email"), nullable=False)
+    owner_id: str = Column(db.Integer, ForeignKey("user.id"), nullable=False)
     owner: User = relationship('User', backref='events')
-    users: List["Subscription"] = relationship("Subscription", back_populates="event")
+    subscriptions: List["Subscription"] = relationship("Subscription", back_populates="event")
 
     name: str = Column(db.String(60), nullable=False)
     description: str = Column(db.String(200), nullable=True)
@@ -184,10 +191,10 @@ class Event(CommonMixin, Model):
 
 
 class Subscription(CommonMixin, Model):
-    user_id: str = Column(db.String(254), ForeignKey('user.email'), primary_key=True)
+    user_id: str = Column(db.Integer, ForeignKey("user.id"), primary_key=True)
     user: User = relationship("User", back_populates="subscribed_events")
     event_id: int = Column(db.Integer, ForeignKey('event.id'), primary_key=True)
-    event: Event = relationship("Event", back_populates="users")
+    event: Event = relationship("Event", back_populates="subscriptions")
 
     last_viewed: datetime = Column(db.DateTime, default=datetime.utcnow)
 
@@ -198,9 +205,9 @@ class Subscription(CommonMixin, Model):
 
 class WebPushToken(CommonMixin, Model):
     endpoint: str = Column(db.String(512), primary_key=True)
-    user_id: str = Column(db.String(254), ForeignKey('user.email'), primary_key=True)
-
+    user_id: str = Column(db.Integer, ForeignKey("user.id"))
     user: User = relationship("User", back_populates="webpush_tokens")
+
     p256dh: str = Column(db.String(100), nullable=False)
     auth: str = Column(db.String(30), nullable=False)
 
@@ -221,18 +228,22 @@ class EventMessage(CommonMixin, Model):
             class_ = []
 
         if self.type is MessageTypes.TEXT:
-            data = jinja2.escape(self.data['message'])
+            data = self.data['message']
             class_.append('text')
             return f"<div class='{' '.join(class_)}' data-timestamp={self.timestamp.isoformat()}>{data}</div>"
+        elif self.type is MessageTypes.IMAGE:
+            file = os.path.join(flask.current_app.config['UPLOAD_FOLDER'], self.data['file'])
+            class_.append('image')
+            return f"""<div class='{' '.join(class_)}' data-timestamp={self.timestamp.isoformat()}>
+                <img src='{flask.url_for('static', filename=file)}'>
+            </div>"""
 
 
 class Answer(CommonMixin, Model):
     id: int = Column(db.Integer, primary_key=True)
-    event_id: int = Column(db.Integer, ForeignKey('event.id'))
-    event: Event = relationship("Event", backref="answers")
 
-    question = relationship("Question", uselist=False, back_populates="answer")
-    private = Column(db.Boolean, default=False, nullable=False)
+    question: "Question" = relationship("Question", uselist=False, back_populates="answer")
+    private: bool = Column(db.Boolean, default=False, nullable=False)
     timestamp: datetime = Column(db.DateTime, default=datetime.utcnow, nullable=False)
     text: str = Column(db.String(300), nullable=False)
 
@@ -242,8 +253,11 @@ class Question(CommonMixin, Model):
     event_id: int = Column(db.Integer, ForeignKey('event.id'))
     event: Event = relationship("Event", backref="questions")
 
+    questioner_id = Column(db.Integer, ForeignKey("user.id"))
+    questioner = relationship("User", backref="questions")
+
     answer_id = Column(db.Integer, ForeignKey('answer.id'), nullable=True, default=None, unique=True)
-    answer: EventMessage = relationship('Answer')
+    answer: Answer = relationship('Answer', uselist=False, back_populates="question")
 
     timestamp: datetime = Column(db.DateTime, default=datetime.utcnow)
     text: str = Column(db.String(100), nullable=False)

@@ -73,7 +73,7 @@
         <a class="navigation-link" href="{{ url_for('users.settings') }}">Settings</a>
     </li>
     <li class="navigation-item">
-        <a class="navigation-link" href="{{ url_for('users.logout') }}">Logout</a>
+        <a class="navigation-link" href="#" onclick="$('#logout-form').submit();">Logout</a>
     </li>
 {% endblock %}
 
@@ -95,8 +95,10 @@
                     </div>
                 {% endfor %}
             </div>
+        {% elif user.location_enabled %}
+            <h1 class="error-center">There are no events nearby!</h1>
         {% else %}
-            <h1>There are no events nearby!</h1>
+            <h1 class="error-center">Set your location in <a href="{{ url_for('users.settings') }}">Settings</a></h1>
         {% endif %}
     </div>
 {% endblock %}

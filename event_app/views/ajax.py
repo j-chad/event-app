@@ -1,6 +1,7 @@
 # coding=utf-8
 import decimal
 from secrets import token_urlsafe
+from typing import Optional
 
 import flask
 import flask_login
@@ -45,7 +46,7 @@ def register_user():
                 "main": []
             }
         }
-    return flask.jsonify(payload)
+    return flask.jsonify(payload), 201
 
 
 @ajax.route('/event/update_subscription', methods=("POST",))
@@ -57,7 +58,7 @@ def update_subscription():
 
     if event in current_user.events:
         return flask.jsonify(error="Cannot subscribe to own event"), 400
-    subscription: models.Subscription = models.Subscription.query.get((current_user.email, event.id))
+    subscription: models.Subscription = models.Subscription.query.get((current_user.id, event.id))
 
     # Toggle Subscription
     if subscription is None:
@@ -75,8 +76,7 @@ def update_subscription():
 def event_add_message():
     token: str = flask.request.form['token']
     try:
-        type_: MessageTypes = MessageTypes(int(flask.request.form['type']))
-        print(type)
+        type_: MessageTypes = MessageTypes(flask.request.form['type'])
     except (KeyError, ValueError):  # If not valid type
         flask.abort(400)
     event: models.Event = models.Event.fetch_from_url_token(token)
@@ -88,7 +88,17 @@ def event_add_message():
 
     # noinspection PyUnboundLocalVariable
     if type_ is MessageTypes.TEXT:
-        data = {"message": flask.request.form['message']}
+        data = {"message": utils.markdownify(flask.request.form['message'])}
+
+    elif type_ is MessageTypes.IMAGE:
+        image = flask.request.files['image']
+        if len(image.filename) == 0 or \
+                image.mimetype not in flask.current_app.config['ALLOWED_IMAGE_MIMETYPES']:
+            flask.abort(400)
+        name = utils.save_image(image)
+        data = {"file": name}
+    else:  # Unknown Type
+        flask.abort(400)
 
     # noinspection PyUnboundLocalVariable
     message = models.EventMessage(event=event, type=type_, data=data)
@@ -96,8 +106,7 @@ def event_add_message():
     db.session.commit()
 
     tasks.notify.queue(message, event)
-
-    return "Ok", 200
+    return "Ok", 201
 
 
 @ajax.route('/event/add_question', methods=("POST",))
@@ -111,18 +120,42 @@ def event_add_question():
         if event.owner == flask_login.current_user:
             flask.abort(400)
 
-    question = models.Question(event=event, text=flask.request.form['message'])
+    question = models.Question(event=event, text=utils.markdownify(flask.request.form['message']),
+                               questioner=current_user)
     db.session.add(question)
     db.session.commit()
 
     tasks.notify.queue(question, event)
-    return "Ok"
+    return "Ok", 201
+
+
+@ajax.route('/event/add_answer', methods=("POST",))
+@login_required
+def event_add_answer():
+    question_id: str = flask.request.form['question']
+    reply: str = flask.request.form['reply'].strip()
+    private: bool = flask.request.form.get('private') is not None
+
+    question: Optional[models.Question] = models.Question.query.get(question_id)
+
+    if question is None:
+        flask.abort(400)
+    if len(reply) == 0:
+        flask.abort(400)
+    if flask_login.current_user != question.event.owner:
+        flask.abort(403)
+
+    answer = models.Answer(question=question, text=utils.markdownify(reply), private=private)
+    db.session.add(answer)
+    db.session.commit()
+
+    tasks.notify.queue(answer, question.event)
+    return "Ok", 201
 
 
 @ajax.route('/user/save_webpush', methods=("POST",))
 @login_required
 def save_web_push():
-    print('Saved New Webpush')
     data = flask.request.json
     try:
         endpoint = data['endpoint']

@@ -9,9 +9,9 @@
         <title>{% block title %}Vent{% endblock %}</title>
 
         {# TODO: Add files @ Root #}
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=1">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=1">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=1">
         <link rel="manifest" href="/site.webmanifest">
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#da532c">
         <meta name="msapplication-TileColor" content="#da532c">
@@ -22,12 +22,12 @@
                   href="https://fonts.googleapis.com/css?family=Roboto+Slab:300,300italic,700,700italic">
             <link rel="stylesheet" href="https://cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
             <link rel="stylesheet" href="{{ url_for('static', filename='css/milligram.css') }}">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.css"
-                  integrity="sha256-He3QEBKoL/nMXlVsoM7S2C2kjFQqS5L+mgA+F8LpG+U="
-                  crossorigin="anonymous">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css"
+                  integrity="sha256-R91pD48xW+oHbpJYGn5xR0Q7tMhH4xOrWn1QqMRINtA="
+                  crossorigin="anonymous"/>
         {% endblock %}
         {% block scripts %}
-            <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
                     integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
                     crossorigin="anonymous"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
@@ -90,53 +90,6 @@
                     });
                 });
 
-                function urlBase64ToUint8Array(base64String) {
-                    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-                    const base64 = (base64String + padding)
-                        .replace(/-/g, '+')
-                        .replace(/_/g, '/')
-                    ;
-                    const rawData = window.atob(base64);
-                    return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
-                }
-
-                function registerWorker() {
-                    navigator.serviceWorker.register('/service-worker.js');
-                    return navigator.serviceWorker.ready;
-                }
-
-                function subscribeUserToPush() {
-                    return registerWorker()
-                        .then(function (registration) {
-                            const subscribeOptions = {
-                                userVisibleOnly: true,
-                                applicationServerKey: urlBase64ToUint8Array('{{ config.WEB_PUSH_PUBLIC_KEY }}')
-                            };
-
-                            return registration.pushManager.subscribe(subscribeOptions);
-                        })
-                        .then(function (pushSubscription) {
-                            return JSON.stringify(pushSubscription);
-                        });
-                }
-
-                function saveSubscription() {
-                    return subscribeUserToPush().then(function (data) {
-                        return fetch('{{ url_for('ajax.save_web_push') }}', {
-                            method: "POST",
-                            credentials: 'same-origin',
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: data
-                        });
-                    }).then(function (response) {
-                        if (!response.ok) {
-                            throw new Error('Bad status code from server.')
-                        }
-                    });
-                }
-
                 function openNav() {
                     $('nav.navigation .side-nav').css("width", "100%");
                 }
@@ -144,12 +97,81 @@
                 function closeNav() {
                     $('nav.navigation .side-nav').css("width", "0");
                 }
+
+                {% if user.is_authenticated %}
+
+                    var eventSource = new EventSource("{{ url_for('sse.stream', channel=channel) }}");
+                    eventSource.onmessage = function (a) {
+                        console.log(a);
+                    };
+
+                    eventSource.addEventListener('message', function (event) {
+                        console.log(event);
+                    });
+
+                    eventSource.addEventListener('question', function (event) {
+                        console.log(event);
+                    });
+
+                    eventSource.addEventListener('answer', function (event) {
+                        console.log(event);
+                    });
+
+                    function urlBase64ToUint8Array(base64String) {
+                        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+                        const base64 = (base64String + padding)
+                            .replace(/-/g, '+')
+                            .replace(/_/g, '/')
+                        ;
+                        const rawData = window.atob(base64);
+                        return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+                    }
+
+                    function registerWorker() {
+                        navigator.serviceWorker.register('/service-worker.js');
+                        return navigator.serviceWorker.ready;
+                    }
+
+                    function subscribeUserToPush() {
+                        return registerWorker()
+                            .then(function (registration) {
+                                const subscribeOptions = {
+                                    userVisibleOnly: true,
+                                    applicationServerKey: urlBase64ToUint8Array('{{ config.WEB_PUSH_PUBLIC_KEY }}')
+                                };
+
+                                return registration.pushManager.subscribe(subscribeOptions);
+                            })
+                            .then(function (pushSubscription) {
+                                return JSON.stringify(pushSubscription);
+                            });
+                    }
+
+                    function saveSubscription() {
+                        return subscribeUserToPush().then(function (data) {
+                            return fetch('{{ url_for('ajax.save_web_push') }}', {
+                                method: "POST",
+                                credentials: 'same-origin',
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: data
+                            });
+                        }).then(function (response) {
+                            if (!response.ok) {
+                                throw new Error('Bad status code from server.')
+                            }
+                        });
+                    }
+
+                {% endif %}
             </script>
         {% endblock %}
     {% endblock %}
 </head>
 <body>
 {% block body %}
+    <form style="display:none;" action="{{ url_for("users.logout") }}" method="POST" id="logout-form"></form>
     <div class="content-wrapper">
         <nav class="navigation">
             <section class="container nav-bar">

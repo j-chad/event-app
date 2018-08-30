@@ -43,9 +43,9 @@ class LoginForm(FlaskForm):
                 return False
 
 
-# noinspection PyPep8Naming
+# noinspection PyPep8Naming,PyUnusedLocal
 def EmailNotUsed(form: FlaskForm, field: wtforms.Field):
-    if User.query.get(field.data) is not None:
+    if User.query.filter_by(email=field.data).first() is not None:
         raise ValidationError("Already Linked To An Account")
 
 
@@ -88,7 +88,7 @@ class RecoveryForm(FlaskForm):
         self.user: Union[User, None] = None
 
     def validate_email(self, field):
-        self.user = User.query.get(field.data)
+        self.user = User.query.filter_by(email=field.data).first()
         if self.user is None:
             raise ValidationError("No Such User Exists")
 
@@ -113,6 +113,7 @@ class RecoveryPhase2Form(FlaskForm):
     recaptcha = RecaptchaField()
 
 
+# noinspection PyMethodParameters
 class CreateEventForm(FlaskForm):
     name = wtforms.StringField(validators=[
         wtforms.validators.DataRequired(),
@@ -123,7 +124,14 @@ class CreateEventForm(FlaskForm):
         wtforms.validators.Length(max=200)
     ])
     private = wtforms.BooleanField()
-    datetime = wtforms.DateTimeField(validators=[
-        wtforms.validators.Optional()
-    ])
-    longitude = wtforms.HiddenField()
+    start = wtforms.DateTimeField(validators=[
+        wtforms.validators.DataRequired()
+    ], widget=wtforms.widgets.HiddenInput())
+    longitude = wtforms.DecimalField(validators=[
+        wtforms.validators.NumberRange(min=-180, max=180),
+        wtforms.validators.DataRequired()
+    ], widget=wtforms.widgets.HiddenInput())
+    latitude = wtforms.DecimalField(validators=[
+        wtforms.validators.NumberRange(min=-90, max=90),
+        wtforms.validators.DataRequired()
+    ], widget=wtforms.widgets.HiddenInput())

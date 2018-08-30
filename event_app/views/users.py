@@ -87,7 +87,7 @@ def dashboard() -> flask.Response:
         owner=flask_login.current_user)).count()
     unread_messages = utils.get_unread_messages(flask_login.current_user, count=True)
     insights = generate_insights(flask_login.current_user)
-    return flask.render_template("users/index.jinja",
+    return flask.render_template("users/dashboard.jinja",
                                  insights=insights,
                                  subscribed=flask_login.current_user.subscribed_events,
                                  owned=flask_login.current_user.events,
@@ -146,7 +146,7 @@ def activate_account(token):
     if user_email is None:
         flask.abort(404)
     else:
-        user: models.User = models.User.query.get(user_email.decode())
+        user: models.User = models.User.query.filter_by(email=user_email.decode()).first()
         if user is None or user.email_verified:
             flask.abort(404)
         else:
@@ -192,7 +192,7 @@ def recovery_change_password(token):
     user_email: Optional[bytes] = redis_store.get('USER:RECOVERY_TOKEN#{}'.format(token))
     if user_email is None:
         flask.abort(404)
-    user: models.User = models.User.query.get(user_email.decode())
+    user: models.User = models.User.query.filter_by(email=user_email.decode()).first()
     if user is None:
         flask.abort(404)
     if flask.request.method == "POST":
@@ -211,8 +211,8 @@ def recovery_change_password(token):
     return flask.render_template('users/recovery_phase_2_minimal.jinja', form=form, token=token)
 
 
-@users.route('/logout')
-def logout():  # TODO: Only POST
+@users.route('/logout', methods=("POST",))
+def logout():
     flask_login.logout_user()
     return flask.redirect(flask.url_for("home.index"))
 

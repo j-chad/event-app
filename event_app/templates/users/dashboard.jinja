@@ -1,0 +1,105 @@
+{% extends "global.jinja" %}
+{% import 'macros.jinja' as macros %}
+
+{% macro card(card, class=None) %}
+    <div class="card{% if class is not none %} {{ class }}{% endif %}">
+        <h3>{{ card.title }}</h3>
+        {{ card.body }}
+        {% if card.actions|length != 0 %}
+            <div class="actions">
+                {% for action in card.actions %}
+                    <a href="{{ action.url }}" class="button">{{ action.title }}</a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% block title %}Vent | Dashboard{% endblock %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users/dashboard.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}
+
+{% block nav_items %}
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('home.index') }}">Dashboard</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('events.discover') }}">Discover</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.settings') }}">Settings</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="#" onclick="$('#logout-form').submit();">Logout</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="wrapper">
+            <div class="left">
+                <h1>Hello, {{ current_user.first_name }}</h1>
+                <h2>You have <strong>{{ unread_messages.total }}</strong> unread message
+                    {%- if unread_messages.total != 1 %}s{% endif %}
+                    {% if owned|length >= 1 %}
+                        and <strong>{{ unanswered_questions }}</strong> unanswered
+                        question{% if unanswered_questions != 1 %}s{% endif -%}
+                    {% endif %}</h2>
+                <a href="{{ url_for('events.create_event') }}">
+                    <div id="create-event" class="card">
+                        <h3>Create an Event</h3>
+                    </div>
+                </a>
+                <hr>
+                <div class="owned-events card">
+                    <h3>My Events</h3>
+                    <ul>
+                        {% for event in owned %}
+                            <li>
+                                <a href="{{ url_for('events.view_event', token=event.url_id) }}">
+                                    <span>{{ event.name }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="subscribed-events card">
+                    <h3>Subscribed Events</h3>
+                    <ul>
+                        {% for subscription in subscribed %}
+                            <li>
+                                <a href="{{ url_for('events.view_event', token=subscription.event.url_id) }}">
+                                    <span>{{ subscription.event.name }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="right">
+                <a href="{{ url_for('events.create_event') }}">
+                    <div class="create-event"></div>
+                </a>
+                {% for insight in insights['warning'] %}
+                    {{ card(insight, "warning") }}
+                {% endfor %}
+                {% for insight in insights['standard'] %}
+                    {{ card(insight, "standard") }}
+                {% endfor %}
+                {% for insight in insights['low'] %}
+                    {{ card(insight, "low") }}
+                {% endfor %}
+                {% for insight in insights['tips'] %}
+                    {{ card(insight, "tip") }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

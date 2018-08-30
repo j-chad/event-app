@@ -1,4 +1,5 @@
 # coding=utf-8
+
 import click
 import faker
 
@@ -21,7 +22,7 @@ def build_database(config: str) -> None:
             click.echo("Created All Tables")
     else:
         raise ValueError("Invalid Config: {}\n\nShould be one of:\n{}".format(
-            config, "\n\t".join(configs.config_map.keys())
+                config, "\n\t".join(configs.config_map.keys())
         ))
 
 

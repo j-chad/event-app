@@ -24,6 +24,10 @@ class Config:
     RATELIMIT_KEY_PREFIX = "RATELIMITER#"
     MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoiai1jaGFkIiwiYSI6ImNqajIzenFpMTB6ZHczd3Bjam50cmUwa2wifQ.mQ8rOg6dSN3P2EnUweer8g"
 
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 Mb
+    UPLOAD_FOLDER = "uploads"  # Relative to static folder
+    ALLOWED_IMAGE_MIMETYPES = {'image/jpeg', 'image/png'}
+
     LOCKDOWN_AFTER_N_PASSWORD_ATTEMPTS = 10
     LOCKDOWN_FOR_N_SECONDS = 30 * 60  # 30 Minutes
 
@@ -33,7 +37,6 @@ class Config:
 
     APP_DIR = os.path.abspath(os.path.dirname(__file__))
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.path.pardir))
-    print(PROJECT_ROOT)
 
 
 class ProductionConfig(Config):
@@ -65,7 +68,7 @@ class TestingConfig(Config):
 
 
 config_map = {
-    "ProductionConfig" : ProductionConfig,
+    "ProductionConfig": ProductionConfig,
     "DevelopmentConfig": DevelopmentConfig,
-    "TestingConfig"    : TestingConfig
+    "TestingConfig": TestingConfig
 }

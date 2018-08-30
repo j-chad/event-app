@@ -1,0 +1,74 @@
+@import "../global"
+
+nav
+    margin-bottom: 10rem
+
+.event-title
+    display: flex
+    flex-direction: row
+    align-items: center
+    margin-bottom: 1rem
+
+    button
+        background-color: #FF851B
+        border-color: #FF851B
+        margin: 0 0 0 3rem
+
+    h1
+        margin-bottom: 0
+
+.details
+    border-left: 0.3rem solid #FF851B
+    padding-left: 1.5rem
+
+.questions
+    .no-questions
+        margin-top: 5rem
+        margin-bottom: 5rem
+        text-align: center
+    .question
+        margin-bottom: 1rem
+        border-radius: 0.7rem
+        padding: 2rem
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2)
+        transition: box-shadow 0.3s
+
+        &:hover
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2)
+
+        .controls
+            display: flex
+            justify-content: center
+
+            label, input
+                margin-bottom: 0 !important
+
+            .group
+                display: inline-flex
+                align-items: center
+
+            .private
+                flex-grow: 1
+                margin-right: 1rem
+
+                label
+                    margin-right: 1rem
+
+            .reply
+                flex-grow: 6
+                margin-right: 1rem
+
+                label
+                    margin-right: 1rem
+
+            .submit
+                flex-grow: 2
+
+        &.text
+            padding: 1rem
+            background-color: #FF851B
+            border-radius: 2px
+            display: inline-block
+            color: white
+
+

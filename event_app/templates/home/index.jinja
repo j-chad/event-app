@@ -75,7 +75,7 @@
                         datatype: 'json',
                         success: function (response) {
                             if (response['status'] === "success") {
-                                alert("Success");
+                                window.location.reload();
                             } else {
                                 var errors = response['errors'];
                                 $.each(errors, function (id, e) {

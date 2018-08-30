@@ -12,8 +12,62 @@
     <script>
         {% if owner %}
             function changeMessageType(node) {
-
+                if (node.value === "{{ message_types.TEXT.value }}") {
+                    $('#message-text').show();
+                    $('#image-input').hide();
+                } else if (node.value === "{{ message_types.IMAGE.value }}") {
+                    $('#image-input').show();
+                    $('#message-text').hide();
+                }
             }
+
+            $(document).ready(function () {
+                $('#message-form').submit(function (e) {
+                    var form = $('#message-form');
+                    var elements = ["#event-token", "#type-select"];
+                    var type = $('#type-select').val();
+
+                    if (type === '{{ message_types.TEXT.value }}') {
+                        elements.push('#message-text');
+                        $.ajax({
+                            type: "POST",
+                            url: form.attr('action'),
+                            data: $(elements.join(', ')).serialize(),
+                            success: function () {
+                                window.location.reload();
+                            }
+                        });
+                    } else if (type === '{{ message_types.IMAGE.value }}') {
+                        var input = $('#image-input');
+                        var file = input.prop('files')[0];
+
+                        var data = new FormData();
+                        data.append('type', type);
+                        data.append('token', $('#event-token').val());
+
+                        var xhr = new XMLHttpRequest();
+                        if (xhr.upload) {
+                            if (file.size <= {{ config['MAX_CONTENT_LENGTH'] }}) {
+                                data.append('image', file, file.name);
+                                xhr.onreadystatechange = function () {
+                                    console.log(this);
+                                    if (this.readyState === 4 && this.status === 201) {
+                                        window.location.reload();
+                                    }
+                                };
+                                xhr.open("POST", form.attr('action'), true);
+                                xhr.send(data);
+                            } else {
+                                toastr['error']("This Image is Too Big");
+                            }
+                        } else {
+                            toastr['error']("Image Uploads Not Supported In This Browser");
+                        }
+                    }
+
+                    e.preventDefault();
+                });
+            });
         {% else %}
             const subscribeOptions = {
                 userVisibleOnly: true,
@@ -36,6 +90,32 @@
                     toastr['error']("Something Went Wrong - Try Again Later");
                 });
             }
+
+            eventSource.addEventListener('message', function (event) {
+                var data = JSON.parse(event.data);
+                switch (data.type) {
+                    case 'text':
+                        alert(data.data.message);
+                        break;
+                }
+            });
+
+            $(document).ready(function () {
+                $('#question-form').submit(function (e) {
+                    var form = $(this);
+
+                    $.ajax({
+                        type: "POST",
+                        url: form.attr('action'),
+                        data: form.serialize(),
+                        success: function () {
+                            window.location.reload();
+                        }
+                    });
+
+                    e.preventDefault();
+                });
+            });
         {% endif %}
     </script>
 {% endblock %}
@@ -51,7 +131,7 @@
         <a class="navigation-link" href="{{ url_for('users.settings') }}">Settings</a>
     </li>
     <li class="navigation-item">
-        <a class="navigation-link" href="{{ url_for('users.logout') }}">Logout</a>
+        <a class="navigation-link" href="#" onclick="$('#logout-form').submit();">Logout</a>
     </li>
 {% endblock %}
 
@@ -64,10 +144,25 @@
                     <button type="button" onclick="toggleSubscription();">{% if subscribed %}Unsubscribe{% else %}
                         Subscribe{% endif %}</button>
                     <button type="button">View On Map</button>
+                    {% if answered_questions == 1 %}
+                        <a href="{{ url_for('events.questions', token=event.url_id) }}">
+                            <button type="button">{{ answered_questions }} Question</button>
+                        </a>
+                    {% elif answered_questions > 1 %}
+                        <a href="{{ url_for('events.questions', token=event.url_id) }}">
+                            <button type="button">{{ answered_questions }} Questions</button>
+                        </a>
+                    {% endif %}
                 {% else %}
-                    <a href="edit">
-                        <button type="button">Edit</button>
-                    </a>
+                    {% if unanswered_questions == 1 %}
+                        <a href="{{ url_for('events.questions', token=event.url_id) }}">
+                            <button type="button">{{ unanswered_questions }} Question</button>
+                        </a>
+                    {% elif unanswered_questions > 1 %}
+                        <a href="{{ url_for('events.questions', token=event.url_id) }}">
+                            <button type="button">{{ unanswered_questions }} Questions</button>
+                        </a>
+                    {% endif %}
                 {% endif %}
             </div>
             <p>{{ event.description }}</p>
@@ -87,7 +182,7 @@
                 {% if loop.first or (message.timestamp - loop.previtem.timestamp) >= config['MESSAGE_BREAK_AFTER_DELTA'] %}
                     <span class="timestamp">{{ message.timestamp.strftime('%d %B %Y') }}</span><br>
                 {% endif %}
-                {{ message.render(class_=["msg"]) }}
+                {{ message.render(class_=["msg"]) | safe }}
                 <br>
             {% endfor %}
         {% endif %}
@@ -95,19 +190,22 @@
     <hr>
     {% if owner %}
         <div class="add-message">
-            <form action="{{ url_for('ajax.event_add_message') }}" method="POST">
+            <form id="message-form" action="{{ url_for('ajax.event_add_message') }}" method="POST">
                 <h3>Add Message</h3>
-                <input type="hidden" name="token" value="{{ event.url_id }}">
-                <select name="type" id="type-select" onchange="changeMessageType(this);">
+                <input id="event-token" type="hidden" name="token" value="{{ event.url_id }}">
+                <label for="type-select">Type</label>
+                <select name="type" id="type-select" onchange="changeMessageType(this);" autocomplete="off">
                     <option selected value="{{ message_types.TEXT.value }}">Text</option>
+                    <option value="{{ message_types.IMAGE.value }}">Image</option>
                 </select>
                 <textarea id="message-text" name="message"></textarea>
+                <input style="display: none;" name="image" type="file" id="image-input" accept="image/jpeg,image/png">
                 <input type="submit" value="Add Message">
             </form>
         </div>
     {% else %}
         <div class="add-question">
-            <form action="{{ url_for('ajax.event_add_question') }}" method="POST">
+            <form id="question-form" action="{{ url_for('ajax.event_add_question') }}" method="POST">
                 <h3>Ask a Question!</h3>
                 <input type="hidden" name="token" value="{{ event.url_id }}">
                 <textarea id="message-text" name="message" maxlength="100"></textarea>

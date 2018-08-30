@@ -1,0 +1,67 @@
+@import ../global
+
+main
+    .wrapper
+        width: 100%
+        height: calc(100vh - #{$nav-height})
+        display: flex
+        justify-content: center
+        align-items: center
+        padding-bottom: $footer-height
+
+        .form
+            padding: 5rem
+            text-align: center
+            width: 35rem
+            background-color: rgba($grey, 0.9)
+            border-radius: 1.5rem
+
+            .datetime-container
+                display: flex
+                justify-content: center
+
+                #date
+                    width: 60%
+                    border-top-right-radius: 0
+                    border-bottom-right-radius: 0
+
+                #time
+                    width: 40%
+                    border-top-left-radius: 0
+                    border-bottom-left-radius: 0
+
+            .private-container
+                display: flex
+                justify-content: center
+                margin-bottom: 1.5rem
+
+                label
+                    margin-bottom: 0
+                    margin-right: 1rem
+
+                input
+                    margin-bottom: 0
+                    margin-left: 1rem
+
+            form input:not([type=button])
+                background-color: rgba(white, 0.5)
+
+            form textarea
+                background-color: rgba(white, 0.5)
+
+            form div.error
+                padding: 0.3rem
+                border-top-right-radius: 0.4rem
+                border-top-left-radius: 0.4rem
+                background-color: $red
+                color: $white
+                font-weight: bold
+                & + input
+                    border-top-left-radius: 0
+                    border-top-right-radius: 0
+                    border: 0.3rem solid $red
+                    border-top-style: none
+
+#map
+    width: 100%
+    height: 100%

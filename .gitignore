@@ -116,3 +116,4 @@ $RECYCLE.BIN/
 *.sh
 *.cnf
 *.key
+static/uploads/*

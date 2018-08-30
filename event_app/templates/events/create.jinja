@@ -1,0 +1,223 @@
+{% extends "global.jinja" %}
+{% import 'macros.jinja' as macros %}
+
+{% block title %}Vent | Create Event{% endblock %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&lang=en">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/events/mdDateTimePicker.min.css') }}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+          integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+          crossorigin=""/>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.2.0/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/events/create.css') }}">
+
+    <style>
+        /*noinspection CssUnusedSymbol*/
+        .mddtp-picker-date .mddtp-picker__left {
+            background-image: url("{{ url_for('static', filename="img/events/ic_keyboard_arrow_left_black_24px.svg") }}") !important;
+        }
+
+        /*noinspection CssUnusedSymbol*/
+        .mddtp-picker-date .mddtp-picker__right {
+            background-image: url("{{ url_for('static', filename="img/events/ic_keyboard_arrow_right_black_24px.svg") }}") !important;
+        }
+
+        /*noinspection CssUnusedSymbol*/
+        .mddtp-picker-date .mddtp-picker__left:disabled {
+            background-image: url("{{ url_for('static', filename="img/events/ic_keyboard_arrow_left_black_disabled_24px.svg") }}") !important;
+        }
+
+        /*noinspection CssUnusedSymbol*/
+        .mddtp-picker-date .mddtp-picker__right:disabled {
+            background-image: url("{{ url_for('static', filename="img/events/ic_keyboard_arrow_right_black_disabled_24px.svg") }}") !important;
+        }
+    </style>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/draggabilly/2.2.0/draggabilly.pkgd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/mdDateTimePicker.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modal.min.js') }}"></script>
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+            integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+            crossorigin=""></script>
+    <script>
+        L.Control.Close = L.Control.extend({
+            onAdd: function (map) {
+                var button = L.DomUtil.create('button', 'close-button');
+                button.innerHTML = "Close";
+
+                L.DomEvent.on(button, 'click', function (e) {
+                    $('#set-location-input').trigger('close');
+
+                    L.DomEvent.stopPropagation(e);
+                });
+
+                return button
+            },
+
+            onRemove: function (map) {
+                L.DomEvent.off(this, 'click');
+            }
+        });
+
+        function clear_errors() {
+            $('#login-form div.error').remove();
+        }
+
+        function add_error(element, text) {
+            element.before("<div class=\"error\">" + text + "</div>");
+        }
+
+        var dateDialog, timeDialog, map, marker;
+
+        function update_start() {
+            var date = dateDialog.time;
+            var time = timeDialog.time;
+            date.set('hour', time.get('hour'));
+            date.set('minute', time.get('minute'));
+
+            $('#start').val(date.format('YYYY-MM-DD HH:mm:ss'));
+
+            $('#date').val(dateDialog.time.format('DD/MM/YYYY'));
+            $('#time').val(timeDialog.time.format('hh : mm a'));
+        }
+
+        function eventHandler(e) {
+            placeMarker(e.latlng);
+        }
+
+        function placeMarker(pos) {
+            if (marker === undefined) {
+                marker = L.marker(pos, {
+                    icon: L.icon({
+                        iconUrl: '{{ url_for('static', filename="img/users/map-marker.svg") }}',
+                        iconSize: [50, 50],
+                        iconAnchor: [25, 50],
+                    }),
+                    draggable: true
+                });
+                marker.addTo(map);
+            } else {
+                marker.setLatLng(pos);
+            }
+
+            console.log(pos);
+            $('#latitude').val(pos.lat);
+            $('#longitude').val(pos.lng);
+        }
+
+        $(document).ready(function () {
+            map = L.map('map');
+            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>, Marker Icon made by <a href="https://www.flaticon.com/authors/simpleicon" title="SimpleIcon">SimpleIcon</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>',
+                maxZoom: 18,
+                minZoom: 2,
+                id: 'mapbox.streets',
+                accessToken: "{{ config['MAPBOX_ACCESS_TOKEN'] }}"
+            }).addTo(map);
+            var closeButton = new L.Control.Close({
+                position: "topright"
+            });
+            closeButton.addTo(map);
+
+            {%- if current_user.location_enabled -%}
+                map.setView({lat: {{ current_user.latitude }}, lng: {{ current_user.longitude }}}, 10);
+                placeMarker({lat: {{ current_user.latitude }}, lng: {{ current_user.longitude }}});
+            {%- else -%}
+                map.locate({setView: true});
+            {%- endif -%}
+            map.on('locationfound', eventHandler);
+            map.on('click', eventHandler);
+
+            dateDialog = new mdDateTimePicker.default({
+                type: 'date',
+                init: moment().add(1, 'day'),
+                past: moment().add(1, 'day'),
+                future: moment().add(1, 'year'),
+                trigger: document.getElementById('date')
+            });
+            timeDialog = new mdDateTimePicker.default({
+                type: 'time',
+                trigger: document.getElementById('time')
+            });
+
+            $('#date')
+                .focus(() => dateDialog.toggle())
+                .on('onOk', function () {
+                    update_start();
+                });
+
+            $('#time')
+                .focus(() => timeDialog.toggle())
+                .on("onOk", function () {
+                    update_start();
+                });
+
+            update_start();
+
+            $('#set-location-input').animatedModal({
+                color: "#FF851B",
+                animatedIn: "zoomInUp",
+                animatedOut: "zoomOutUp",
+                afterOpen: function () {
+                    map.invalidateSize();
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block nav_items %}
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('home.index') }}">Dashboard</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('events.discover') }}">Discover</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="{{ url_for('users.settings') }}">Settings</a>
+    </li>
+    <li class="navigation-item">
+        <a class="navigation-link" href="#" onclick="$('#logout-form').submit();">Logout</a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    <div class="wrapper">
+        <div class="form">
+            {{ form.errors }}
+            <h1>Create Event</h1>
+            <form id="create-form" novalidate method="POST" action="{{ url_for('events.create_event') }}">
+                {{ macros.form_error(form.name) }}
+                {{ form.name(id="name", type="text", placeholder="Name", required=True, maxlength=60) }}<br>
+                {{ macros.form_error(form.description) }}
+                {{ form.description(id="description", placeholder="Description") }}<br>
+                {{ macros.form_error(form.start) }}
+                <div class="datetime-container">
+                    <input id="date" type="text" placeholder="Date">
+                    <input id="time" type="text" placeholder="Time">
+                </div>
+                <a id="set-location-input" href="#animatedModal"><input type="button" value="Set Location"></a>
+                <div class="private-container"><label for="private">Private</label>{{ form.private(id="private") }}
+                </div>
+                {{ form.start() }}
+                {{ form.latitude(id="latitude") }}
+                {{ form.longitude(id="longitude") }}
+                {{ form.csrf_token() }}
+                <button class="button">Create</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="animatedModal">
+        <div id="map" class="modal-content"></div>
+    </div>
+{% endblock %}
