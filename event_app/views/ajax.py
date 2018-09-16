@@ -88,7 +88,15 @@ def event_add_message():
 
     # noinspection PyUnboundLocalVariable
     if type_ is MessageTypes.TEXT:
-        data = {"message": utils.markdownify(flask.request.form['message'])}
+        title: Optional[str] = flask.request.form.get('title', None)
+        if title is not None:
+            title = title.strip()
+            if len(title) == 0:
+                title = None
+        data = {
+            "title": title,
+            "message": utils.markdownify(flask.request.form['message'])
+        }
 
     elif type_ is MessageTypes.IMAGE:
         image = flask.request.files['image']

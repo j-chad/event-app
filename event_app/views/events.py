@@ -12,26 +12,49 @@ from ..extensions import db
 events = flask.Blueprint('events', __name__)
 
 
+# noinspection PyCallByClass
 @events.route('/discover')
 @login_required
 def discover() -> flask.Response:
-    if current_user.location_enabled:
-        # noinspection PyPep8
-        events_ = models.Event.query.filter(
-                models.Event.distance_from(current_user.latitude, current_user.longitude)
-                <= flask.current_app.config['EVENT_MAXIMUM_DISTANCE'],
-                models.Event.private == False
-        ).order_by(
-                models.Event.distance_from(current_user.latitude, current_user.longitude),
-                models.Event.start
-        ).all()
-        if len(events_) == 0:
-            events_ = None
+    _distance_query = \
+        models.Event.distance_from(current_user.latitude, current_user.longitude) \
+            if current_user.location_enabled else None  # Reference to allow dictionary use
+
+    # Order
+    order_preference = [_distance_query, models.Event.start, models.Event.name]
+    order_by_string = flask.request.args.get('order')
+    if order_by_string is not None:
+        if order_by_string == "time":
+            order = models.Event.start
+        elif order_by_string == "name":
+            order = models.Event.name
+        elif order_by_string == "distance" and current_user.location_enabled:
+            order = _distance_query
+        else:
+            return flask.abort(400)
+        # Prioritise selected order
+        order_preference.remove(order)
+        order_preference.insert(0, order)
+    # Remove None From Priority List
+    order_preference[:] = [x for x in order_preference if x is not None]
+
+    # Distance
+    distance_param = flask.request.args.get('dist', 'far')
+    if distance_param == "far":
+        max_distance = flask.current_app.config['DEFAULT_EVENT_MAXIMUM_DISTANCE']
+    elif distance_param == "medium":
+        max_distance = flask.current_app.config['DEFAULT_EVENT_MEDIUM_DISTANCE']
+    elif distance_param == "nearby":
+        max_distance = flask.current_app.config['DEFAULT_EVENT_NEARBY_DISTANCE']
     else:
-        events_ = None
-    return flask.render_template("events/discover.jinja",
-                                 events=events_,
-                                 loc_enabled=current_user.location_enabled)
+        return flask.abort(400)
+
+    events_ = models.Event.query.filter(
+            models.Event.distance_from(current_user.latitude, current_user.longitude) <= max_distance,
+            models.Event.private == False
+    ).order_by(*order_preference).all()
+
+    return flask.render_template("events/discover.jinja", events=events_)
 
 
 @events.route('/event/create', methods=("GET", "POST"))
@@ -57,7 +80,11 @@ def view_event(token):
     if event is None:
         flask.abort(404)
 
-    subscribed: bool = models.Subscription.query.get((current_user.id, event.id)) is not None
+    subscription: models.Subscription = models.Subscription.query.get((current_user.id, event.id))
+    subscribed: bool = subscription is not None
+    if subscribed:
+        subscription.update()
+
     owner: bool = event in current_user.events
     messages: List[models.EventMessage] = models.EventMessage.query.filter_by(event=event).order_by(
             models.EventMessage.timestamp).all()
@@ -69,7 +96,7 @@ def view_event(token):
                     models.Question.answer.has(private=False),
                     models.Question.questioner == current_user
             )
-    ).order_by(models.Question.timestamp).count()
+    ).order_by(models.Question.timestamp.desc()).count()
     unanswered_questions = models.Question.query.filter_by(event=event, answer=None).count()
 
     return flask.render_template("events/event_detail.jinja",

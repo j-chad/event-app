@@ -10,6 +10,7 @@ import flask_login
 from PIL import Image
 from flask import redirect, request, url_for
 from markdown import markdown
+from mdx_downheader import DownHeaderExtension
 from werkzeug.datastructures import FileStorage
 
 from . import models
@@ -47,26 +48,27 @@ def is_safe_url(target: str) -> bool:
 
 
 def get_unread_messages(user: models.User, count: bool = False) -> Union[
-    Dict[str, models.EventMessage], Dict[str, int]]:
-    queries = {}
-    for subscription in user.subscribed_events:
-        queries[subscription.event_id] = []
-        queries[subscription.event_id].append(models.EventMessage.query.filter(
-                models.EventMessage.timestamp > subscription.last_viewed))
+    Dict[models.Event, models.EventMessage], Dict[models.Event, int]]:
     messages = {}
     if count:
         messages['total'] = 0
-    for event_id in queries:
-        flat_messages = map(lambda a: a.count() if count else a.all(), queries[event_id])
-        quantity = functools.reduce(lambda a, b: a + b, flat_messages)
-        messages[event_id] = quantity
+    for subscription in user.subscribed_events:
+        query = models.EventMessage.query.filter(
+                models.EventMessage.timestamp > subscription.last_viewed,
+                models.EventMessage.event == subscription.event
+        )
         if count:
-            messages['total'] += quantity
+            count = query.count()
+            messages[subscription.event] = count
+            messages['total'] += count
+        else:
+            message_list = query.all()
+            messages[subscription.event] = message_list
     return messages
 
 
 def markdownify(text):
-    return cleaner.clean(markdown(text))
+    return cleaner.clean(markdown(text, extensions=[DownHeaderExtension(levels=3)]))
 
 
 def save_image(img: FileStorage) -> str:

@@ -25,10 +25,11 @@ def create_app(config_object: Type[configs.Config] = configs.ProductionConfig) -
 
     @app.context_processor
     def template_context():
-        return {
-            'user': flask_login.current_user,
-            'channel': views.get_channel() if flask_login.current_user.is_authenticated else None
-        }
+        if flask_login.current_user is not None:  # Redis Queue Doesn't Seem To Play nice With This
+            return {
+                'user': flask_login.current_user,
+                'channel': views.get_channel() if flask_login.current_user.is_authenticated else None
+            }
 
     return app
 
@@ -43,6 +44,8 @@ def register_extensions(app: flask.app.Flask) -> None:
     extensions.redis_queue.init_app(app)
     extensions.redis_store.init_app(app)
     extensions.limiter.init_app(app)
+    extensions.humanise.init_app(app)
+
     # Set up user loader
     extensions.login_manager.user_loader(lambda token: models.User.query.filter_by(session_token=token).first())
 

@@ -4,6 +4,7 @@ import flask_login
 import flask_mail
 from flask_bcrypt import Bcrypt
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_humanize import Humanize
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_paranoid import Paranoid
@@ -20,6 +21,7 @@ redis_queue = RQ()
 redis_store = FlaskRedis()
 limiter = Limiter(key_func=get_remote_address)
 paranoid = Paranoid()
+humanise = Humanize()
 
 login_manager.login_view = "users.login"
 login_manager.login_message = "Please log in to access this page."
@@ -28,6 +30,11 @@ login_manager.session_protection = None
 
 paranoid.redirect_view = "users.login"
 
+fullcleaner = bleach.sanitizer.Cleaner(
+        tags=[],
+        attributes={},
+        protocols=[]
+)
 cleaner = bleach.sanitizer.Cleaner(
         tags=[
             'a',

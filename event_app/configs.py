@@ -31,7 +31,9 @@ class Config:
     LOCKDOWN_AFTER_N_PASSWORD_ATTEMPTS = 10
     LOCKDOWN_FOR_N_SECONDS = 30 * 60  # 30 Minutes
 
-    EVENT_MAXIMUM_DISTANCE = 50  # Km
+    DEFAULT_EVENT_NEARBY_DISTANCE = 10  # Km
+    DEFAULT_EVENT_MEDIUM_DISTANCE = 30  # Km
+    DEFAULT_EVENT_MAXIMUM_DISTANCE = 50  # Km
 
     MESSAGE_BREAK_AFTER_DELTA = datetime.timedelta(days=1)
 
@@ -42,15 +44,17 @@ class Config:
 class ProductionConfig(Config):
     ENV = "Production"
     DEBUG = False
-    SERVER_NAME = ""
+    SERVER_NAME = "vent.local:8000"
     MAIL_DEFAULT_SENDER = "Event App Notifier"
+    SEND_EMAILS = True
+    RATELIMIT_ENABLED = True
 
 
 class DevelopmentConfig(Config):
     ENV = "Development"
     DEBUG = True
     MAIL_DEFAULT_SENDER = "Event App Notifier <Development>"
-    SEND_EMAILS = False
+    SEND_EMAILS = True
     SERVER_NAME = "vent.local:8000"
     RATELIMIT_ENABLED = False
 

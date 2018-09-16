@@ -15,16 +15,16 @@ users = Blueprint('users', __name__)
 
 
 def send_validation_email(user: models.User, validation_token: str):
-    if flask.helpers.get_debug_flag() and flask.current_app.config.get("SEND_EMAILS", False):
-        email = "chadfield.jackson@gmail.com"
+    if flask.current_app.config.get("SEND_EMAILS", False):
+        email = "chadfield.jackson+debug@gmail.com" if flask.helpers.get_debug_flag() else user.email
         msg = flask_mail.Message("Account Verification", recipients=[email])
         msg.html = flask.render_template('email/verification.jinja', user=user, token=validation_token)
         tasks.send_email.queue(msg)
 
 
 def send_recovery_email(user: models.User, recovery_token: str):
-    if flask.helpers.get_debug_flag() and flask.current_app.config.get("SEND_EMAILS", False):
-        email = "chadfield.jackson@gmail.com" if flask.helpers.get_debug_flag() else user.email
+    if flask.current_app.config.get("SEND_EMAILS", False):
+        email = "chadfield.jackson+debug@gmail.com" if flask.helpers.get_debug_flag() else user.email
         msg = flask_mail.Message("Account Recovery", recipients=[email])
         msg.html = flask.render_template('email/recovery.jinja', user=user, token=recovery_token)
         tasks.send_email.queue(msg)
@@ -53,7 +53,7 @@ def generate_insights(user: models.User):
             ]
         })
 
-    if len(user.subscribed_events) == 0:
+    if user.subscribed_events.count() == 0:
         insights["low"].append({
             "title": "Subscribe To An Event",
             "body": """
@@ -74,6 +74,46 @@ def generate_insights(user: models.User):
             ]
         })
 
+    for event, messages in utils.get_unread_messages(flask_login.current_user).items():
+        count = len(messages)
+        if count == 1:
+            message: models.EventMessage = messages[0]
+            if message.type is models.MessageTypes.TEXT:
+                insights["standard"].append({
+                    "title": event.name,
+                    "body": message.data['message'],
+                    "actions": [
+                        {
+                            "title": "View",
+                            "url": flask.url_for("events.view_event", token=event.url_id)
+                        }
+                    ]
+                })
+            else:
+                type_ = {
+                    models.MessageTypes.IMAGE: "Image"
+                }[message.type]
+                insights["standard"].append({
+                    "title": event.name,
+                    "body": f"New {type_} Message",
+                    "actions": [
+                        {
+                            "title": "View",
+                            "url": flask.url_for("events.view_event", token=event.url_id)
+                        }
+                    ]
+                })
+        elif count > 1:
+            insights["standard"].append({
+                "title": event.name,
+                "body": f"{count} New Messages",
+                "actions": [
+                    {
+                        "title": "View",
+                        "url": flask.url_for("events.view_event", token=event.url_id)
+                    }
+                ]
+            })
     return insights
 
 

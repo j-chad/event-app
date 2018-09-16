@@ -6,26 +6,136 @@ main
         height: 400px
         position: relative
 
-    .category
-        width: 100%
+    #event-container
+        display: flex
+        justify-content: space-around
+        padding-top: 7px
 
-        .card
-            display: inline-block
-            margin-bottom: 2rem
-            padding: 2rem
-            background-color: #FF851B
-            color: white
-            border-radius: 0.7rem
-            transition: box-shadow 0.3s
-            margin-right: 2rem
-            width: 30rem
+        .controls
+            order: 2
+            display: flex
+            flex-grow: 1
+            flex-direction: column
+            justify-content: flex-start
 
-            &:hover
-                box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2)
+            .group
+                display: flex
+                flex-direction: column
+                justify-content: space-around
 
-    .error-center
-        line-height: calc(100vh - 7rem)
-        padding: 0
-        margin: 0
-        text-align: center
+                h5
+                    order: 1
+                    font-family: 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif
+                    margin: 0 auto
+                    color: $orange
+                    font-weight: 700
 
+                a
+                    order: 2
+                    margin: 0 auto 3px
+                    width: 200px
+                    border: $orange 1px solid
+
+                    &:not(:last-child)
+                        margin-bottom: 3px
+
+                    &:not(.selected)
+                        background-color: white
+                        color: $orange
+                        transition: background-color 500ms, color 500ms
+
+                        &:hover
+                            background-color: lighten($orange, 10%)
+                            color: white
+
+                    &.selected
+                        background-color: $orange
+                        color: white
+
+        .events
+            order: 1
+            flex-grow: 2
+            max-width: 700px
+            min-width: 360px
+
+            .list-card
+                display: flex
+                justify-content: space-around
+                width: 100%
+                background-color: darken(white, 10%)
+                padding: 10px
+                border-radius: 3px
+                margin-bottom: 7px
+                box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2)
+                transition: box-shadow 0.3s, margin 0.2s
+
+                &:hover
+                    margin-bottom: 17px
+                    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2)
+
+                .buttons
+                    display: flex
+                    flex-direction: column
+                    justify-content: center
+
+                    a, button
+                        margin: 0
+                        width: 150px
+
+                        &:first-child
+                            margin-bottom: 5px
+
+                .content
+                    .start
+                        -ms-text-overflow: ellipsis
+                        text-overflow: ellipsis
+                        overflow: hidden
+                        color: gray
+                        font-size: 17px
+                        line-height: 23px
+                        height: 2em
+                        text-transform: uppercase
+                        letter-spacing: 1px
+                        padding: 10px 20px 0 0
+                    .name
+                        font-size: 20px
+                        line-height: 25px
+                        max-height: 2.5em
+                        font-weight: 600
+                        letter-spacing: 0
+                        padding: 0
+                        height: 45px
+                        margin-bottom: 2px
+                    .distance
+                        text-overflow: ellipsis
+                        overflow: hidden
+                        white-space: nowrap
+                        color: #666A73
+                        font-size: 17px
+                        line-height: 23px
+                        height: 2em
+
+@media(max-width: 700px)
+    #event-container
+        flex-direction: column
+        justify-content: flex-start
+
+        .controls
+            order: 1 !important
+            margin-bottom: 7px
+            flex-direction: row !important
+            justify-content: space-around !important
+            flex-wrap: wrap
+
+        .events
+            order: 2 !important
+
+@media only screen and (max-width: 470px)
+    #event-container
+        .events
+            .list-card
+                .buttons
+                    display: none !important
+                .content
+                    width: 100% !important
+            min-width: 0 !important

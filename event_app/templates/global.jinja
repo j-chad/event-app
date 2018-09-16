@@ -107,15 +107,23 @@
 
                     eventSource.addEventListener('message', function (event) {
                         console.log(event);
+                        toastr["info"]("New Message");
                     });
 
                     eventSource.addEventListener('question', function (event) {
                         console.log(event);
+                        toastr["info"]("New Question");
                     });
 
                     eventSource.addEventListener('answer', function (event) {
                         console.log(event);
+                        toastr["info"]("New Answer");
                     });
+
+                    const subscribeOptions = {
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array('{{ config.WEB_PUSH_PUBLIC_KEY }}')
+                    };
 
                     function urlBase64ToUint8Array(base64String) {
                         const padding = '='.repeat((4 - base64String.length % 4) % 4);

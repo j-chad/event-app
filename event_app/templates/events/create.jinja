@@ -171,6 +171,44 @@
                     map.invalidateSize();
                 }
             });
+
+            var form = $('#create-form');
+            form.on('submit', function (event) {
+
+                clear_errors();
+                var data = form.serializeArray().reduce(function (obj, item) {
+                    obj[item.name] = item.value;
+                    return obj;
+                }, {});
+
+                var valid = true;
+
+                //Validate Name
+                if (data['name'].trim().length === 0) {
+                    add_error($('#name'), "This Field Is Required")
+                }
+
+                //Validate Datetime
+                var date = Date.parse(data['start']);
+                if (isNaN(date)) {
+                    add_error($("#time-thing"), "This Field Is Required");
+                    valid = false;
+                } else if (date <= Date.now()) {
+                    add_error($("#time-thing"), "Invalid Date/Time");
+                    valid = false;
+                }
+
+                //Validate Location
+                add_error($('#set-location-input'), "test");
+                valid = false;
+
+                if (valid) {
+                    return true;
+                } else {
+                    event.preventDefault();
+                    return false;
+                }
+            });
         });
     </script>
 {% endblock %}
@@ -193,7 +231,6 @@
 {% block content %}
     <div class="wrapper">
         <div class="form">
-            {{ form.errors }}
             <h1>Create Event</h1>
             <form id="create-form" novalidate method="POST" action="{{ url_for('events.create_event') }}">
                 {{ macros.form_error(form.name) }}
@@ -201,9 +238,9 @@
                 {{ macros.form_error(form.description) }}
                 {{ form.description(id="description", placeholder="Description") }}<br>
                 {{ macros.form_error(form.start) }}
-                <div class="datetime-container">
-                    <input id="date" type="text" placeholder="Date">
-                    <input id="time" type="text" placeholder="Time">
+                <div id="time-thing" class="datetime-container">
+                    <input id="date" type="text" value="" placeholder="Date">
+                    <input id="time" type="text" value="" placeholder="Time">
                 </div>
                 <a id="set-location-input" href="#animatedModal"><input type="button" value="Set Location"></a>
                 <div class="private-container"><label for="private">Private</label>{{ form.private(id="private") }}

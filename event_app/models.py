@@ -26,10 +26,10 @@ relationship = db.relationship
 
 @enum.unique
 class MessageTypes(enum.Enum):
-    TEXT = 'text'
-    IMAGE = 'image'
-    # LOCATION = 1
-    # FILE = 3
+    TEXT = 'text'  # message: text
+    IMAGE = 'image'  # file: path
+    # LOCATION = 1  # x: float, y: float
+    # FILE = 3  # file: path
 
 
 # noinspection PyMethodParameters,PyUnresolvedReferences,PyReturnFromInit
@@ -55,7 +55,7 @@ class CommonMixin:
 class User(CommonMixin, UserMixin, Model):
     id: int = Column(db.Integer, primary_key=True)
     email: str = Column(db.String(254), unique=True, nullable=False)
-    subscribed_events: List['Subscription'] = relationship("Subscription", back_populates="user")
+    subscribed_events: List['Subscription'] = relationship("Subscription", back_populates="user", lazy="dynamic")
     webpush_tokens: List['WebPushToken'] = relationship('WebPushToken')
 
     first_name: str = Column(db.String(40), nullable=False)
@@ -106,19 +106,6 @@ class User(CommonMixin, UserMixin, Model):
         salted_password = plain_password + self.salt.decode()
         self._password = bcrypt.generate_password_hash(salted_password)
 
-    @hybrid_method
-    def check_password(self, plain_password: str) -> bool:
-        """Checks If The User Entered The Right Password"""
-        salted_password = plain_password + self.salt.decode()
-        return bcrypt.check_password_hash(self.password, salted_password)
-
-    @property
-    def full_name(self) -> str:
-        if self.last_name is not None:
-            return f"{self.first_name} {self.last_name}"
-        else:
-            return self.first_name
-
     @hybrid_property
     def location_enabled(self) -> bool:
         return (self.latitude is not None) and (self.longitude is not None)
@@ -127,6 +114,23 @@ class User(CommonMixin, UserMixin, Model):
     @location_enabled.expression
     def location_enabled(self) -> bool:
         return (self.latitude != None) & (self.longitude != None)
+
+    def check_password(self, plain_password: str) -> bool:
+        """Checks If The User Entered The Right Password"""
+        salted_password = plain_password + self.salt.decode()
+        return bcrypt.check_password_hash(self.password, salted_password)
+
+    def subscribed(self, event: "Event") -> bool:
+        return db.session.query(
+                db.session.query(Subscription).filter_by(user=self, event=event).exists()
+        ).scalar()
+
+    @property
+    def full_name(self) -> str:
+        if self.last_name is not None:
+            return f"{self.first_name} {self.last_name}"
+        else:
+            return self.first_name
 
     @staticmethod
     def generate_salt():
@@ -141,8 +145,8 @@ class Event(CommonMixin, Model):
     subscriptions: List["Subscription"] = relationship("Subscription", back_populates="event")
 
     name: str = Column(db.String(60), nullable=False)
-    description: str = Column(db.String(200), nullable=True)
-    start: datetime = Column(db.DateTime, nullable=True, default=None)
+    description: str = Column(db.String(500), nullable=True)
+    start: datetime = Column(db.DateTime, nullable=False, default=None)
     latitude: Decimal = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -90 < latitude < 90
     longitude: Decimal = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -180  < longitude < 180
     private: bool = Column(db.Boolean, nullable=False, default=False)
@@ -221,22 +225,15 @@ class EventMessage(CommonMixin, Model):
     type: MessageTypes = Column(db.Enum(MessageTypes))
     data: Dict[str, Any] = Column(JSON)
 
-    def render(self, class_=None) -> str:
+    def render(self) -> str:
         """Renders the message for display"""
-
-        if class_ is None:
-            class_ = []
 
         if self.type is MessageTypes.TEXT:
             data = self.data['message']
-            class_.append('text')
-            return f"<div class='{' '.join(class_)}' data-timestamp={self.timestamp.isoformat()}>{data}</div>"
+            return data
         elif self.type is MessageTypes.IMAGE:
             file = os.path.join(flask.current_app.config['UPLOAD_FOLDER'], self.data['file'])
-            class_.append('image')
-            return f"""<div class='{' '.join(class_)}' data-timestamp={self.timestamp.isoformat()}>
-                <img src='{flask.url_for('static', filename=file)}'>
-            </div>"""
+            return f"<img src='{flask.url_for('static', filename=file)}'>"
 
 
 class Answer(CommonMixin, Model):
