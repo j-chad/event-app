@@ -1,0 +1,538 @@
+\documentclass[12pt, draft]{report}
+\usepackage[margin=2.7cm]{geometry}
+\usepackage{titlesec}
+\usepackage[backend=biber]{biblatex}
+\usepackage{url}
+\usepackage{todonotes}
+\usepackage[utf8]{inputenc}
+\usepackage[acronym]{glossaries}
+\usepackage{microtype}
+\usepackage[pdfusetitle]{hyperref}
+\usepackage{pgfplots}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{framed}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{parskip}
+\usepackage{tikz}
+\usepackage{dot2texi}
+
+\usetikzlibrary{calc,positioning,arrows,chains,shapes,matrix}
+
+\definecolor{keyword}{HTML}{008000}
+\definecolor{comment}{HTML}{408080}
+\definecolor{strings}{HTML}{BA2121}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+
+\lstdefinestyle{mystyle}{
+commentstyle=\color{comment},
+keywordstyle=\color{keyword},
+numberstyle=\tiny\color{codegray},
+stringstyle=\color{strings},
+basicstyle=\footnotesize,
+breakatwhitespace=false,
+breaklines=true,
+captionpos=b,
+keepspaces=true,
+numbers=left,
+numbersep=5pt,
+showspaces=false,
+showstringspaces=false,
+showtabs=false,
+tabsize=2
+}
+
+\lstset{style=mystyle, language=Python}
+
+\title{Online Event Management Software | Digital Scholarship}
+\author{Jackson Chadfield}
+\date{\today}
+
+\titleformat{\chapter}{\normalfont\huge}{\thechapter.}{20pt}{\huge\bf}
+
+\makeglossaries
+\newacronym{orm}{ORM}{Object Relational Mapper}
+
+\addbibresource{documentation.bib}
+
+\begin{document}
+
+	\begin{titlepage} % Suppresses displaying the page number on the title page and the subsequent page counts as page 1
+		\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for horizontal lines, change thickness here
+
+		\center % Centre everything on the page
+
+		%------------------------------------------------
+		%	Headings
+		%------------------------------------------------
+
+
+		\textsc{\LARGE Sancta Maria College}\\[1.5cm] % Main heading such as the name of your university/college
+
+		\textsc{\Large Digital Technologies}\\[0.5cm] % Major heading such as course name
+
+		\textsc{\large Scholarship}\\[0.5cm] % Minor heading such as course title
+
+		%------------------------------------------------
+		%	Title
+		%------------------------------------------------
+
+		\HRule\\[0.4cm]
+
+		{\huge\bfseries Online Event Management Software}\\[0.4cm] % Title of your document
+
+		\HRule\\[1.5cm]
+
+		%------------------------------------------------
+		%	Author(s)
+		%------------------------------------------------
+
+		{\large\textit{Author}}\\
+		Jackson \textsc{Chadfield} % Your name
+
+		%------------------------------------------------
+		%	Date
+		%------------------------------------------------
+
+		\vfill\vfill\vfill % Position the date 3/4 down the remaining page
+
+		{\large\today} % Date, change the \today to a set date if you want to be precise
+
+		%------------------------------------------------
+		%	Logo
+		%------------------------------------------------
+
+		\vfill\vfill
+		\includegraphics[width=0.2\textwidth]{static/logo.png}\\[1cm] % Include a department/university logo - this will require the graphicx package
+
+		%----------------------------------------------------------------------------------------
+		p/documentation/src/documentation.tex
+		\vfill
+		% Push the date up 1/4 of the remaining page
+
+	\end{titlepage}
+
+	\tableofcontents
+	\pagebreak
+
+	\chapter{Preface}
+	This project is completely open source and available at \url{https://github.com/j-chad/event-app}. Building it will require python 3 (tested on 3.6).
+
+	\chapter{Introduction}
+	I was approached by my clients, who recently had problems organising a school ball. Their main problems were the ammount of attendees and organisers, which made it difficult to efficently notify and update all attendees of upcoming events or changes.
+
+	One of the main concerns for notifying attendees, was that not all attendees used just one platform such as facebook. This meant some of the attendees were not always recieving important information.
+
+	My clients were mostly school students that had many other obligations, and were voluntaring to organise the ball. They found it difficult to keep everyone updated while still studying and performing other obligations.
+
+	\section{Initial Consultation}
+	They organised the ball through lots of meetings and used a whiteboard to detail the event. Facebook was used to share details to the students attending the event. The main issues were communication and keeping everyone updated and on the same page. Another issue was quickly and efficiently communicating any changes to the event goers. The group used facebook polls to ask ideas but struggled with the fact that participants could edit the list of options. There were also issues with people who didn’t use facebook and weren’t able to be notified in this way.
+
+	\section{Specifications}
+	The main requirements of this project are:
+	\begin{itemize}
+		\item Users can create events.
+		\item Users can subscribe to other events.
+		\item Notifications and updates should be presented in real time.
+		\item Updates to events should support rich content.
+		\item There should be multiple notification methods which the user can choose from.
+		\item Users can ask questions about the event
+		\item The app must be as easy to use on a phone as on a desktop.
+	\end{itemize}
+	On top of these requirements, the service should also be secure, private and easy to use.
+
+	\section{Key Stakeholders}
+	My key stakeholders are the initial group of students, who approached me after planning a ball. However, my app will also cater to a much larger demographic of students and similarly aged members of the public.
+
+	I will be primarily discussing my changes with the inital group, but I will also be seeking feedback from fellow students. This will enable my app to cater to a wider audience.
+
+	\section{Concept Statement}
+	My stakeholders, who recently organised a school ball, have voiced concerns about the difficulty it takes to organise events with a high number of attendees. A website event management system would help to ease the burden of coordinating large groups of attendees. While this would be developed with the stakeholders in mind, it would also be beneficial for other organisations planning events.
+
+	\section{Existing Solutions}
+	Event management is a fairly common task, so there are a multitude of solutions that I must evaluate. This will help me to determine what works and what doesn't, and give me insight on what to implement in my app.
+
+	\subsection{Facebook Events}
+
+	\subsection{Eventbrite}
+	Eventbrite is another very popular event management system, that lets users view nearby events.
+	It supports buying tickets, as well as settings to make the event private or public. The UI is very nice and clean, and I found it very easy to navigate and create an event.
+
+	\begin{figure}[H]
+		\caption{Eventbrite Homepage}
+		\includegraphics[width=\linewidth]{static/eventbrite-home.png}
+	\end{figure}
+
+	The event pages give a high amount of detail, without cluttering the screen. Including a map, and the time of the event. This will be important in my application, as the user needs to be able to quickly see the information.
+
+	\begin{figure}[H]
+		\caption{Eventbrite Event Page}
+		\includegraphics[width=\linewidth]{static/eventbrite-event.png}
+	\end{figure}
+
+	A big problem with this site, is that it doesn't allow for messages to the attendees, or for the attendees to ask questions about the event, which were both part of my specifications. Additionally, the site is also full of ads and trackers, which poses a privacy concern.
+
+	\subsubsection{Conclusion}
+	The user interface of eventbrite is well designed, with clean colours and well presented information. I like the fact that it supports tickets, but I will not be implementing this due to the cost and security issues that it raises. I will, however, consider their design and flow between pages when developing my application.
+
+
+	\chapter{Research}
+
+	\section{Language}
+	The most important question to begin developing this application is: what language to use. Since the programming language I use for the back end will drive the whole application, it is important to choose the correct language. Most languages support web development as it is a common task, therefore I will select a few of the more popular languages.
+
+	\subsection{Javascript}
+	Javascript is a relatively new language for programming the back-end, it has historically been used to write code on the front-end. In recent years it has taken off and become popular due to website designers only needing to learn one language in order to build an application. The maturity of this language as a back-end is concerning, as it may not be as heavily vetted as alternatives. There are also other quirks of the language that put me off, such as strange type coercion (1 == “1”) and implicit global variables.
+
+	\subsection{PHP}
+	PHP is the most widely used language for web development in the world, with over 80\% of websites using it. This language does not have the problem of maturity, having been around for 24 years. The problem with PHP is it’s unpredictable and inconsistent. In PHP: NULL < -1 yet NULL == 0. This is not a one off case. The whole language is riddled with strange design decisions and many ways to do a single thing, each with different naming schemes. On top of all this, the language encourages bad website design and makes you go out of your way to create secure apps.
+
+	\subsection{Python}
+	Python is an object oriented language that has been around for almost 28 years. It is a general purpose programming language and has many frameworks that enable web development. The syntax and language are very concise and expressive, making development very quick and easy to debug. Python avoids both the pitfalls of PHP and Javascript and is very flexible. Since python is a interpreted language it is marginally slower than similar languages which are compiled. The fact that it is not specific to web development means that I can use a wide range of tools to accomplish my tasks.
+
+	\section{Web Framework}
+	In order for me to efficiently and securely write a web app, I will need to use a web framework which handles all low level details such asl http and routing logic, I will need to use one of the many web frameworks made for python. A web framework handles most of the logic that is general to all websites and lets me worry about higher level application logic. The two main frameworks in python are \textbf{flask} and \textbf{django}.
+
+	\subsection{Django}
+	Django is a web framework that takes a "battery included approach". It includes many features out of the box, meaning programmers can spend more time writing code without worrying about implementation details. Although this framework would have many useful features, it would impose an infrastructure that is far too heavy for my purposes.
+
+	\subsection{Flask}
+	Flask is a "microframework" and is the opposite of Django in the fact that it makes less decisions for the programmer. It is very lightweight and leaves almost all of the higher level implementation and infrastructure details to the programmer. This is perfect for my needs as I can pick and choose the features I need.
+
+	\section{Relational Database Engine}
+	The relational database will have an important role as being the primary data store for my application. Therefore it must be efficient and reliable so as to keep my application running smoothly.
+
+	\subsection{SQLite}
+	SQlite is a lightweight database engine that operates using database files. This means it is fast, efficient and extremely easy to set up. However this means it doesn’t provide proper access controls. Another downside is that it only supports 1 write operation at any given time. The slow write operations will be a major drawback when the web app is scaled up and has many users.
+
+	\subsection{MySQL}
+	MySQL is a much more full featured relational database. It is one of the faster available database engines available and is also one of the most popular engines. MySQL has a large open source community fixing bugs and providing support, which is always a welcome addition. MySQL is a database server (not embedded), and is designed for larger applications. MySQL is well known for being very secure and performant, both features would add value to my application. MySQL also offers a much more full featured language with support for more constructs.
+
+	\subsection{PostgreSQL}
+	PostgreSQL is also a very popular relational database. It has very similar features to MySQL but is closer to the ANSI SQL standard, i.e. more feature complete. PostgreSQL is a little slower than MySQL and doesn’t perform as well in highly concurrent environments.
+
+	\section{Non-Relational Database Engine (Key-Value)}
+	My non-relational database will be used to handle tasks and data which are not related but still must be stored. This will include data involving caching, tasks, rate-limiting and verification. I will use a key-value model for my non-relational data.
+
+	\subsection{Memcached}
+	Memcached is a popular key-value store which is extremely efficient and fast. However, it’s operations are not atomic, meaning race conditions can be created. This is a huge problem in my application, as it could have many hundred requests per second which must be handled simultaneously. Since the operations are not atomic, the data is not reliable with a high traffic.
+
+	\subsection{Redis}
+	Redis is another excellent non relational database. Unlike memcached, every operation is atomic meaning that when the application is scaled up and there may be a few hundred changes to the database every second, there shouldn't be any data race issues. This is very important in a higly concurrent application. Redis is every bit as fast as memcached and supports more features, which is always nice.
+
+	\section{Object Relational Mapper}
+	A Object Relational Mapper (ORM) handles an abstraction level between the programming language and the database. This means that I can write python code that the ORM will: transform to SQL, execute the SQL, and transform any non-pythonic objects into python data types. This allows easy and safe development, and enables me to use SQLite to test and MySQL in production with minimal changes in code.
+
+	\subsection{PeeWee}
+	Peewee is a lightweight orm with simple syntax. It is quick and suitable for smaller apps, but it lacks more complicated features. Another important consideration is the community size. PeeWee only has one major contributor, meaning patches and features will be released slowly. It also has very few resources online.
+
+	\subsection{SQLAlchemy}
+	SQLalchemy is a very stable ORM that integrates very nicely into flask using an extension. It is a very widely used ORM and I have the most experience with it. SQLAlchemy is much larger than PeeWee but offers a lot more features while maintaining simple and expressive syntax. There are 9 major contributors and it has a large online following. SQLAlchemy also offers the ability to drop down to raw SQL if needed.
+
+	\section{Task Queue}
+	A task queue will become important in the later stages of my website when I need to write asynchronous code that doesn't block the current request. This will increase the time it takes for the web app to respond, and allow asynchronous events to be scheduled.
+
+	\subsection{Celery}
+	Celery is a very large and full featured task queue. Due to the large community support, I started off with this task queue.
+	However I quickly found it was much to complex and didn't have strong support for the flask web framework. It required a structure that
+	interfered with the rest of my code and it needed many workarounds to get it to do basic things, such as send an email.
+
+	\subsection{Redis Queue (RQ2)}
+	I then tried a much more basic task queue which was designed to work with flask. This task queue was much more suited to my needs.
+	I didn't have to worry about passing any app contexts around or use any hacky workarounds.
+
+	\section{Security Considerations}
+	While this site doesn’t handle inherently sensitive data, it is my belief that any website should do their absolute best to provide a secure and private service. There are many aspects to consider when ensuring an app is secure, and it is nearly impossible to cover everything. However I will minimise risks and threats by using current security best practices.
+
+	\subsection{Safe Password Storage}
+	An important consideration in any application that manages passwords, is the hashing mechanism. I will use Bcrypt to hash the passwords with a random salt (per user) which is generated with the OS CSPRNG. Bcrypt performs in constant time which will mitigate timing attacks. The salt ensures that an attacker must bruteforce each password individually. They cannot find one hash and then test it against the whole database as each persons hash will be different, even if they have the same password.
+
+	\subsection{SQL Injection}
+	SQL Injection occurs when a SQL query takes malicious user input and executes it. It is a fairly easy threat to deal with, but it still one of the most common. Since I am using an ORM, SQL Injection will be (mostly) managed for me, with all input data being cleaned before a query is performed. Theoretically this should completely mitigate SQL injections as an attack vector. However, SQLAlchemy also allows using raw SQL for some operations. Raw SQL code will not be automatically cleaned by SQLAlchemy and is therefore unsafe unless it doesn’t rely on user input.
+
+	\subsection{Cross Site Scripting (XSS)}
+	XSS is very similar to SQL injection in the fact that it involves executing malicious input. XSS means a user can write malicious code that will be delivered to other users of the site. The template engine installed with flask (jinja2) is by default configured to escape any special symbols into the html equivalent, rendering any malicious inputs useless. However this setting escapes everything which adds unnecessary overhead and slows down the application, because of this speed loss, I decided to manually mark input as unsafe/safe. This is a bit riskier but is safe if handled correctly. I also opted to escape user input before it was entered into the database for items such as message text. This minimises future risk of the malicious data being presented to users.
+
+	\subsection{Login Management}
+	I initially began this project with the intention of creating my own login management system, however the complex and time consuming nature of this application meant I switched to a prebuilt solution using flask-login and flask-paranoid. Flask login integrates with SQLAlchemy and provides essential session management, where the session is stored as a cookie and verified each request. Flask-paranoid is used as a second layer of security which verifies that the users session doesn't suddenly switch to another computer, which could indicate the users session has been stolen by a malicious user.
+
+	As an extra layer, I also added a verification email, which is sent to the users email. This helps to protect against spam and verifies that the user owns the email.
+
+	\section{Design Research}
+
+	\chapter{Development and Implementation}
+
+	\section{Back-End}
+
+	\subsection{Site Map}
+	One of the first descisions I needed to make, is a map of the site. This was revised a few times, but I ended up with a decently simple map.
+
+	\begin{center}
+		\begin{dot2tex}[dot, autosize]
+			digraph G {
+			rankdir=LR
+			node[shape=box];
+			Event_Detail[label="Event Detail"];
+			Create_Event[label="Create Event"];
+
+
+			Index -> Login -> Dashboard;
+			Index -> Register -> Dashboard;
+			Dashboard -> Settings;
+			Dashboard -> Create_Event;
+			Dashboard -> Discover;
+			Dashboard -> Event_Detail;
+			Event_Detail -> Questions;
+			Discover -> Event_Detail;
+			}
+		\end{dot2tex}
+	\end{center}
+
+	\subsection{Database Tables}
+	\begin{center}
+		\begin{dot2tex}[neato]
+			graph G {
+			rankdir=LR
+			node[shape=box];
+			edge[dir=both, arrowhead="crow", arrowtail="tee"];
+
+			eventmessage -- event;
+			event -- user;
+			subscription -- event;
+			subscription -- user;
+			question -- answer;
+			question -- event;
+			question -- user;
+			webpushtoken -- user;
+			}
+		\end{dot2tex}
+	\end{center}
+
+	\subsection{Application Diagram}
+	\begin{center}
+		\begin{dot2tex}[dot, autosize]
+			digraph G {
+			MySQL[shape=diamond];
+			Redis[shape=diamond];
+			SQLAlchemy[shape=box];
+			App[shape=oval, label="Flask App"];
+			Queue[shape=box, label="Task Queue"];
+			Nginx[shape=box];
+			Static[shape=folder];
+			Push[shape=box, label="Push Server"];
+			Browser[shape=oval];
+			Worker[shape=box, label="Service Worker"];
+			Email[shape=oval];
+
+			Push -> Worker -> Browser;
+			App -> SQLAlchemy[dir=both];
+			App -> Redis[dir=both];
+			SQLAlchemy -> MySQL[dir=both];
+			App -> Queue;
+			Queue -> Push;
+			Queue -> Redis[dir=both];
+			Queue -> SQLAlchemy[dir=both];
+			Queue -> Email;
+			App -> Nginx[dir=both];
+			Nginx -> Browser[dir=both];
+			Static -> Nginx;
+
+			}
+		\end{dot2tex}
+	\end{center}
+
+	\subsection{User Primary Key}
+	The user table is one of the most important tables in the database, almost every table relies on it either directly or indirectly. Initially (and for most of its development) I used the users email as it's primary key. I made this decision as users all have separate emails and seems like a natural way to identify users. This works under most cases, however if a user needs to change their email, we need to change the primary key. This leads to essentially creating a new user, losing and invalidating all references to other tables. To solve this issue I simply changed the primary key and all related foreign keys to use a simple integer. I then used a unique constraint on email to ensure it is still unique.
+
+	\subsection{Storing Messages}
+	My application would be pretty pointless if it didn’t have a way to store and retrieve messages. Since I need to be able to use multiple types of messages, each with different data (e.g. text, location, file). This is a problem as I can’t store different types of data for each type of message. I solved this by specifying the type using a ENUM and the data is contained within a json field. This way, I can easily create new types of messages.
+
+	\subsection{Determining Unread Messages}
+	An important piece of data needed for the dashboard screen, is what messages the user hasn’t read. A simple solution to this problem would be to include a boolean on each message that indicates whether it has been displayed to the user. However, I found querying by this way slow and inefficient. I found a better solution would be to instead store a timestamp of when the user last loaded a specific event. I can then simply query any messages broadcast after this timestamp. If I index the message timestamps as a binary tree, I can then achieve an average lookup speed of \(O(\log n)\), which is a significant improvement on \(O(n)\).
+
+	\begin{center}
+		\begin{tikzpicture}
+			\begin{axis}[
+			title=Linear Time vs Logarithmic Time,
+			xlabel=Messages ($$n$$),
+			ylabel=Time,
+			xmin=0,
+			xmax=10,
+			ymin=0,
+			ymax=10,
+			ytick=\empty,
+			xtick=\empty,
+			legend pos=north west
+			]
+
+				\addplot[
+				color=blue,
+				domain=0:10,
+				samples=100
+				]{ln(x)};
+				\addlegendentry{$$O(log n)$$}
+				\addplot[
+				color=red,
+				domain=0:10,
+				samples=2
+				]{x};
+				\addlegendentry{$$O(n)$$}
+
+			\end{axis}
+		\end{tikzpicture}
+	\end{center}
+
+	I initially stored the “last viewed” timestamp in the redis datastore, but after some testing decided to move it to the Subscription table. This move was due to two reasons:
+	\begin{itemize}
+		\item The timestamp is fairly critical, we don't want the user to suddenly be notified about every single message ever sent. All critical data should be kept in the relational database.
+		\item The timestamp is actually reliant on a subscription, e.g. when a user creates or deletes a subscription, the timestamp must be modified or deleted manually. This adds unnecessary code into the application and is unintuitive.
+	\end{itemize}
+
+	\subsection{Push Notifications}
+	Push notifications were by far, one of the trickier features to implement. It starts off with a service worker, which must be registered in the global scope. In development, I simply set a url “/service-worker” to return the file, but in production this will be served by the web server (e.g. nginx). The user is then prompted to allow notifications. Once my app has been given permission, it will be handed some cryptographic keys and an endpoint. These are then registered in my database through an asynchronous call. I initially set the user as the primary key, however, this quickly caused errors as each endpoint is specific to a device. This meant that users would only be able to have one device receiving push notifications. I then changed the primary key to a new id column. This lead to new problems where an endpoint would be registered twice if a user subscribed, unsubscribed, and subscribed again. This caused each user to receive multiple push notifications for each event. I then attempted to solve this with a composite primary key of the endpoint and user id. This did not cause problems but on later review of the code I removed the primary key on the user id. The primary key on the user was unnecessary as each user is assigned a unique endpoint by their browser.
+
+	\begin{center}
+		\begin{figure}
+			\caption{Standard Push Notification Workflow}
+			\begin{tikzpicture}[node distance=2cm,auto,>=stealth]
+
+				\node[draw](serv_w){Service Worker};
+				\node[draw, right=of serv_w](client){Client};
+				\node[draw, right=of client](server){Vent Server};
+				\node[draw, right=of server](notify){Notification Server};
+
+				%Grounds
+				\node[below of=serv_w, node distance=5cm](serv_w_ground){};
+				\node[below of=client, node distance=5cm](client_ground){};
+				\node[below of=server, node distance=5cm](server_ground){};
+				\node[below of=notify, node distance=5cm](notify_ground){};
+
+				%Draw
+				\draw (serv_w) -- (serv_w_ground);
+				\draw (client) -- (client_ground);
+				\draw (server) -- (server_ground);
+				\draw (notify) -- (notify_ground);
+
+				\draw[->, dashed, blue]($(client)!0.25!(client_ground)$) -- node[above,scale=1,midway]{Register For Push} ($(server)!0.25!(server_ground)$);
+				\draw[->, magenta]($(server)!0.55!(server_ground)$) -- node[above,scale=1,midway]{Send Notification} ($(notify)!0.55!(notify_ground)$);
+				\draw[->, magenta]($(notify)!0.70!(notify_ground)$) -- node[above,scale=1,midway]{Dispatch Notification} ($(serv_w)!0.70!(serv_w_ground)$);
+				\draw[->, magenta]($(serv_w)!0.85!(serv_w_ground)$) -- node[above,scale=1,midway]{Display Notification} ($(client)!0.85!(client_ground)$);
+
+			\end{tikzpicture}
+		\end{figure}
+	\end{center}
+
+	When a notification needs to be sent, a call is made to each endpoint with relevant data. I used pywebpush to achieve this. If a 410 gone or 404 not found are returned, I assume that the endpoint is expired or invalid and delete it from my database.
+
+	\subsection{Concealing Object IDs}
+	While developing the application, I realised that some of my urls weren’t as secret as they should be. The primary key for events is an integer type and is set to auto increment. This means that (most) event’s primary keys will simply be the previous event’s primary key + 1. The way that I exposed the events to users was \textbf{myapp.com/event/\textit{\textless id\textgreater}}. This gives any malicious users a straightforward way to iterate over every listed event. To fix this I used a module named hashid, which provides a reversible obfuscated base64 id. Hashids also take a salt which means its not just a straight reversal. Hashids are in no way secure, but they provide a useful url obfuscation technique.
+
+	\subsection{GET Idempotency}
+	Another issue I discovered during my development, is the method I use to access endpoints. When I added email verification to my app, I also added the ability to resend an email in case it doesn’t reach the inbox. However this method (and the logout method)  was accessed using a GET request. The issue with a GET request is that it is defined as a safe and idempotent method in the HTTP specifications. This means that it shouldn’t modify any system state, only retrieve information. Browsers will often cache and refetch endpoints retrieved with GET causing the code to run unintentionally. This could cause the user to retrieve multiple emails or be logged out without pressing anything. To fix this, I added a hidden form that is submitted when the user clicks on the logout button.
+
+	\subsection{Password Entropy}
+	When the user made a password, I wanted to ensure that it would be sufficiently secure. I began with basic password rules such as minimum length, lowercase, uppercase and digits. However I felt that this was to strict and imposing. This was also a server side validation and at the time didn’t have any client side validation. I decided to instead remove the server side validation and use a entropy + common password checker on the client side. Although it is a simple matter to bypass client side validation, there is no motivation to make a less secure password for themselves.
+
+	\subsection{Login Lockout}
+	While designing my security features, I added logic to lockout users who keep entering the wrong password in an attempt to stop brute force and dictionary attacks. I use the same identification function as my rate limiter. I also use another identification method provided by the helpful flask extension: paranoid, but paranoid tests if it is a different client, while a rate limiter checks if it is the same client. It would be extremely easy to trick paranoids detection to think you are a different user. I store the amount of times that a user has got an incorrect password in redis using the identifier. I also set an expiry time which gets reset when they get a password wrong. This allows the data to be erased after a while ensuring lockdowns are only temporary. If the number of attempts is to high, I deny any POST requests and return a helpful link to reset their password using their verified email.
+
+	\subsection{Rich Messages}
+	I wanted a simple way to enable users to write text using rich formatting. I decided on using markdown, which is a lightweight markup language, which is human readable and easy to convert to html. Converting user input into html will bring with it a risk of XSS. To circumvent this, I sanitize with \textbf{Bleach} - a library by mozilla, for sanitizing html.
+
+
+	Originally, I attempted to use all messages as markdown. This lead to problems in my database. This is due to the database having max lengths for answers and questions. This can be exploited by the user by writing markdown which expands. For this reason, I decided to only use markdown for event messages.
+
+	\begin{framed}
+		For example, the markdown: \verb+* * * * * * A+ expands to \(131\) characters when converted to html. By using this technique, a \(299\) character long string can be expanded to \(> 3000\) characters.
+	\end{framed}
+
+
+	\subsection{Image Messages}
+	I ran into a problem when implementing sending images as messages. Traditionally images and files cannot be uploaded asynchronously, due to security risks with javascript reading local files. However, in 2008 a proposal was created for \textit{XMLHttpRequest Level 2}. This specification is an improvement on the initial \textit{XMLHttpRequest}, and allows (among many things) asynchronous file uploading. There is enough support for this standard to use it without worrying about polyfills.
+
+	\begin{figure}[H]
+		\caption{Support for XMLHttpRequest Level 2}
+		\includegraphics[width=\linewidth]{static/xmlhttp2support.png}
+	\end{figure}
+
+
+	\subsection{Geo Search \& Mapping}
+	For users to be able to see nearby events, we first need to know the location of events. An important consideration in storing the coordinates (latitude \& longitude) is how accurate they need to be. I found that 5 decimal points gives precision of ~1m which is more than enough precision. I wrote the algorithm to calculate the distance as a hybrid method in my ORM, which means it will work in the database and on the server with no changes to the code. In order to display my geographical data I needed a map provider. I initially decided on using bing maps, but after a few hours with no results, I switched to mapbox using leaflet. I was able to quickly get a map displayed using mapbox and leaflet.
+
+	\subsection{Server to Client Communication}
+	While users of my application will get real-time emails and push notifications, any updates to the data will not be presented to them until the page is refreshed. This is an important feature for my application to have, before the data is truly real-time. HTTP is traditionally a half-duplex protocol, where a client sends a request and received a response. To show real time data, I need to be able to send data to the client from the server whenever there is new data. There have been numerous methods used in an attempt to overcome these limitations. One of the most common of these methods, is simply asking the server constantly for the new data. A variation on this is asking for the data and then the server waits until it receives new data before responding. While some of these techniques work well, they have a large amount of overhead, constantly sending or receiving unnecessary data. There are two relatively new specifications that allow communication between the server and client. The first method I tried was Server Sent Events (SSE). SSE is built upon http and is fairly straightforward: The client connects to an event source, and then the server pushes data to that event source, giving the client the data. This is still technically half-duplex but the server initiates the request, rather than the client. The other specification is Websockets. Websockets are a separate protocol from http and are achieved by using an upgrade header in http. Websockets are fully duplex and very efficient. I used SSE as Websockets were much more difficult to implement safely and were overpowered for my needs.
+
+	When implementing SSE I needed an identifier for each channel a user would subscribe to. A quick solution was to use the base64url encoded version of the users email, however this can leak the users email, even if served over https. I switched this to a sha256 hash, to better secure the information.
+
+	\subsection{Image Processing}
+	When a user uploads an image, I want to make sure that the Image is the most compressed, both to save space and bandwidth.
+	A simple and effective first step is to limit the maximum size of the image. However if this is set too low, then the user might not be able to upload their images, and too high and it won't be effective. To fully optimise my bandwith and space I need to ensure that the images are compressed. To compress the image, I used JPEG compression set at 75\% quality and set the optimise flag, which does an extra pass through the image. This provided a much smaller file size with little decrease in visual fidelity. Too ensure that this doesn't caused a large delay in the request, I decided to measure the time it took to process the image. To measure this, I used the following code, with a large (1 MB) PNG image:
+
+	\begin{lstlisting}
+		import time
+
+		def process(f_handle):
+		img = Image.open(f_handle)
+		img.thumbnail((800, img_handle.height),Image.ANTIALIAS)
+		img.save('test.jpg', optimize=True, quality=75)
+
+		start = time.clock()
+		with open('test.png') as f_handle:
+		process(f_handle)
+		print(time.clock() - start)
+	\end{lstlisting}
+
+	After running this code many times, I found that it takes around \(\frac{1}{20}\) a second to fully process the image. This is an acceptable timeframe, and will be percieved as instantaneous. As it doesn't take up much time or resources, I was able to process the image directly in the request context.
+
+
+	\section{Front-End}
+	Designing the front end was a lot more challenging to get right, as the user interface needed to feel friendly and simple, yet be able to be flexible. I started off with drawing up a mock of the home page eith my client, so that I could get a feel for the theme.
+
+	\begin{figure}[H]
+		\caption{The Initial Design}
+		\includegraphics[width=\linewidth]{static/front-end1.png}
+	\end{figure}
+
+	We decided on an orange theme, with large simple blocks of content. This made it easy to understand the content quickly, and gave a modern feel. I decided to use milligram as a minimal css template, as it was small and didn't get in the way, while still noticeably improving the overall look and feel.
+
+	It is also important that all of the pages work well with mobile, as it is a requirement that the website works the same on all devices and screen sizes. To ensure this, I implemented responsive design techniques that allowed the content to fit within the screen. For example,
+
+	\subsection{Index Page}
+	After my redesign of the index page, I mostly stuck with the initial design. I brightened the orange, changed the image, and made it feel a bit more modern.
+
+	\begin{figure}[H]
+		\caption{Revamped Index Page}
+		\includegraphics[width=\linewidth]{static/front-end2.jpg}
+	\end{figure}
+
+	The resulting website is much more inviting with a functioning and responsive register form. In order to improve the user experience when they sign up, the register form first validates locally. If it is valid, the data will be submitted asynchronously to the server side. The data is then validated on the server to ensure the data is still valid. This provides a "fast-fail" experience when filling out the form, which ensures it will warn you if the data is not valid, saving a frustrating page refresh.
+
+	\subsection{Dashboard}
+	This page is the users main page, it gives an overview over all the events they own or follow. It is important that this page is clear and easy to navigate.
+
+	\begin{figure}[H]
+		\caption{Dashboard Page}
+		\includegraphics[width=\linewidth]{static/front-end3.png}
+		\label{fig:dashboard}
+	\end{figure}
+
+	For the dashboard, I opted for a card based approach. The left hand side of the screen gives information about subscribed events and owned events, as well as containing helpful statistics and buttons. The right hand side contains \textit{insights}, which are generated based on various contexts. For example, figure \ref{fig:dashboard} shows 2 \textit{warning} insights and 1 \textit{tip} insight. Updates to events will also be shown here. This design is highly customisable for the user, as well as being very flexible.
+
+	\subsection{Discover}
+	I Initially designed this page with a category based design, where there would be seperate categorys that would have a list of events. This was inspired by the google play store design.
+
+
+	\subsection{Event View}
+
+
+	\subsection{Create Event}
+
+	\chapter{Evaluation}
+
+	\chapter{Conclusion}
+
+	\printbibliography
+
+	\printglossaries
+\end{document}
