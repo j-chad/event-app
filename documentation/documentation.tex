@@ -1,4 +1,4 @@
-\documentclass[12pt, draft]{report}
+\documentclass[a4paper,oneside,12pt,draft]{report}
 \usepackage[margin=2.7cm]{geometry}
 \usepackage{titlesec}
 \usepackage[backend=biber]{biblatex}
@@ -6,7 +6,7 @@
 \usepackage{todonotes}
 \usepackage[utf8]{inputenc}
 \usepackage[acronym]{glossaries}
-\usepackage{microtype}
+\usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
 \usepackage[pdfusetitle]{hyperref}
 \usepackage{pgfplots}
 \usepackage{graphicx}
@@ -17,7 +17,8 @@
 \usepackage{parskip}
 \usepackage{tikz}
 \usepackage{dot2texi}
-
+\usepackage{hyperref}
+\usepackage[binary-units=true]{siunitx}
 \usetikzlibrary{calc,positioning,arrows,chains,shapes,matrix}
 
 \definecolor{keyword}{HTML}{008000}
@@ -107,7 +108,6 @@ tabsize=2
 		\includegraphics[width=0.2\textwidth]{static/logo.png}\\[1cm] % Include a department/university logo - this will require the graphicx package
 
 		%----------------------------------------------------------------------------------------
-		p/documentation/src/documentation.tex
 		\vfill
 		% Push the date up 1/4 of the remaining page
 
@@ -117,47 +117,65 @@ tabsize=2
 	\pagebreak
 
 	\chapter{Preface}
-	This project is completely open source and available at \url{https://github.com/j-chad/event-app}. Building it will require python 3 (tested on 3.6).
+	This project is my submission for the \textbf{New Zealand Technology Scholarship}\footnote{\url{https://nzqa.govt.nz/qualifications-standards/awards/new-zealand-scholarship/scholarship-subjects/scholarship-technology/}}
+
+	It is completely open source as part of my ethos and commitment to privacy \& transparency. The source code is available on github\footnote{\url{https://github.com/j-chad/event-app}}.
+
+	This document was written in \LaTeX{} and is also freely available on the public repository.
+
+
 
 	\chapter{Introduction}
-	I was approached by my clients, who recently had problems organising a school ball. Their main problems were the ammount of attendees and organisers, which made it difficult to efficently notify and update all attendees of upcoming events or changes.
+	I was approached by my clients, who recently had problems organising a school ball. Their main problem was communication between the large volume of attendees and the organisers. In particular, there were difficulties in efficently notifying and updating all attendees of upcoming events and changes.
 
-	One of the main concerns for notifying attendees, was that not all attendees used just one platform such as facebook. This meant some of the attendees were not always recieving important information.
+	One of the main concerns for notifying attendees, was that not all attendees used just one platform such as Facebook. This meant some of the attendees were not always recieving important information.
 
-	My clients were mostly school students that had many other obligations, and were voluntaring to organise the ball. They found it difficult to keep everyone updated while still studying and performing other obligations.
+	My clients were mostly school students that had many other obligations, and were voluntaring to organise the ball. They found it difficult to keep everyone updated while still studying and performing other responsibilities.
 
 	\section{Initial Consultation}
-	They organised the ball through lots of meetings and used a whiteboard to detail the event. Facebook was used to share details to the students attending the event. The main issues were communication and keeping everyone updated and on the same page. Another issue was quickly and efficiently communicating any changes to the event goers. The group used facebook polls to ask ideas but struggled with the fact that participants could edit the list of options. There were also issues with people who didn’t use facebook and weren’t able to be notified in this way.
+	%They organised the ball through lots of meetings and used a whiteboard to detail the event. Facebook was used to share details to the students attending the event. The main issues were communication and keeping everyone updated and on the same page. Another issue was quickly and efficiently communicating any changes to the event goers. The group used facebook polls to ask ideas but struggled with the fact that participants could edit the list of options. There were also issues with people who didn’t use facebook and weren’t able to be notified in this way.
+	I met with my clients, the Ball Commitee, to discuss how they previously organised the ball, problems they encountered and to discuss their ideas for improvements.
+
+	The previous ball was organised largely through Facebook. The Ball Committee members were all administrators of the page and published updates to attendees on this platform. Students attending the ball were advised to subscribe to the facebook page. The Commitee found that not all students were on Facebook. This caused a need for the information to be relayed through other mediums such as email or SMS, inducing an effect not dissimilar to chinese whispers as information was not always relayed as intended. In effect this created more work for the Ball Comittee and meant there wasn't a single source of information.
+
+	I asked the Committee if they could instead relay all their information by email rather than facebook. They said most students do not reguarly check their school email address, and it is harder to reply to a large volume of questions using this format. I then asked if the school newsletter would be a possible solution. However not all Teachers read out the information, and students don't tend to seek it out on their own.
+
+	To better understand the issue, I surveyed students who were not on Facebook. Of the 74\% that responded to my survey, I found that a large proportion were worried about the privacy implications following the recent Facebook data scandal. I then asked this group what their preferred social media platform was, of which I got a large range of different apps.
 
 	\section{Specifications}
-	The main requirements of this project are:
+	After the initial consultation and some research, the main specifications of this project are:
 	\begin{itemize}
-		\item Users can create events.
-		\item Users can subscribe to other events.
-		\item Notifications and updates should be presented in real time.
-		\item Updates to events should support rich content.
-		\item There should be multiple notification methods which the user can choose from.
-		\item Users can ask questions about the event
-		\item The app must be as easy to use on a phone as on a desktop.
+		\item Organisers can send out rich content updates that \textbf{all} users can subscribe to.
+		\item Users will be able to easily find events that matter to them
+		\item Notifications and updates will be presented in real time.
+		\item It must be aesthetically pleasing and appealing to the target audience.
+		\item Users will be able to ask questions about the event.
+		\item The app must be accessible by everyone.
 	\end{itemize}
 	On top of these requirements, the service should also be secure, private and easy to use.
 
-	\section{Key Stakeholders}
-	My key stakeholders are the initial group of students, who approached me after planning a ball. However, my app will also cater to a much larger demographic of students and similarly aged members of the public.
+	The Ball Committee have requested that this application be completed by the end of 2018 so it can assist next years Committee.
 
-	I will be primarily discussing my changes with the inital group, but I will also be seeking feedback from fellow students. This will enable my app to cater to a wider audience.
+	\section{Key Stakeholders}
+	My key stakeholders are the Ball Committee and those attending ball. My project is all about effective communication between these two parties so I need to consider their needs and feedback throughout the development process. I haved arranged to meet with various Ball Committee members during development to discuss progress and future features being considered. I have decided to meet with different Committee members individually during this time, to get a better range of ideas.
+
+	I will also be consulting fellow students about design and features to ensure that it is easy for them to use. I need to ensure I get a wide range of students in order to recieve feedback that is reflective of the intended audience.
+
+	While the Ball Committee and attendees are my key stakeholders, I am also aware that this project has the potential to cater to a much larger demographic. During the development of this project, I will also consider how it could be used in other events, such as community events and concerts.
 
 	\section{Concept Statement}
-	My stakeholders, who recently organised a school ball, have voiced concerns about the difficulty it takes to organise events with a high number of attendees. A website event management system would help to ease the burden of coordinating large groups of attendees. While this would be developed with the stakeholders in mind, it would also be beneficial for other organisations planning events.
+	My stakeholders, who recently organised a school ball, have voiced concerns about the difficulty it takes to organise events with a high number of attendees. A website event management system would help to ease the burden of effective communication to large groups of attendees. While this would be developed with the stakeholders in mind, it would also be beneficial for other large events.
+
+	The main problem I will be solving is a unified way to communicate between organisers and a large amount of attendees. Key to this, is to ensure that \textbf{all} attendees recieve up to date reliable information in a timely and consistent manner.
 
 	\section{Existing Solutions}
-	Event management is a fairly common task, so there are a multitude of solutions that I must evaluate. This will help me to determine what works and what doesn't, and give me insight on what to implement in my app.
+	Event management is a fairly common task so there are a multitude of solutions that I must evaluate. This will help me to determine the strengths and weaknesses of each and give me insight on what to implement in my app.
 
 	\subsection{Facebook Events}
 
 	\subsection{Eventbrite}
 	Eventbrite is another very popular event management system, that lets users view nearby events.
-	It supports buying tickets, as well as settings to make the event private or public. The UI is very nice and clean, and I found it very easy to navigate and create an event.
+	It supports buying tickets, as well as settings to make the event private or public. The UI is a modern and clean design, and I found it very easy to navigate and create an event.
 
 	\begin{figure}[H]
 		\caption{Eventbrite Homepage}
@@ -180,10 +198,21 @@ tabsize=2
 	\chapter{Research}
 
 	\section{Language}
-	The most important question to begin developing this application is: what language to use. Since the programming language I use for the back end will drive the whole application, it is important to choose the correct language. Most languages support web development as it is a common task, therefore I will select a few of the more popular languages.
+	Each programming language has its own strengths and weaknesses. Since the programming language I use for the back end will drive the whole application, it is important to choose a language that will suit a web application. For a language to suit this project it must have a few features:
+
+	\begin{itemize}
+		\item It must be able to be concurrent and able to respond to requests simultaneously due to the large volume of users expected to use this site.
+		\item It must be quick to develop in given the time constraint.
+		\item It must easily and efficently interface with popular relational databases
+	\end{itemize}
+
+	I have decided to evaluate the following languages, which I have experience in: Javascript, PHP, Python and C\#.
 
 	\subsection{Javascript}
-	Javascript is a relatively new language for programming the back-end, it has historically been used to write code on the front-end. In recent years it has taken off and become popular due to website designers only needing to learn one language in order to build an application. The maturity of this language as a back-end is concerning, as it may not be as heavily vetted as alternatives. There are also other quirks of the language that put me off, such as strange type coercion (1 == “1”) and implicit global variables.
+	Javascript is a dynamic, duck typed language. It has been the de facto language for front-end programming since the inception of the web. Recently it has also become a popular back-end language with the advent of nodejs. This gives developers the significant advantage of only having to learn and write programs in one language both client-side and server-side.
+
+
+	Javascript is a relatively new language for programming the back-end, it has historically been used to write code on the front-end. In recent years it has taken off and become popular due to website designers only needing to learn one language in order to build an application. The maturity of this language as a back-end is concerning, as it may not be as heavily vetted as alternatives. There are also other quirks of the language that put me off, such as strange type coercion (1 == “1”) and implicit global variables. I have a lot of experience using this language on the front-end but very little on the back-end.
 
 	\subsection{PHP}
 	PHP is the most widely used language for web development in the world, with over 80\% of websites using it. This language does not have the problem of maturity, having been around for 24 years. The problem with PHP is it’s unpredictable and inconsistent. In PHP: NULL < -1 yet NULL == 0. This is not a one off case. The whole language is riddled with strange design decisions and many ways to do a single thing, each with different naming schemes. On top of all this, the language encourages bad website design and makes you go out of your way to create secure apps.
@@ -393,7 +422,7 @@ tabsize=2
 	Push notifications were by far, one of the trickier features to implement. It starts off with a service worker, which must be registered in the global scope. In development, I simply set a url “/service-worker” to return the file, but in production this will be served by the web server (e.g. nginx). The user is then prompted to allow notifications. Once my app has been given permission, it will be handed some cryptographic keys and an endpoint. These are then registered in my database through an asynchronous call. I initially set the user as the primary key, however, this quickly caused errors as each endpoint is specific to a device. This meant that users would only be able to have one device receiving push notifications. I then changed the primary key to a new id column. This lead to new problems where an endpoint would be registered twice if a user subscribed, unsubscribed, and subscribed again. This caused each user to receive multiple push notifications for each event. I then attempted to solve this with a composite primary key of the endpoint and user id. This did not cause problems but on later review of the code I removed the primary key on the user id. The primary key on the user was unnecessary as each user is assigned a unique endpoint by their browser.
 
 	\begin{center}
-		\begin{figure}
+		\begin{figure}[H]
 			\caption{Standard Push Notification Workflow}
 			\begin{tikzpicture}[node distance=2cm,auto,>=stealth]
 
@@ -447,6 +476,11 @@ tabsize=2
 		For example, the markdown: \verb+* * * * * * A+ expands to \(131\) characters when converted to html. By using this technique, a \(299\) character long string can be expanded to \(> 3000\) characters.
 	\end{framed}
 
+	\lstset{language=html}
+	Another problem of markdown is when it generates the HTML, it does so without context of the page it will be presented in. This means that it can (and will) generate a \lstinline|<h1>| tag in the middle of the page. This causes issues with displaying content. Luckily the markdown processor I use supports extensions, and it was a trivial matter to find an extension which increases the header depth.
+
+	I also expanded markdown into event descriptions, to allow more control over the information presented to potential participants. This required me to change the description column from  \textit{VARCHAR(500)} to \textit{TEXT}, to avoid the problem listed above.
+
 
 	\subsection{Image Messages}
 	I ran into a problem when implementing sending images as messages. Traditionally images and files cannot be uploaded asynchronously, due to security risks with javascript reading local files. However, in 2008 a proposal was created for \textit{XMLHttpRequest Level 2}. This specification is an improvement on the initial \textit{XMLHttpRequest}, and allows (among many things) asynchronous file uploading. There is enough support for this standard to use it without worrying about polyfills.
@@ -467,8 +501,9 @@ tabsize=2
 
 	\subsection{Image Processing}
 	When a user uploads an image, I want to make sure that the Image is the most compressed, both to save space and bandwidth.
-	A simple and effective first step is to limit the maximum size of the image. However if this is set too low, then the user might not be able to upload their images, and too high and it won't be effective. To fully optimise my bandwith and space I need to ensure that the images are compressed. To compress the image, I used JPEG compression set at 75\% quality and set the optimise flag, which does an extra pass through the image. This provided a much smaller file size with little decrease in visual fidelity. Too ensure that this doesn't caused a large delay in the request, I decided to measure the time it took to process the image. To measure this, I used the following code, with a large (1 MB) PNG image:
+	A simple and effective first step is to limit the maximum size of the image. However if this is set too low, then the user might not be able to upload their images, and too high and it won't be effective. To fully optimise my bandwith and space I need to ensure that the images are compressed. To compress the image, I used JPEG compression set at 75\% quality and set the optimise flag, which does an extra pass through the image. This provided a much smaller file size with little decrease in visual fidelity. Too ensure that this doesn't caused a large delay in the request, I decided to measure the time it took to process the image. To measure this, I used the following code, with a large (\SI{1}{\mega\byte}) PNG image:
 
+	\lstset{language=python}
 	\begin{lstlisting}
 		import time
 
@@ -483,8 +518,25 @@ tabsize=2
 		print(time.clock() - start)
 	\end{lstlisting}
 
-	After running this code many times, I found that it takes around \(\frac{1}{20}\) a second to fully process the image. This is an acceptable timeframe, and will be percieved as instantaneous. As it doesn't take up much time or resources, I was able to process the image directly in the request context.
+	After running this code many times, I found that it takes around \SI{50}{\milli\second} to fully process the image. This is an acceptable timeframe, and will be percieved as instantaneous. As it doesn't take up much time or resources, I was able to process the image directly in the request context.
 
+	\subsection{Generating Random Events}
+	In order to test my website, I needed a number of events. For most of the developmental period I did this by hand, with 2 or 3 hardcoded events. This was fine but eventually I needed to scale up the ammount of events so it was more reflective of its intended use. To do this I wrote a simple factory which creates events in the database using random data. I then refactored the \textit{populate} command to create as many events as neccesary. This worked well but gave me very random names that were just random words glued together. To create more meaningful names I decided to use a simple Markov chain.
+
+	A Markov chain is essentially a list of states with a probability of moving to another state. This gives a cheap way to mimic artificial intelligence. It is often used for the predictive text function in phone keyboards. In this usecase, it tells us if we have the letter \textbf{A} then the most probable next letter based on our data. We then randomly select a letter using the weights given by the chain. The process then repeats using the new letter. It can be made to work better by changing the number of letters used for the state.
+
+	To get the data needed to find probablities, I used selenium to scrape over 1000 event names (almost 45000 characters). I then generated a markov chain (of order 2) and saved the state to a json file. This gave m
+
+	\subsection{SQLAlchemy Queue Pool Overflow}
+	While this isn't so much an error or a problem in my design, I thought it needed mentioning. One of the most common errors that was raised during the development of my app was:
+	\begin{framed}
+		\lstinline|sqlalchemy.exc.TimeoutError: QueuePool limit of size 10 overflow 10 reached|
+	\end{framed}
+	This is due to the nature of both flask and SQLAlchemy. Behind the scenes, SQLAlchemy creates a pool of connections. This is because it is inefficent to create and maintain a new connection whenever a new user connects. With large web apps this could easily lead to holding millions of database connections simultaneously. Instead a specific number of connections are created, these are reused by different users. If there are no connections ready in the pool, a new one will be created. If too many connections are held and a new one is requested, it will eventually timeout, giving this error.
+
+	Attempting to replicate this behaviour when testing in a production environment was unsuccessful. As it turns out, this is because it is an issue only in a debugging environment. When flask is in debug mode, it keeps a live debugger open which keeps the connections busy. This means they cannot be recycled, and will be held open. This causes an overflow when the pool eventually tries to open more connections than allowed.
+
+	The only real solution to this, is to raise the connection limit. This helps but merely delays the inevitable.
 
 	\section{Front-End}
 	Designing the front end was a lot more challenging to get right, as the user interface needed to feel friendly and simple, yet be able to be flexible. I started off with drawing up a mock of the home page eith my client, so that I could get a feel for the theme.
