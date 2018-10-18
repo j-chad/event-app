@@ -14,15 +14,15 @@ sse = ServerSentEventsBlueprint('sse', __name__)
 
 @sse.before_request
 def check_access():
-    if not flask_login.current_user.is_authenticated:
+    if not is_authorised(request.args['channel']):
         abort(403)
-    else:
-        if get_channel() != request.args["channel"]:
-            abort(403)
-        print("Authenticated")
 
 
 sse.add_url_rule(rule="", endpoint="stream", view_func=sse.stream)
+
+
+def is_authorised(requested_channel: str, user: Optional[models.User] = None) -> bool:
+    return flask_login.current_user.is_authenticated and get_channel(user) == requested_channel
 
 
 def get_channel(user: Optional[models.User] = None):

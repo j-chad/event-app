@@ -2,14 +2,71 @@
 
 {% block title %}Vent | {{ event.name }}{% endblock %}
 
+{% macro render_message(message) %}
+    <div class="message-card card">
+        <div class="header">
+            {% if message.data.get('title') != None %}
+                <h3 class="title">{{ message.data['title'] }}</h3>
+            {% else %}
+                <h3 class="title">Untitled</h3>
+            {% endif %}
+            <div class="controls">
+                <img class="control collapse" src="{{ url_for('static', filename='img/events/collapse.svg') }}" alt="">
+                {% if owner %}<img data-id="{{ message.id }}" class="control remove"
+                                   src="{{ url_for('static', filename='img/events/remove.svg') }}" alt="">{% endif %}
+            </div>
+            <time>{{ message.timestamp | humanize }}</time>
+        </div>
+        <div class="content">
+            {{ message.render() }}
+        </div>
+    </div>
+{% endmacro %}
+
 {% block stylesheets %}
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/events/event_detail.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
+          integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+          crossorigin=""/>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"
+            integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
+            crossorigin=""></script>
     <script>
+        var map;
+        var marker;
+        $(document).ready(function () {
+            $('.control.collapse').click(function (e) {
+                var target = e.target;
+                var content = $(target.parentNode.parentNode.nextElementSibling);
+                console.log(target, content);
+                if (target.classList.contains("active")) {
+                    target.classList.remove("active");
+                    content.show();
+                } else {
+                    target.classList.add("active");
+                    content.hide();
+                }
+            });
+
+            //Map
+            map = L.map('map');
+            map.setView([{{ event.latitude }}, {{ event.longitude }}], 11);
+            L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a></div>',
+                maxZoom: 14,
+                minZoom: 11,
+                id: 'mapbox.streets',
+                accessToken: "{{ config['MAPBOX_ACCESS_TOKEN'] }}"
+            }).addTo(map);
+
+            marker = L.marker([{{ event.latitude }}, {{ event.longitude }}]).bindPopup("{{ event.name }}").addTo(map);
+        });
+
         {% if owner %}
             function changeMessageType(node) {
                 if (node.value === "{{ message_types.TEXT.value }}") {
@@ -22,9 +79,23 @@
             }
 
             $(document).ready(function () {
+                $('.control.remove').click(function (e) {
+                    var id = e.target.dataset.id;
+                    if (confirm("Are you sure you want to delete this message?")) {
+                        $.ajax({
+                            type: "POST",
+                            url: "{{ url_for('ajax.event_remove_message') }}",
+                            data: 'id=' + id,
+                            success: function () {
+                                toastr['success']("Message Removed");
+                                e.target.parentNode.parentNode.parentNode.parentNode.removeChild(e.target.parentNode.parentNode.parentNode)
+                            }
+                        });
+                    }
+                });
                 $('#message-form').submit(function (e) {
                     var form = $('#message-form');
-                    var elements = ["#event-token", "#type-select"];
+                    var elements = ["#event-token", "#type-select", "#message-title"];
                     var type = $('#type-select').val();
 
                     if (type === '{{ message_types.TEXT.value }}') {
@@ -67,13 +138,31 @@
 
                     e.preventDefault();
                 });
+
+                $('.unanswered-question form').submit(function (e) {
+                    var form = $(this);
+
+                    $.ajax({
+                        type: "POST",
+                        url: form.attr('action'),
+                        data: form.serialize(),
+                        success: function () {
+                            $('#question-form > input[type=\'text\']').val("");
+                            toastr['success']("Question Answered!");
+                            form.parent().remove();
+                            var pendingNumber = $('#pending-number');
+                            if (pendingNumber.length === 1) {
+                                pendingNumber.text(Number(pendingNumber.text()) - 1);
+                            }
+                        }
+                    }).fail(function () {
+                        toastr['error']("Something Went Wrong - Try Again Later");
+                    });
+
+                    e.preventDefault();
+                });
             });
         {% else %}
-            const subscribeOptions = {
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array('{{ config.WEB_PUSH_PUBLIC_KEY }}')
-            };
-
             function toggleSubscription() {
                 $.post('{{ url_for('ajax.update_subscription') }}',
                     {token: "{{ event.url_id }}"},
@@ -109,8 +198,15 @@
                         url: form.attr('action'),
                         data: form.serialize(),
                         success: function () {
-                            window.location.reload();
+                            $('#question-form > input[type=\'text\']').val("");
+                            toastr['success']("Question Submitted!");
+                            var pendingNumber = $('#pending-number');
+                            if (pendingNumber.length === 1) {
+                                pendingNumber.text(Number(pendingNumber.text()) + 1);
+                            }
                         }
+                    }).fail(function () {
+                        toastr['error']("Something Went Wrong - Try Again Later");
                     });
 
                     e.preventDefault();
@@ -138,79 +234,108 @@
 {% block content %}
     <div class="container">
         <div class="details">
-            <div class="event-title">
-                <h1>{{ event.name }}</h1>
-                {% if not owner %}
-                    <button type="button" onclick="toggleSubscription();">{% if subscribed %}Unsubscribe{% else %}
-                        Subscribe{% endif %}</button>
-                    <button type="button">View On Map</button>
-                    {% if answered_questions == 1 %}
-                        <a href="{{ url_for('events.questions', token=event.url_id) }}">
-                            <button type="button">{{ answered_questions }} Question</button>
-                        </a>
-                    {% elif answered_questions > 1 %}
-                        <a href="{{ url_for('events.questions', token=event.url_id) }}">
-                            <button type="button">{{ answered_questions }} Questions</button>
-                        </a>
+            <h1>{{ event.name }}</h1>
+            <time>{{ event.start.strftime('%-d %B %-I:%M %p') }}</time>
+        </div>
+        <div class="main">
+            <div class="left">
+                <div class="block description">
+                    {{ event.description }}
+                </div>
+                <div class="block messages">
+                    <h2 class="header">Messages</h2>
+                    {% if messages|length == 0 %}
+                        <div class="no-messages">Updates and News will be shown here!</div>
+                    {% else %}
+                        {% for message in messages %}
+                            {{ render_message(message) }}
+                        {% endfor %}
                     {% endif %}
+                </div>
+                {% if answered_questions|length > 0 or unanswered_question_count > 0 or owner %}
+                    <div class="block questions">
+                        <h2 class="header">Questions</h2>
+                        <h4 class="pending"><strong id="pending-number">{{ unanswered_question_count }}</strong> Pending
+                            Question{{ 's' if unanswered_question_count != 1 }}</h4>
+                        {% if owner and unanswered_question_count > 0 %}
+                            <div class="unanswered">
+                                {% for question in unanswered_questions %}
+                                    <div class="unanswered-question">
+                                        <h3>{{ question.text|capitalize }}</h3>
+                                        <form action="{{ url_for('ajax.event_add_answer') }}" , method="POST">
+                                            <input type="hidden" name="question" value="{{ question.id }}">
+                                            {# TODO: Obfustucate ID #}
+                                            <input name="reply" type="text" placeholder="Answer">
+                                            <label>
+                                                Private <input name="private" type="checkbox">
+                                            </label>
+                                            <input type="submit" value="Submit">
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        {% if answered_questions|length != 0 %}
+                            {% for question in answered_questions %}
+                                <div class="question-answer">
+                                    <div class="question-section">
+                                        {%- if question.answer.private -%}
+                                            <img class="q-prefix"
+                                                 src="{{ url_for('static', filename='img/events/private.svg') }}"
+                                                 title="Private" alt="Private Question">
+                                        {%- else -%}
+                                            <img class="q-prefix"
+                                                 src="{{ url_for('static', filename='img/events/Q&A.svg') }}"
+                                                 title="Public" alt="Public Question">
+                                        {%- endif -%}
+                                        <h3 class="text">{{ question.text|capitalize }}</h3>
+                                    </div>
+                                    <div class="answer-section">
+                                        <span>{{ question.answer.text }}</span>
+                                        <time>{{ question.answer.timestamp | humanize }}</time>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if owner %}
+                    <div class="block add-message">
+                        <h2 class="header">Add Message</h2>
+                        <form id="message-form" action="{{ url_for('ajax.event_add_message') }}" method="POST">
+                            <input id="event-token" type="hidden" name="token" value="{{ event.url_id }}">
+                            <select id="type-select" name="type" onchange="changeMessageType(this);">
+                                <option value="{{ message_types.TEXT.value }}">Text</option>
+                                <option value="{{ message_types.IMAGE.value }}">Image</option>
+                            </select>
+                            <input type="text" id="message-title" name="title" placeholder="Title (Optional)">
+                            <textarea name="message" id="message-text"></textarea>
+                            <input style="display: none;" name="image" type="file" id="image-input"
+                                   accept="image/jpeg,image/png">
+                            <input type="submit" value="Add Message">
+                        </form>
+                    </div>
                 {% else %}
-                    {% if unanswered_questions == 1 %}
-                        <a href="{{ url_for('events.questions', token=event.url_id) }}">
-                            <button type="button">{{ unanswered_questions }} Question</button>
-                        </a>
-                    {% elif unanswered_questions > 1 %}
-                        <a href="{{ url_for('events.questions', token=event.url_id) }}">
-                            <button type="button">{{ unanswered_questions }} Questions</button>
-                        </a>
-                    {% endif %}
+                    <div class="block add-question">
+                        <h2 class="header">Ask A Question</h2>
+                        <form id="question-form" action="{{ url_for('ajax.event_add_question') }}" method="POST">
+                            <input id="event-token" type="hidden" name="token" value="{{ event.url_id }}">
+                            <input type="text" name="message" placeholder="Ask a Question">
+                            <input type="submit" value="Submit">
+                        </form>
+                    </div>
                 {% endif %}
             </div>
-            <p>{{ event.description }}</p>
-            {# Q&A #}
+            <div class="right">
+                <div class="controls">
+                    {% if owner %}
+                        <button type="button">{{ "Unsubscribe" if current_user.subscribed(event) else "Subscribe" }}</button>{% endif %}
+                    <a class="button" target="_blank"
+                       href="https://www.google.com/maps/search/?api=1&query={{ event.latitude }}%2C{{ event.longitude }}">View
+                        On Map</a>
+                </div>
+                <div id="map"></div>
+            </div>
         </div>
     </div>
-    <hr>
-    <div class="messages container">
-        {% if messages|length == 0 and not owner %}
-            {% if not subscribed %}
-                <h2 class="no-messages">There are no messages, <span>subscribe</span> to stay updated!</h2>
-            {% else %}
-                <h2 class="no-messages">Keep tuned for updates here!</h2>
-            {% endif %}
-        {% else %}
-            {% for message in messages %}
-                {% if loop.first or (message.timestamp - loop.previtem.timestamp) >= config['MESSAGE_BREAK_AFTER_DELTA'] %}
-                    <span class="timestamp">{{ message.timestamp.strftime('%d %B %Y') }}</span><br>
-                {% endif %}
-                {{ message.render(class_=["msg"]) | safe }}
-                <br>
-            {% endfor %}
-        {% endif %}
-    </div>
-    <hr>
-    {% if owner %}
-        <div class="add-message">
-            <form id="message-form" action="{{ url_for('ajax.event_add_message') }}" method="POST">
-                <h3>Add Message</h3>
-                <input id="event-token" type="hidden" name="token" value="{{ event.url_id }}">
-                <label for="type-select">Type</label>
-                <select name="type" id="type-select" onchange="changeMessageType(this);" autocomplete="off">
-                    <option selected value="{{ message_types.TEXT.value }}">Text</option>
-                    <option value="{{ message_types.IMAGE.value }}">Image</option>
-                </select>
-                <textarea id="message-text" name="message"></textarea>
-                <input style="display: none;" name="image" type="file" id="image-input" accept="image/jpeg,image/png">
-                <input type="submit" value="Add Message">
-            </form>
-        </div>
-    {% else %}
-        <div class="add-question">
-            <form id="question-form" action="{{ url_for('ajax.event_add_question') }}" method="POST">
-                <h3>Ask a Question!</h3>
-                <input type="hidden" name="token" value="{{ event.url_id }}">
-                <textarea id="message-text" name="message" maxlength="100"></textarea>
-                <input type="submit" value="Add Question">
-            </form>
-        </div>
-    {% endif %}
 {% endblock %}

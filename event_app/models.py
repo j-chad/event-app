@@ -144,8 +144,8 @@ class Event(CommonMixin, Model):
     owner: User = relationship('User', backref='events')
     subscriptions: List["Subscription"] = relationship("Subscription", back_populates="event")
 
-    name: str = Column(db.String(60), nullable=False)
-    description: str = Column(db.String(500), nullable=True)
+    name: str = Column(db.String(100), nullable=False)
+    description: str = Column(db.Text, nullable=True)
     start: datetime = Column(db.DateTime, nullable=False, default=None)
     latitude: Decimal = Column(DECIMAL(precision=7, scale=5, unsigned=False), nullable=True)  # -90 < latitude < 90
     longitude: Decimal = Column(DECIMAL(precision=8, scale=5, unsigned=False), nullable=True)  # -180  < longitude < 180

@@ -4,7 +4,17 @@
     order=request.args.get('order', 'distance'),
     dist=request.args.get('dist', 'far')
 ) %}
-    {{ url_for("events.discover", order=order, dist=dist) }}
+    {% if order == None %}
+        {% set order=request.args.get("order", "distance") if current_user.location_enabled else request.args.get("order", "time") %}
+    {% endif %}
+    {% if dist == none %}
+        {% set order=request.args.get("dist", "far") %}
+    {% endif %}
+    {% if current_user.location_enabled %}
+        {{ url_for("events.discover", order=order, dist=dist) }}
+    {% else %}
+        {{ url_for("events.discover", order=order) }}
+    {% endif %}
 {% endmacro %}
 
 {% macro event_card(event) %}
@@ -84,7 +94,7 @@
             L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a></div>',
                 maxZoom: 14,
-                minZoom: 11,
+                minZoom: 1,
                 id: 'mapbox.streets',
                 accessToken: "{{ config['MAPBOX_ACCESS_TOKEN'] }}"
             }).addTo(map);
@@ -118,25 +128,31 @@
     <div class="container" id="event-container">
         <div class="controls">
             {% set dist=request.args.get("dist", "far") %}
-            {% set order=request.args.get("order", "distance") %}
+            {% set order=request.args.get("order", "distance") if current_user.location_enabled else request.args.get("order", "time") %}
             <div class="group">
                 <h5>Order By</h5>
                 <a class="button {{ 'selected' if order=="time" or order==None else '' }}"
                    href="{{ tokenise(order="time") }}">Time</a>
-                <a class="button {{ 'selected' if order=="distance" else '' }}"
-                   href="{{ tokenise(order="distance") }}">Distance</a>
+                {% if current_user.location_enabled %}
+                    <a class="button {{ 'selected' if order=="distance" else '' }}"
+                       href="{{ tokenise(order="distance") }}">Distance</a>
+                {% endif %}
                 <a class="button {{ 'selected' if order=="name" else '' }}"
                    href="{{ tokenise(order="name") }}">Name</a>
             </div>
-            <div class="group">
-                <h5>Distance</h5>
-                <a class="button {{ 'selected' if dist=="nearby" else '' }}"
-                   href="{{ tokenise(dist="nearby") }}">Nearby</a>
-                <a class="button {{ 'selected' if dist=="medium" else '' }}"
-                   href="{{ tokenise(dist="medium") }}">Medium</a>
-                <a class="button {{ 'selected' if dist=="far" or dist==None else '' }}"
-                   href="{{ tokenise(dist="far") }}">Far</a>
-            </div>
+            {% if current_user.location_enabled %}
+                <div class="group">
+                    <h5>Distance</h5>
+                    <a class="button {{ 'selected' if dist=="nearby" else '' }}"
+                       href="{{ tokenise(dist="nearby") }}">Nearby</a>
+                    <a class="button {{ 'selected' if dist=="medium" else '' }}"
+                       href="{{ tokenise(dist="medium") }}">Medium</a>
+                    <a class="button {{ 'selected' if dist=="far" or dist==None else '' }}"
+                       href="{{ tokenise(dist="far") }}">Far</a>
+                    <a class="button {{ 'selected' if dist=="all" else '' }}"
+                       href="{{ tokenise(dist="all") }}">All</a>
+                </div>
+            {% endif %}
         </div>
         <div class="events">
             {% if events|length > 0 %}

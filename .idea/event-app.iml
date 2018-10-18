@@ -17,6 +17,7 @@
     <orderEntry type="library" name="material-datetime-picker" level="application" />
     <orderEntry type="library" name="draggabilly.pkgd" level="application" />
     <orderEntry type="library" name="jquery.modal" level="application" />
+    <orderEntry type="library" name="jquery.sticky" level="application" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_FOLDERS">

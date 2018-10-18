@@ -6,7 +6,7 @@ from flask_login import current_user, login_required
 from sqlalchemy import or_
 
 from event_app.models import MessageTypes
-from .. import forms, models
+from .. import forms, models, utils
 from ..extensions import db
 
 events = flask.Blueprint('events', __name__)
@@ -16,22 +16,24 @@ events = flask.Blueprint('events', __name__)
 @events.route('/discover')
 @login_required
 def discover() -> flask.Response:
-    _distance_query = \
-        models.Event.distance_from(current_user.latitude, current_user.longitude) \
-            if current_user.location_enabled else None  # Reference to allow dictionary use
+    if current_user.location_enabled:
+        _distance_query = models.Event.distance_from(current_user.latitude, current_user.longitude)
+    else:
+        _distance_query = None  # Reference to allow dictionary use
 
     # Order
-    order_preference = [_distance_query, models.Event.start, models.Event.name]
+    order_preference = [_distance_query, "start", "name"]
     order_by_string = flask.request.args.get('order')
     if order_by_string is not None:
         if order_by_string == "time":
-            order = models.Event.start
+            order = "start"
         elif order_by_string == "name":
-            order = models.Event.name
+            order = "name"
         elif order_by_string == "distance" and current_user.location_enabled:
             order = _distance_query
         else:
             return flask.abort(400)
+
         # Prioritise selected order
         order_preference.remove(order)
         order_preference.insert(0, order)
@@ -46,13 +48,20 @@ def discover() -> flask.Response:
         max_distance = flask.current_app.config['DEFAULT_EVENT_MEDIUM_DISTANCE']
     elif distance_param == "nearby":
         max_distance = flask.current_app.config['DEFAULT_EVENT_NEARBY_DISTANCE']
+    elif distance_param == "all":
+        max_distance = None
     else:
         return flask.abort(400)
 
-    events_ = models.Event.query.filter(
-            models.Event.distance_from(current_user.latitude, current_user.longitude) <= max_distance,
-            models.Event.private == False
-    ).order_by(*order_preference).all()
+    if current_user.location_enabled and max_distance is not None:
+        events_ = models.Event.query.filter(
+                models.Event.distance_from(current_user.latitude, current_user.longitude) <= max_distance,
+                models.Event.private == False
+        ).order_by(*order_preference).all()
+    else:
+        events_ = models.Event.query.filter(
+                models.Event.private == False
+        ).order_by(*order_preference).all()
 
     return flask.render_template("events/discover.jinja", events=events_)
 
@@ -62,10 +71,21 @@ def discover() -> flask.Response:
 def create_event() -> flask.Response:
     form = forms.CreateEventForm()
     if form.validate_on_submit():
+
+        description = form.description.data
+        if description is not None:
+            if len(description.strip()) == 0:
+                description = None
+            else:
+                description = utils.markdownify(description)
+
         new_event = models.Event(owner=current_user,
                                  name=form.name.data,
-                                 description=form.description.data,
-                                 private=form.private.data)
+                                 description=description,
+                                 private=form.private.data,
+                                 start=form.start.data,
+                                 latitude=form.latitude.data,
+                                 longitude=form.longitude.data)
         db.session.add(new_event)
         db.session.commit()
         return flask.redirect("/event/{}".format(new_event.url_id))
@@ -87,7 +107,7 @@ def view_event(token):
 
     owner: bool = event in current_user.events
     messages: List[models.EventMessage] = models.EventMessage.query.filter_by(event=event).order_by(
-            models.EventMessage.timestamp).all()
+            models.EventMessage.timestamp.desc()).all()
     # noinspection PyComparisonWithNone
     answered_questions: List[models.Question] = models.Question.query.filter(
             models.Question.event == event,
@@ -96,18 +116,36 @@ def view_event(token):
                     models.Question.answer.has(private=False),
                     models.Question.questioner == current_user
             )
-    ).order_by(models.Question.timestamp.desc()).count()
-    unanswered_questions = models.Question.query.filter_by(event=event, answer=None).count()
+    ).order_by(models.Question.timestamp.desc()).all()
 
-    return flask.render_template("events/event_detail.jinja",
-                                 event=event,
-                                 subscribed=subscribed,
-                                 owner=owner,
-                                 user=current_user,
-                                 messages=messages,
-                                 message_types=MessageTypes,
-                                 unanswered_questions=unanswered_questions,
-                                 answered_questions=answered_questions)
+    base_kwargs = {
+        "event": event,
+        "user": current_user,
+        "messages": messages,
+    }
+
+    if owner:
+
+        unanswered_questions = models.Question.query.filter_by(event=event, answer=None).all()
+        unanswered_question_count = len(unanswered_questions)
+
+        return flask.render_template("events/event_detail.jinja",
+                                     **base_kwargs,
+                                     owner=True,
+                                     message_types=MessageTypes,
+                                     unanswered_question_count=unanswered_question_count,
+                                     unanswered_questions=unanswered_questions,
+                                     answered_questions=answered_questions)
+    else:
+        unanswered_question_count = models.Question.query.filter_by(event=event, answer=None,
+                                                                    questioner=current_user).count()
+
+        return flask.render_template("events/event_detail.jinja",
+                                     **base_kwargs,
+                                     subscribed=subscribed,
+                                     owner=False,
+                                     unanswered_question_count=unanswered_question_count,
+                                     answered_questions=answered_questions)
 
 
 @events.route('/event/<token>/questions')

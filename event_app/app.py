@@ -62,6 +62,7 @@ def register_blueprints(app: flask.app.Flask) -> None:
 def register_commands(app: flask.app.Flask) -> None:
     app.cli.add_command(commands.build_database)
     app.cli.add_command(commands.populate_database)
+    app.cli.add_command(commands.generate_markov)
 
 
 def register_shellcontext(app: flask.app.Flask) -> None:
@@ -75,7 +76,8 @@ def register_shellcontext(app: flask.app.Flask) -> None:
             'tasks': tasks,
             'mail': extensions.mail,
             'utils': utils,
-            'forms': forms
+            'forms': forms,
+            'views': views
         }
 
     app.shell_context_processor(shell_context)

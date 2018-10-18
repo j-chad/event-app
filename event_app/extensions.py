@@ -2,6 +2,7 @@
 import bleach
 import flask_login
 import flask_mail
+import markovify
 from flask_bcrypt import Bcrypt
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_humanize import Humanize
@@ -55,3 +56,13 @@ cleaner = bleach.sanitizer.Cleaner(
             'p'
         ]
 )
+
+
+class EventNameMarkov(markovify.NewlineText):
+    def __init__(self, input_text, state_size=1, *args, **kwargs):
+        super().__init__(input_text, state_size, *args, **kwargs)
+
+    def test_sentence_output(self, words, max_overlap_ratio, max_overlap_total) -> bool:
+        """Add a length limit"""
+        return super().test_sentence_output(words, max_overlap_ratio, max_overlap_total) and len(
+            self.word_join(words)) <= 50

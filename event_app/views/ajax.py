@@ -89,10 +89,16 @@ def event_add_message():
     # noinspection PyUnboundLocalVariable
     if type_ is MessageTypes.TEXT:
         title: Optional[str] = flask.request.form.get('title', None)
+        message: str = flask.request.form['message']
+
         if title is not None:
             title = title.strip()
             if len(title) == 0:
                 title = None
+
+        if len(message.strip()) == 0:
+            flask.abort(400)
+
         data = {
             "title": title,
             "message": utils.markdownify(flask.request.form['message'])
@@ -117,6 +123,27 @@ def event_add_message():
     return "Ok", 201
 
 
+@ajax.route('/event/remove_message', methods=("POST",))
+@login_required
+def event_remove_message():
+    id: str = flask.request.form['id']
+    try:
+        int_id = int(id)
+    except ValueError:
+        flask.abort(400)
+
+    message: models.EventMessage = models.EventMessage.query.get(int_id)
+    if message is None:
+        flask.abort(400)  # If not valid message id
+    else:
+        if message.event.owner != flask_login.current_user:
+            flask.abort(403)
+
+    db.session.delete(message)
+    db.session.commit()
+    return '', 204
+
+
 @ajax.route('/event/add_question', methods=("POST",))
 @login_required
 def event_add_question():
@@ -128,7 +155,7 @@ def event_add_question():
         if event.owner == flask_login.current_user:
             flask.abort(400)
 
-    question = models.Question(event=event, text=utils.markdownify(flask.request.form['message']),
+    question = models.Question(event=event, text=flask.request.form['message'],
                                questioner=current_user)
     db.session.add(question)
     db.session.commit()
@@ -153,7 +180,7 @@ def event_add_answer():
     if flask_login.current_user != question.event.owner:
         flask.abort(403)
 
-    answer = models.Answer(question=question, text=utils.markdownify(reply), private=private)
+    answer = models.Answer(question=question, text=reply, private=private)
     db.session.add(answer)
     db.session.commit()
 

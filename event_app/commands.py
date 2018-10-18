@@ -1,74 +1,75 @@
 # coding=utf-8
+import os
+import random
 
 import click
 import faker
+from flask.cli import with_appcontext
 
-from . import app, configs, extensions, models
+from . import extensions, models, utils
 
 fake = faker.Faker()
 
 
 @click.command()
-@click.argument('config', default="DevelopmentConfig")
-def build_database(config: str) -> None:
+@with_appcontext
+def build_database() -> None:
     """Builds the database."""
-    config_obj = configs.config_map.get(config)
-    if config_obj is not None:
-        with app.create_app(config_obj).app_context():
-            extensions.db.session.commit()
-            extensions.db.drop_all()
-            click.echo("Dropped All Tables")
-            extensions.db.create_all()
-            click.echo("Created All Tables")
-    else:
-        raise ValueError("Invalid Config: {}\n\nShould be one of:\n{}".format(
-                config, "\n\t".join(configs.config_map.keys())
-        ))
+    extensions.db.session.commit()
+    extensions.db.drop_all()
+    click.secho("Dropped All Tables", fg="red", bold=True)
+    extensions.db.create_all()
+    click.secho("Created All Tables", fg="green", bold=True)
 
 
 @click.command()
-@click.argument('config', default="DevelopmentConfig")
-def populate_database(config: str) -> None:
+@with_appcontext
+@click.option('--users', default=10, help="Number of Users to generate", type=click.IntRange(0, 50))
+@click.option('--events', default=50, help="Number of Events to generate", type=click.IntRange(0, 100))
+@click.option('--markov', default='event_name_model.json', help="State file for event naming markov chain")
+@click.option('--rebuild/--no-rebuild', default=True)
+@click.pass_context
+def populate_database(ctx: click.Context, users: int, events: int, rebuild: bool, markov: str) -> None:
     """Adds some data to the database."""
-    config_obj = configs.config_map.get(config)
-    with app.create_app(config_obj).app_context():
-        user_1 = models.User(email='chadfield.jackson@gmail.com',
-                             password='password',
-                             first_name=fake.first_name_male(),
-                             last_name=fake.last_name(),
-                             latitude=-36.859385,
-                             longitude=174.760502
-                             )
-        user_2 = models.User(email='a@example.com',
-                             password='password',
-                             first_name=fake.first_name_male(),
-                             last_name=fake.last_name()
-                             )
 
-        event_1 = models.Event(name="My Event",
-                               description="super fun",
-                               private=False,
-                               owner=user_1,
-                               latitude=-36.882674,
-                               longitude=174.753181,
-                               start=fake.future_datetime(end_date="+30d")
-                               )
-        event_2 = models.Event(name="Public Event",
-                               description="also super fun",
-                               private=False,
-                               owner=user_2,
-                               latitude=-36.853834,
-                               longitude=174.736358,
-                               start=fake.future_datetime(end_date="+30d")
-                               )
-        event_3 = models.Event(name="Private Event",
-                               description="super not fun",
-                               private=True,
-                               owner=user_2,
-                               latitude=-36.845867,
-                               longitude=174.771034,
-                               start=fake.future_datetime(end_date="+30d")
-                               )
+    if rebuild:
+        ctx.invoke(build_database)
 
-        extensions.db.session.add_all((user_1, user_2, event_1, event_2, event_3))
-        extensions.db.session.commit()
+    user_1 = models.User(email='chadfield.jackson@gmail.com',
+                         password='password',
+                         first_name=fake.first_name_male(),
+                         last_name=fake.last_name(),
+                         latitude=-36.859385,
+                         longitude=174.760502
+                         )
+    user_2 = models.User(email='a@example.com',
+                         password='password',
+                         first_name=fake.first_name_male(),
+                         last_name=fake.last_name()
+                         )
+
+    with click.progressbar(range(users + 2), label="Creating Users", length=users + 2) as bar:
+        user_list = [utils.user_factory() for _ in bar]
+    user_list += [user_1, user_2]
+    bar.update(len(user_list))
+    extensions.db.session.add_all(user_list)
+
+    with open(os.path.abspath(markov)) as fp:
+        state = fp.read()
+    model = extensions.EventNameMarkov.from_json(state)
+    click.secho('Loaded Markov Generator', fg="green")
+    with click.progressbar(range(events), label="Creating Events") as bar:
+        event_list = [utils.event_factory(random.choice(user_list), model=model) for _ in bar]
+    extensions.db.session.add_all(event_list)
+
+    extensions.db.session.commit()
+    click.secho("Database Updated", fg="green", bold=True)
+
+
+@click.command()
+@click.argument('corpus', type=click.File())
+@click.argument('output', type=click.File('w'), default="event_name_model.json")
+def generate_markov(corpus, output) -> None:
+    data = extensions.EventNameMarkov(corpus.read()).to_json()
+    output.write(data)
+    click.secho("Markov Chain Generated", fg="green", bold=True)

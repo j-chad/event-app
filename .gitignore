@@ -368,4 +368,7 @@ TSWLatexianTemp*
 # Texmaker Session
 *.tks
 
-documentation/build/*.dot
+*-dot2tex-*.dot
+*-dot2tex-*.tex
+
+event_name_model.json

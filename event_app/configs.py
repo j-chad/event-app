@@ -23,6 +23,7 @@ class Config:
     MINIMUM_PASSWORD_LENGTH = 8
     RATELIMIT_KEY_PREFIX = "RATELIMITER#"
     MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoiai1jaGFkIiwiYSI6ImNqajIzenFpMTB6ZHczd3Bjam50cmUwa2wifQ.mQ8rOg6dSN3P2EnUweer8g"
+    HUMANIZE_USE_UTC = True
 
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 Mb
     UPLOAD_FOLDER = "uploads"  # Relative to static folder
@@ -57,6 +58,7 @@ class DevelopmentConfig(Config):
     SEND_EMAILS = True
     SERVER_NAME = "vent.local:8000"
     RATELIMIT_ENABLED = False
+    SQLALCHEMY_POOL_SIZESQLALCHEMY_POOL_SIZE = 15
 
 
 class TestingConfig(Config):

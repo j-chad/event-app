@@ -1,10 +1,12 @@
 # coding=utf-8
 import functools
 import os
+import random
 import uuid
 from typing import Callable, Dict, Union
 from urllib.parse import urljoin, urlparse
 
+import faker
 import flask
 import flask_login
 from PIL import Image
@@ -14,7 +16,9 @@ from mdx_downheader import DownHeaderExtension
 from werkzeug.datastructures import FileStorage
 
 from . import models
-from .extensions import cleaner
+from .extensions import EventNameMarkov, cleaner
+
+fake = faker.Faker()
 
 
 def requires_anonymous(endpoint: Union[str, Callable] = "home.index", msg="You are already logged in"):
@@ -81,7 +85,39 @@ def save_image(img: FileStorage) -> str:
         if img_handle.height < 100 or img_handle.width < 100:
             raise ValueError("Image Too Small")
         else:
-            img_handle.thumbnail((800, img_handle.height), Image.LANCZOS)
+            if img_handle.width < 800:
+                width = img_handle.width
+            else:
+                width = 800
+            img_handle.thumbnail((width, img_handle.height), Image.LANCZOS)
             img_handle = img_handle.convert(mode="RGB")  # JPEG has no alpha channel
             img_handle.save(save_location, optimize=True, quality=75)
+            img_handle.verify()
     return filename
+
+
+def event_factory(user: models.User, model: EventNameMarkov):
+    while True:
+        name = model.make_sentence(tries=1000)
+        if name is not None:
+            break
+    MAX = (-36.837096, 174.927929)
+    MIN = (-37.022071, 174.702810)
+    lat = random.uniform(MIN[0], MAX[0])
+    long = random.uniform(MIN[1], MAX[1])
+    return models.Event(name=name,
+                        description=fake.paragraph(nb_sentences=5, variable_nb_sentences=True),
+                        private=fake.boolean(chance_of_getting_true=20),
+                        owner=user,
+                        latitude=lat,
+                        longitude=long,
+                        start=fake.future_datetime(end_date="+40d")
+                        )
+
+
+def user_factory():
+    return models.User(email=fake.email(),
+                       password='password',
+                       first_name=fake.first_name(),
+                       last_name=fake.last_name()
+                       )

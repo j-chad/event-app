@@ -60,14 +60,21 @@ main
 
             .list-card
                 display: flex
-                justify-content: space-around
+                justify-content: space-between
                 width: 100%
                 background-color: darken(white, 10%)
-                padding: 10px
+                padding: 10px 20px
                 border-radius: 3px
                 margin-bottom: 7px
                 box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2)
                 transition: box-shadow 0.3s, margin 0.2s
+
+                &.error
+                    background-color: $red
+                    color: $white
+
+                    a
+                        color: $orange
 
                 &:hover
                     margin-bottom: 17px

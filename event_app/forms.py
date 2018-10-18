@@ -120,8 +120,7 @@ class CreateEventForm(FlaskForm):
         wtforms.validators.Length(max=60)
     ])
     description = wtforms.TextAreaField(validators=[
-        wtforms.validators.Optional(),
-        wtforms.validators.Length(max=200)
+        wtforms.validators.Optional()
     ])
     private = wtforms.BooleanField()
     start = wtforms.DateTimeField(validators=[

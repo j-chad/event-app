@@ -3,10 +3,10 @@ from secrets import token_urlsafe
 from typing import Optional, Union
 
 import flask
-import flask_login
 import flask_mail
 from flask import Blueprint, render_template
 from flask_limiter.util import get_remote_address
+from flask_login import current_user, login_required, login_user, logout_user
 
 from .. import forms, models, tasks, utils
 from ..extensions import db, limiter, redis_store
@@ -74,7 +74,7 @@ def generate_insights(user: models.User):
             ]
         })
 
-    for event, messages in utils.get_unread_messages(flask_login.current_user).items():
+    for event, messages in utils.get_unread_messages(current_user).items():
         count = len(messages)
         if count == 1:
             message: models.EventMessage = messages[0]
@@ -124,13 +124,13 @@ def dashboard() -> flask.Response:
     Called from home.index, treat as ordinary route
     """
     unanswered_questions = models.Question.query.filter(models.Question.answer == None, models.Question.event.has(
-        owner=flask_login.current_user)).count()
-    unread_messages = utils.get_unread_messages(flask_login.current_user, count=True)
-    insights = generate_insights(flask_login.current_user)
+            owner=current_user)).count()
+    unread_messages = utils.get_unread_messages(current_user, count=True)
+    insights = generate_insights(current_user)
     return flask.render_template("users/dashboard.jinja",
                                  insights=insights,
-                                 subscribed=flask_login.current_user.subscribed_events,
-                                 owned=flask_login.current_user.events,
+                                 subscribed=current_user.subscribed_events,
+                                 owned=current_user.events,
                                  unanswered_questions=unanswered_questions,
                                  unread_messages=unread_messages)
 
@@ -146,7 +146,7 @@ def login():
         elif login_form.validate():
             # Reset Attempt Count
             redis_store.delete('USER:LOGIN_FAILURES#{}'.format(get_remote_address()))
-            flask_login.login_user(login_form.user)
+            login_user(login_form.user)
             flask.flash({"body": "Logged In Successfully"}, "success")
             return utils.redirect_with_next('home.index')
         else:
@@ -169,7 +169,7 @@ def register():
                            password=register_form.password.data)
         db.session.add(user)
         db.session.commit()
-        flask_login.login_user(user)
+        login_user(user)
         token = str(token_urlsafe())
         redis_store.set('USER:VERIFICATION_TOKEN#{}'.format(token), user.email,
                         ex=flask.current_app.config['VERIFICATION_TOKEN_EXPIRY'],
@@ -198,10 +198,10 @@ def activate_account(token):
 
 
 @users.route('/verify/resend', methods=["GET"])  # TODO: Change To POST
-@flask_login.login_required
-@limiter.limit("1/hour", key_func=lambda: flask_login.current_user.email)
+@login_required
+@limiter.limit("1/hour", key_func=lambda: current_user.email)
 def resend_activation_email():
-    user: models.User = flask_login.current_user
+    user: models.User = current_user
     token = str(token_urlsafe())
     redis_store.set('USER:VERIFICATION_TOKEN#{}'.format(token), user.email,
                     ex=flask.current_app.config['VERIFICATION_TOKEN_EXPIRY'],
@@ -243,7 +243,7 @@ def recovery_change_password(token):
             user.password = form.password.data
             db.session.commit()
             flask.flash({"body": "Password Has Been Reset"}, "success")
-            flask_login.login_user(user)
+            login_user(user)
             return flask.redirect(flask.url_for("home.index"))
         else:
             # TODO: Implement Lockout
@@ -253,14 +253,14 @@ def recovery_change_password(token):
 
 @users.route('/logout', methods=("POST",))
 def logout():
-    flask_login.logout_user()
+    logout_user()
     return flask.redirect(flask.url_for("home.index"))
 
 
 @users.route('/settings')
-@flask_login.login_required
+@login_required
 def settings():
     return flask.render_template('users/settings.jinja',
-                                 latitude=flask_login.current_user.latitude,
-                                 longitude=flask_login.current_user.longitude
+                                 latitude=current_user.latitude,
+                                 longitude=current_user.longitude
                                  )
