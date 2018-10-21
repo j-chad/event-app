@@ -1,6 +1,7 @@
 # coding=utf-8
 import datetime
 import os
+from urllib.parse import urlparse
 
 
 class Config:
@@ -11,6 +12,9 @@ class Config:
     RECAPTCHA_PUBLIC_KEY = os.environ['RECAPTCHA_PUBLIC_KEY']
     REDIS_URL = os.environ['REDIS_URL']
     RQ_REDIS_URL = os.environ['REDIS_URL']
+    sse_url = urlparse(os.environ['REDIS_URL'])
+    SSE_REDIS_HOST = f"{sse_url.username}:{sse_url.password}@{sse_url.hostname}"
+    SSE_REDIS_PORT = sse_url.port
     RATELIMIT_STORAGE_URL = os.environ['REDIS_URL']
     MAIL_SERVER = os.environ['MAIL_SERVER']
     MAIL_PORT = os.environ['MAIL_PORT']
