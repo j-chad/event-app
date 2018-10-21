@@ -143,20 +143,18 @@
                     function subscribeUserToPush() {
                         return registerWorker()
                             .then(function (registration) {
-                                const subscribeOptions = {
-                                    userVisibleOnly: true,
-                                    applicationServerKey: urlBase64ToUint8Array('{{ config.WEB_PUSH_PUBLIC_KEY }}')
-                                };
-
                                 return registration.pushManager.subscribe(subscribeOptions);
                             })
                             .then(function (pushSubscription) {
+                                console.log(pushSubscription);
                                 return JSON.stringify(pushSubscription);
                             });
                     }
 
                     function saveSubscription() {
+                        console.log("Subscription chain started");
                         return subscribeUserToPush().then(function (data) {
+                            console.log("Saving push");
                             return fetch('{{ url_for('ajax.save_web_push') }}', {
                                 method: "POST",
                                 credentials: 'same-origin',

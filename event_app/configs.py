@@ -24,6 +24,7 @@ class Config:
     RATELIMIT_KEY_PREFIX = "RATELIMITER#"
     MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoiai1jaGFkIiwiYSI6ImNqajIzenFpMTB6ZHczd3Bjam50cmUwa2wifQ.mQ8rOg6dSN3P2EnUweer8g"
     HUMANIZE_USE_UTC = True
+    PREFERRED_URL_SCHEME = 'https'
 
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 Mb
     UPLOAD_FOLDER = "uploads"  # Relative to static folder

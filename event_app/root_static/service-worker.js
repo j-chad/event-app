@@ -1,4 +1,4 @@
-var version = '1.3.6';
+var version = '1.4.6';
 
 self.addEventListener('install', function (event) {
     console.log('[ServiceWorker] Installed version', version);

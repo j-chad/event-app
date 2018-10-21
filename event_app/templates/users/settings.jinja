@@ -16,6 +16,8 @@
             integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw=="
             crossorigin=""></script>
     <script type="text/javascript">
+        const email_regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
         var map;
         var marker;
 
@@ -52,6 +54,7 @@
         });
 
         $(document).ready(function () {
+            var saveButton = $('#save-button');
             map = L.map('userLocation');
             {%- if current_user.location_enabled -%}
                 map.setView([{{ current_user.latitude }}, {{ current_user.longitude }}], 10);
@@ -74,6 +77,125 @@
                 position: "topright"
             });
             updateLocation.addTo(map);
+
+            $('input').change(function () {
+                saveButton.prop('disabled', false);
+            });
+
+            saveButton.click(function () {
+                var formData = {};
+                var errors = false;
+                var passChanged = false;
+                var emailChanged = false;
+
+                var emailNotif = $('#email-notif');
+                var pushNotif = $('#push-notif');
+
+                //Verify
+                var oldPass = $('#old-p');
+                var newPass = $('#new-p');
+                var newPass2 = $('#new-p-p');
+
+                oldPass.removeClass('error');
+                oldPass.prop('placeholder', '');
+
+                if (oldPass.val() !== '' && newPass.val() !== '' && newPass2.val() !== '') {
+                    if (newPass.val() !== newPass2.val()) {
+                        newPass2.addClass('error');
+                        newPass2.prop('placeholder', 'Passwords Don\'t Match');
+                        newPass2.val('');
+                        newPass.val('');
+                        errors = true;
+                    } else if (newPass.val().length < {{ config['MINIMUM_PASSWORD_LENGTH'] }}) {
+                        newPass.addClass('error');
+                        newPass.prop('placeholder', 'Passwords Must Be At Least 8 Characters');
+                        newPass.val('');
+                        newPass2.val('');
+                        errors = true;
+                    } else if (confirm("Are you sure you want your password changed?")) {
+                        newPass2.removeClass('error');
+                        newPass2.prop('placeholder', '');
+                        passChanged = true;
+                    }
+                }
+
+                var f_name = $('#f-name');
+                var l_name = $('#l-name');
+                var email = $('#email');
+                if (f_name.val().trim() === '') {
+                    f_name.addClass('error');
+                    f_name.prop('placeholder', 'Name Cannot Be Empty');
+                    f_name.val('');
+                    errors = true;
+                } else {
+                    f_name.removeClass('error');
+                    f_name.prop('placeholder', '');
+                }
+                if (l_name.val().trim() === '') {
+                    l_name.addClass('error');
+                    l_name.prop('placeholder', 'Name Cannot Be Empty');
+                    l_name.val('');
+                    errors = true;
+                } else {
+                    l_name.removeClass('error');
+                    l_name.prop('placeholder', '');
+                }
+                if (!email.val().match(email_regex)) {
+                    email.addClass('error');
+                    email.prop('placeholder', 'Invalid Email');
+                    email.val('');
+                    errors = true;
+                } else {
+                    email.removeClass('error');
+                    email.prop('placeholder', '');
+                }
+
+                if (!errors) {
+                    // Submit
+                    if (f_name.val() !== '{{ user.first_name }}') {
+                        formData.f_name = f_name.val();
+                    }
+                    if (l_name.val() !== '{{ user.last_name }}') {
+                        formData.l_name = l_name.val();
+                    }
+                    if (email.val() !== '{{ user.email }}') {
+                        formData.email = email.val();
+                        emailChanged = true;
+                    }
+                    if (emailNotif.prop('checked') !== {{ 'true' if user.email_notify else 'false' }}) {
+                        formData.email_notif = emailNotif.prop('checked');
+                    }
+                    if (pushNotif.prop('checked') !== {{ 'true' if user.web_push_notify else 'false' }}) {
+                        formData.push_notif = pushNotif.prop('checked');
+                    }
+                    if (passChanged) {
+                        formData.password = newPass.val();
+                        formData.old_password = oldPass.val();
+                    }
+
+                    $.post("{{ url_for('ajax.update_settings') }}", formData)
+                        .done(function () {
+                            toastr['success']("Settings Saved!");
+                            if (passChanged) {
+                                window.location = "{{ url_for('users.login') }}"
+                            } else if (emailChanged) {
+                                toastr['info']("Email has been changed. Please check your inbox!");
+                            }
+                        })
+                        .fail(function (data) {
+                            console.log(data);
+                            if (passChanged && data.status === 403) {
+                                oldPass.addClass('error');
+                                oldPass.prop('placeholder', 'Password is not valid!');
+                                oldPass.val('');
+                            } else {
+                                toastr['error']('Something went wrong, try again later');
+                            }
+                        });
+                }
+            });
+
+            saveButton.prop('disabled', true);
         });
 
         function placeMarker(pos) {
@@ -117,4 +239,48 @@
 
 {% block content %}
     <div id="userLocation"></div>
+    <div class="container settings">
+        <div class="block">
+            <h2>Notification Settings</h2>
+            <label>
+                Email <input id="email-notif" autocomplete="off" name="email"
+                             type="checkbox" {{ 'checked' if user.email_notify }} {{ "disabled" if not user.email_verified }}>
+            </label>
+            <label>
+                Push Notification <input id="push-notif" autocomplete="off" name="push"
+                                         type="checkbox" {{ 'checked' if user.web_push_notify }}>
+            </label>
+        </div>
+        <div class="block">
+            <h2>User Settings</h2>
+            <label>
+                First Name
+                <input id="f-name" autocomplete="off" type="text" value="{{ user.first_name }}">
+            </label>
+            <label>
+                Last Name
+                <input id="l-name" autocomplete="off" type="text" value="{{ user.last_name }}">
+            </label>
+            <label>
+                Email
+                <input id="email" autocomplete="off" type="text" value="{{ user.email }}">
+            </label>
+        </div>
+        <div class="block">
+            <h2>Password Settings</h2>
+            <label>
+                Old Password
+                <input id="old-p" autocomplete="off" type="password" value="">
+            </label>
+            <label>
+                New Password
+                <input id="new-p" autocomplete="off" type="password" value="">
+            </label>
+            <label>
+                Repeat New Password
+                <input id="new-p-p" autocomplete="off" type="password" value="">
+            </label>
+        </div>
+        <button id="save-button" type="button" disabled>Save</button>
+    </div>
 {% endblock %}

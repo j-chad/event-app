@@ -233,7 +233,7 @@ class EventMessage(CommonMixin, Model):
             return data
         elif self.type is MessageTypes.IMAGE:
             file = os.path.join(flask.current_app.config['UPLOAD_FOLDER'], self.data['file'])
-            return f"<img src='{flask.url_for('static', filename=file)}'>"
+            return f"<img src='{flask.url_for('static', filename=file, _external=True, _scheme='https')}'>"
 
 
 class Answer(CommonMixin, Model):

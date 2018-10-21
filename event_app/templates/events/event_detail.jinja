@@ -78,7 +78,56 @@
                 }
             }
 
+            eventSource.addEventListener('question', function (event) {
+                    var data = JSON.parse(event.data);
+                    if (data.event === '{{ event.url_id }}') {
+                        {% if unanswered_question_count > 0 %}
+                            var question = $(
+                                "<div class=\"unanswered-question\">" +
+                                "   <h3>" + data.question + "</h3>" +
+                                "   <form action=\"{{ url_for('ajax.event_add_answer') }}\" , method=\"POST\">" +
+                                "       <input type=\"hidden\" name=\"question\" value=\"" + data.id + "\">" +
+                                "       <input name=\"reply\" type=\"text\" placeholder=\"Answer\">" +
+                                "       <label>" +
+                                "           Private <input name=\"private\" type=\"checkbox\">" +
+                                "       </label>" +
+                                "       <input type=\"submit\" value=\"Submit\">" +
+                                "   </form>" +
+                                "</div>");
+                            question.find('form').submit(function (e) {
+                                var form = $(this);
+                                console.log(form);
+                                $.ajax({
+                                    type: "POST",
+                                    url: form.attr('action'),
+                                    data: form.serialize(),
+                                    success: function () {
+                                        $('#question-form > input[type=\'text\']').val("");
+                                        toastr['success']("Question Answered!");
+                                        form.parent().remove();
+                                        var pendingNumber = $('#pending-number');
+                                        if (pendingNumber.length === 1) {
+                                            pendingNumber.text(Number(pendingNumber.text()) - 1);
+                                        }
+                                    }
+                                }).fail(function () {
+                                    toastr['error']("Something Went Wrong - Try Again Later");
+                                });
+                                e.preventDefault();
+                            });
+                            question.prependTo($('#unanswered'));
+                            var pendingNumber = $('#pending-number');
+                            pendingNumber.text(Number(pendingNumber.text()) + 1);
+                        {% else %}
+                            window.location.reload();
+                        {% endif %}
+                    }
+                }
+            );
+
             $(document).ready(function () {
+                changeMessageType($('#type-select')[0]);
+                $('#image-input').val("");
                 $('.control.remove').click(function (e) {
                     var id = e.target.dataset.id;
                     if (confirm("Are you sure you want to delete this message?")) {
@@ -115,6 +164,7 @@
                         var data = new FormData();
                         data.append('type', type);
                         data.append('token', $('#event-token').val());
+                        data.append('title', $('#message-title').val());
 
                         var xhr = new XMLHttpRequest();
                         if (xhr.upload) {
@@ -154,6 +204,20 @@
                             if (pendingNumber.length === 1) {
                                 pendingNumber.text(Number(pendingNumber.text()) - 1);
                             }
+                            // Add Answer
+                            if (!form.find('[name=private]').prop('checked')) {
+                                var answer = $("<div class=\"question-answer\">" +
+                                    "   <div class=\"question-section\">" +
+                                    "       <img class=\"q-prefix\" src=\"{{ url_for('static', filename='img/events/Q&A.svg') }}\" title=\"Public\" alt=\"Public Question\">" +
+                                    "       <h3 class=\"text\">" + form.parent().find('h3').text() + "</h3>" +
+                                    "   </div>" +
+                                    "   <div class=\"answer-section\">" +
+                                    "       <span>" + form.find('[name=reply]').val() + "</span>" +
+                                    "       <time>Now</time>" +
+                                    "   </div>" +
+                                    "</div>");
+                                answer.prependTo('#answered');
+                            }
                         }
                     }).fail(function () {
                         toastr['error']("Something Went Wrong - Try Again Later");
@@ -168,6 +232,7 @@
                     {token: "{{ event.url_id }}"},
                     'json'
                 ).done(function (data) {
+                    console.log('b');
                     if (data['subscription'] === true) {
                         saveSubscription().then(function () {
                             window.location.reload();
@@ -180,12 +245,52 @@
                 });
             }
 
+            eventSource.addEventListener('answer', function (event) {
+                var data = JSON.parse(event.data);
+                if (data.event === '{{ event.url_id }}') {
+                    {% if answered_questions|length != 0 %}
+                        var imgsrc = data.private ? "{{ url_for('static', filename='img/events/private.svg') }}" : "{{ url_for('static', filename='img/events/Q&A.svg') }}";
+                        var answer = $("<div class=\"question-answer\">" +
+                            "   <div class=\"question-section\">" +
+                            "       <img class=\"q-prefix\" src=\"" + imgsrc + "\" title=\"Public\" alt=\"Public Question\">" +
+                            "       <h3 class=\"text\">" + data.question.text + "</h3>" +
+                            "   </div>" +
+                            "   <div class=\"answer-section\">" +
+                            "       <span>" + data.answer + "</span>" +
+                            "       <time>Now</time>" +
+                            "   </div>" +
+                            "</div>");
+                        answer.prependTo('#answered');
+                        var pendingNumber = $('#pending-number');
+                        pendingNumber.text(Number(pendingNumber.text()) - 1);
+                    {% else %}
+                        window.location.reload();
+                    {% endif %}
+                }
+            });
+
             eventSource.addEventListener('message', function (event) {
                 var data = JSON.parse(event.data);
-                switch (data.type) {
-                    case 'text':
-                        alert(data.data.message);
-                        break;
+                if (data.event === '{{ event.url_id }}') {
+                    {% if messages|length != 0 %}
+                        var title = (data.data.title == null) ? "Untitled" : data.data.title;
+                        var message = $("<div class=\"message-card card\">" +
+                            "     <div class=\"header\">" +
+                            "         <h3 class=\"title\">" + title + "</h3>" +
+                            "         <div class=\"controls\">" +
+                            "             <img class=\"control collapse\" src=\"{{ url_for('static', filename='img/events/collapse.svg') }}\" alt=\"\">" +
+                            "         </div>" +
+                            "         <time>Now</time>" +
+                            "     </div>" +
+                            "     <div class=\"content\">" + data.rendered + "</div>" +
+                            "</div>");
+                        message.prependTo("#message-container");
+
+                        //Tell Server it has been viewed
+                        $.post('{{ url_for('ajax.event_viewed_message') }}', {event: '{{event.url_id}}'});
+                    {% else %}
+                        window.location.reload();
+                    {% endif %}
                 }
             });
 
@@ -247,9 +352,11 @@
                     {% if messages|length == 0 %}
                         <div class="no-messages">Updates and News will be shown here!</div>
                     {% else %}
-                        {% for message in messages %}
-                            {{ render_message(message) }}
-                        {% endfor %}
+                        <div id="message-container">
+                            {% for message in messages %}
+                                {{ render_message(message) }}
+                            {% endfor %}
+                        </div>
                     {% endif %}
                 </div>
                 {% if answered_questions|length > 0 or unanswered_question_count > 0 or owner %}
@@ -258,7 +365,7 @@
                         <h4 class="pending"><strong id="pending-number">{{ unanswered_question_count }}</strong> Pending
                             Question{{ 's' if unanswered_question_count != 1 }}</h4>
                         {% if owner and unanswered_question_count > 0 %}
-                            <div class="unanswered">
+                            <div id="unanswered" class="unanswered">
                                 {% for question in unanswered_questions %}
                                     <div class="unanswered-question">
                                         <h3>{{ question.text|capitalize }}</h3>
@@ -276,26 +383,28 @@
                             </div>
                         {% endif %}
                         {% if answered_questions|length != 0 %}
-                            {% for question in answered_questions %}
-                                <div class="question-answer">
-                                    <div class="question-section">
-                                        {%- if question.answer.private -%}
-                                            <img class="q-prefix"
-                                                 src="{{ url_for('static', filename='img/events/private.svg') }}"
-                                                 title="Private" alt="Private Question">
-                                        {%- else -%}
-                                            <img class="q-prefix"
-                                                 src="{{ url_for('static', filename='img/events/Q&A.svg') }}"
-                                                 title="Public" alt="Public Question">
-                                        {%- endif -%}
-                                        <h3 class="text">{{ question.text|capitalize }}</h3>
+                            <div id="answered">
+                                {% for question in answered_questions %}
+                                    <div class="question-answer">
+                                        <div class="question-section">
+                                            {%- if question.answer.private -%}
+                                                <img class="q-prefix"
+                                                     src="{{ url_for('static', filename='img/events/private.svg') }}"
+                                                     title="Private" alt="Private Question">
+                                            {%- else -%}
+                                                <img class="q-prefix"
+                                                     src="{{ url_for('static', filename='img/events/Q&A.svg') }}"
+                                                     title="Public" alt="Public Question">
+                                            {%- endif -%}
+                                            <h3 class="text">{{ question.text|capitalize }}</h3>
+                                        </div>
+                                        <div class="answer-section">
+                                            <span>{{ question.answer.text }}</span>
+                                            <time>{{ question.answer.timestamp | humanize }}</time>
+                                        </div>
                                     </div>
-                                    <div class="answer-section">
-                                        <span>{{ question.answer.text }}</span>
-                                        <time>{{ question.answer.timestamp | humanize }}</time>
-                                    </div>
-                                </div>
-                            {% endfor %}
+                                {% endfor %}
+                            </div>
                         {% endif %}
                     </div>
                 {% endif %}
@@ -328,8 +437,10 @@
             </div>
             <div class="right">
                 <div class="controls">
-                    {% if owner %}
-                        <button type="button">{{ "Unsubscribe" if current_user.subscribed(event) else "Subscribe" }}</button>{% endif %}
+                    {% if not owner %}
+                        <button onclick="toggleSubscription();"
+                                type="button">{{ "Unsubscribe" if current_user.subscribed(event) else "Subscribe" }}</button>
+                    {% endif %}
                     <a class="button" target="_blank"
                        href="https://www.google.com/maps/search/?api=1&query={{ event.latitude }}%2C{{ event.longitude }}">View
                         On Map</a>

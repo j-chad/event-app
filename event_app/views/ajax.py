@@ -1,5 +1,6 @@
 # coding=utf-8
 import decimal
+import uuid
 from secrets import token_urlsafe
 from typing import Optional
 
@@ -49,6 +50,47 @@ def register_user():
     return flask.jsonify(payload), 201
 
 
+@ajax.route('/user/update_settings', methods=("POST",))
+@login_required
+def update_settings():
+    current_user: models.User = flask_login.current_user
+    password = flask.request.form.get('password', None)
+    f_name = flask.request.form.get('f_name', None)
+    l_name = flask.request.form.get('l_name', None)
+    email = flask.request.form.get('email', None)
+    push_notif = flask.request.form.get('push_notif', None)
+    email_notif = flask.request.form.get('email_notif', None)
+
+    if f_name is not None:
+        current_user.first_name = f_name
+    if l_name is not None:
+        current_user.last_name = l_name
+    if push_notif is not None:
+        current_user.web_push_notify = utils.translate_json_bool(push_notif)
+    if email_notif is not None:
+        current_user.email_notify = utils.translate_json_bool(email_notif)
+    if email is not None:
+        current_user.email = email
+        current_user.email_verified = False
+        token = str(token_urlsafe())
+        redis_store.set('USER:VERIFICATION_TOKEN#{}'.format(token), email,
+                        ex=flask.current_app.config['VERIFICATION_TOKEN_EXPIRY'],
+                        nx=True)
+        send_validation_email(current_user, token)
+    if password is not None:
+        old_pass = flask.request.form.get('old_password')
+        if old_pass is None:
+            flask.abort(401)
+        if not current_user.check_password(old_pass):
+            flask.abort(403)
+        current_user.password = password
+        flask_login.logout_user()
+        current_user.session_token = uuid.uuid4().hex
+    db.session.commit()
+
+    return "", 204
+
+
 @ajax.route('/event/update_subscription', methods=("POST",))
 @login_required
 def update_subscription():
@@ -86,22 +128,23 @@ def event_add_message():
         if event.owner != flask_login.current_user:
             flask.abort(403)
 
+    title: Optional[str] = flask.request.form.get('title', None)
+
+    if title is not None:
+        title = title.strip()
+        if len(title) == 0:
+            title = None
+
     # noinspection PyUnboundLocalVariable
     if type_ is MessageTypes.TEXT:
-        title: Optional[str] = flask.request.form.get('title', None)
         message: str = flask.request.form['message']
-
-        if title is not None:
-            title = title.strip()
-            if len(title) == 0:
-                title = None
 
         if len(message.strip()) == 0:
             flask.abort(400)
 
         data = {
             "title": title,
-            "message": utils.markdownify(flask.request.form['message'])
+            "message": utils.markdownify(message)
         }
 
     elif type_ is MessageTypes.IMAGE:
@@ -110,7 +153,7 @@ def event_add_message():
                 image.mimetype not in flask.current_app.config['ALLOWED_IMAGE_MIMETYPES']:
             flask.abort(400)
         name = utils.save_image(image)
-        data = {"file": name}
+        data = {"file": name, "title": title}
     else:  # Unknown Type
         flask.abort(400)
 
@@ -141,6 +184,23 @@ def event_remove_message():
 
     db.session.delete(message)
     db.session.commit()
+    return '', 204
+
+
+@ajax.route('/event/update_viewed_messages', methods=("POST",))
+@login_required
+def event_viewed_message():
+    event_id: str = flask.request.form['event']
+    event: models.Event = models.Event.fetch_from_url_token(event_id)
+    if event is None:
+        flask.abort(400)  # If not valid event token
+
+    subscription: models.Subscription = models.Subscription.query.get((flask_login.current_user.id, event.id))
+    if subscription is None:
+        flask.abort(400)
+
+    subscription.update()
+
     return '', 204
 
 

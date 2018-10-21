@@ -1,5 +1,9 @@
 @import ../global
 
+body
+    background: url("../../img/users/background1.jpg") fixed
+    background-size: cover
+
 main
     #userLocation
         position: relative
@@ -12,3 +16,25 @@ main
 
         &:hover
             cursor: pointer
+
+    .settings
+        max-width: 540px
+        .block
+            background-color: rgba(white, 0.9)
+            -webkit-border-radius: 0.7rem
+            -moz-border-radius: 0.7rem
+            border-radius: 0.7rem
+            padding: 15px
+            margin-top: 10px
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2)
+            transition: box-shadow 0.3s
+            &:hover
+                box-shadow: 0 12px 24px 0 rgba(0, 0, 0, 0.2)
+
+        #save-button
+            width: 100%
+            margin-top: 10px
+
+input.error
+    color: red
+    border: solid 2px $red

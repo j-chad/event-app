@@ -45,13 +45,15 @@
     <div class="container">
         <div class="wrapper">
             <div class="left">
-                <h1>Hello, {{ current_user.first_name }}</h1>
-                <h2>You have <strong>{{ unread_messages.total }}</strong> unread message
-                    {%- if unread_messages.total != 1 %}s{% endif %}
-                    {% if owned|length >= 1 %}
-                        and <strong>{{ unanswered_questions }}</strong> unanswered
-                        question{% if unanswered_questions != 1 %}s{% endif -%}
-                    {% endif %}</h2>
+                <div class="intro">
+                    <h1>Hello, {{ current_user.first_name }}</h1>
+                    <h2>You have <strong>{{ unread_messages.total }}</strong> unread message
+                        {%- if unread_messages.total != 1 %}s{% endif %}
+                        {% if owned|length >= 1 %}
+                            and <strong>{{ unanswered_questions }}</strong> unanswered
+                            question{% if unanswered_questions != 1 %}s{% endif -%}
+                        {% endif %}</h2>
+                </div>
                 <a href="{{ url_for('events.create_event') }}">
                     <div id="create-event" class="card">
                         <h3>Create an Event</h3>

@@ -35,6 +35,7 @@ def send_message(message: models.EventMessage):
     data = {
         "type": message.type.value,
         "data": message.data,
+        "rendered": message.render(),
         "event": message.event.url_id
     }
     for subscription in message.event.subscriptions:
@@ -54,9 +55,14 @@ def send_answer(answer: models.Answer):
     data = {
         "answer": answer.text,
         "question": {
-            "id": answer.question.id
+            "id": answer.question.id,
+            "text": answer.question.text
         },
-        "event": answer.event.url_id,
+        "event": answer.question.event.url_id,
         "private": answer.private
     }
-    sse.publish(data, channel=get_channel(answer.question.questioner), type="question")
+    if answer.private:
+        sse.publish(data, channel=get_channel(answer.question.questioner), type="answer")
+    else:
+        for subscription in answer.question.event.subscriptions:
+            sse.publish(data, channel=get_channel(subscription.user), type="answer")

@@ -121,3 +121,13 @@ def user_factory():
                        first_name=fake.first_name(),
                        last_name=fake.last_name()
                        )
+
+
+def translate_json_bool(data: str) -> bool:
+    normalised = data.lower().strip()
+    if normalised == 'true':
+        return True
+    elif normalised == 'false':
+        return False
+    else:
+        raise ValueError(f"{data} is not true or false")

@@ -3,6 +3,7 @@ from secrets import token_urlsafe
 from typing import Optional, Union
 
 import flask
+import flask_login
 import flask_mail
 from flask import Blueprint, render_template
 from flask_limiter.util import get_remote_address
@@ -194,6 +195,7 @@ def activate_account(token):
             user.email_verified = True
             db.session.commit()
             flask.flash({"body": "Email Verified"}, "success")
+            flask_login.login_user(user)
             return flask.redirect(flask.url_for('home.index'))
 
 
@@ -264,3 +266,9 @@ def settings():
                                  latitude=current_user.latitude,
                                  longitude=current_user.longitude
                                  )
+
+
+@users.route('/calender.ics')
+@login_required
+def add_calendar(token):
+    pass
