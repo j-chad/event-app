@@ -525,7 +525,7 @@ tabsize=2
 
 	A Markov chain is essentially a list of states with a probability of moving to another state. This gives a cheap way to mimic artificial intelligence. It is often used for the predictive text function in phone keyboards. In this usecase, it tells us if we have the letter \textbf{A} then the most probable next letter based on our data. We then randomly select a letter using the weights given by the chain. The process then repeats using the new letter. It can be made to work better by changing the number of letters used for the state.
 
-	To get the data needed to find probablities, I used selenium to scrape over 1000 event names (almost 45000 characters). I then generated a markov chain (of order 2) and saved the state to a json file. This gave m
+	To get the data needed to find probablities, I used selenium to scrape over 1000 event names (almost 45000 characters). I then generated a markov chain (of order 1) and saved the state to a json file. This gave m
 
 	\subsection{SQLAlchemy Queue Pool Overflow}
 	While this isn't so much an error or a problem in my design, I thought it needed mentioning. One of the most common errors that was raised during the development of my app was:
@@ -573,18 +573,25 @@ tabsize=2
 
 	\subsection{Discover}
 	I Initially designed this page with a category based design, where there would be seperate categorys that would have a list of events. This was inspired by the google play store design.
-
-	Upon consulting my clients, I was told that it was hard to use and confusing. The design also didn't scale down to a smaller device well. After a redesign, the feedback I recieved was much more positive.
+	
+	\begin{figure}[H]
+		\caption{Discover Page Redesigned}
+		\includegraphics[width=\linewidth]{static/front-end5.png}
+		\label{fig:dashboard}
+	\end{figure}
+	
+	Upon consulting my clients, I was told that it was hard to use and confusing. The design also didn't scale down to a smaller device well. It was also difficult for the user to look for an event that matches criteria, as they would have no control over the categories that appear. After a redesign, the feedback I recieved was much more positive.
 
 	\begin{figure}[H]
 		\caption{Discover Page Redesigned}
 		\includegraphics[width=\linewidth]{static/front-end4.png}
 		\label{fig:dashboard}
 	\end{figure}
-
-	This design was much more user friendly, in the sense that it gave users more refined choices as well as having better presentation of the data.
+	
+	This design was much more user friendly, in the sense that it gave users more refined choices as well as having better presentation of the data. The page uses flexboxes to scale appropriately on smaller screens, while keeping a consistent experience. It also gives users the ability to subscribe to an event without needing to first go to the event page.
 
 	\subsection{Event View}
+	It is imperative that the event details page will give as much information as possible, while still remaining easy to consume. This page is central to the whole app, and thus must be simple to use.
 
 
 	\subsection{Create Event}

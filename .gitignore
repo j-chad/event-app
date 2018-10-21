@@ -372,3 +372,5 @@ TSWLatexianTemp*
 *-dot2tex-*.tex
 
 event_name_model.json
+!/rootCA.pem
+!/rootCA.key
