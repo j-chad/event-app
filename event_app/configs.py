@@ -56,7 +56,7 @@ class Config:
 class ProductionConfig(Config):
     ENV = "Production"
     DEBUG = False
-    SERVER_NAME = "vent.local:8000"
+    SERVER_NAME = os.environ['SERVER_NAME']
     MAIL_DEFAULT_SENDER = "Event App Notifier"
     SEND_EMAILS = True
     RATELIMIT_ENABLED = True
