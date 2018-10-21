@@ -1,1 +1,1 @@
-web: gunicorn autoapp:app --worker-class gevent
+web: gunicorn autoapp:app --worker-class gevent --certfile rootCA.pem --keyfile rootCA.key

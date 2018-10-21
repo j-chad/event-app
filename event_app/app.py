@@ -16,7 +16,6 @@ def create_app(config_object: Type[configs.Config] = configs.ProductionConfig) -
                       instance_relative_config=True)  # Provide package name in case extensions make assumptions
     app.url_map.strict_slashes = False
     app.config.from_object(config_object)
-    app.config.from_pyfile("config.py")
 
     register_extensions(app)
     register_blueprints(app)
