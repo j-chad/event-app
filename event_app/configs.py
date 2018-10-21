@@ -17,7 +17,7 @@ class Config:
     MAIL_USERNAME = os.environ['MAIL_USERNAME']
     MAIL_USE_TLS = bool(os.environ['MAIL_USE_TLS'])
     MAIL_USE_SSL = bool(os.environ['MAIL_USE_SSL'])
-    SQLALCHEMY_DATABASE_URI = os.environ['CLEARDB_DATABASE_URL']
+    SQLALCHEMY_DATABASE_URI = os.environ['JAWSDB_URL']
     WEB_PUSH_PRIVATE_KEY = os.environ['WEB_PUSH_PRIVATE_KEY']
     WEB_PUSH_PUBLIC_KEY = os.environ['WEB_PUSH_PUBLIC_KEY']
     RECAPTCHA_PRIVATE_KEY = os.environ['RECAPTCHA_PRIVATE_KEY']
