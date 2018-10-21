@@ -40,7 +40,7 @@ class Config:
     HUMANIZE_USE_UTC = True
     PREFERRED_URL_SCHEME = 'https'
 
-    SQLALCHEMY_POOL_SIZE = 5
+    SQLALCHEMY_POOL_SIZE = 2
     SQLALCHEMY_MAX_OVERFLOW = 1
 
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 Mb
@@ -76,7 +76,6 @@ class DevelopmentConfig(Config):
     SEND_EMAILS = True
     SERVER_NAME = "vent.local:8000"
     RATELIMIT_ENABLED = False
-    SQLALCHEMY_POOL_SIZESQLALCHEMY_POOL_SIZE = 15
 
 
 class TestingConfig(Config):
