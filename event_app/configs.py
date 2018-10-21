@@ -40,8 +40,8 @@ class Config:
     HUMANIZE_USE_UTC = True
     PREFERRED_URL_SCHEME = 'https'
 
-    SQLALCHEMY_POOL_SIZE = 2
-    SQLALCHEMY_MAX_OVERFLOW = 1
+    SQLALCHEMY_POOL_SIZE = 3
+    SQLALCHEMY_MAX_OVERFLOW = 2
 
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 Mb
     UPLOAD_FOLDER = "uploads"  # Relative to static folder
