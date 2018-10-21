@@ -12,8 +12,7 @@ def create_app(config_object: Type[configs.Config] = configs.ProductionConfig) -
 
     Creates and initialises the application"""
 
-    app = flask.Flask(__name__.split('.')[0],
-                      instance_relative_config=True)  # Provide package name in case extensions make assumptions
+    app = flask.Flask(__name__.split('.')[0])  # Provide package name in case extensions make assumptions
     app.url_map.strict_slashes = False
     app.config.from_object(config_object)
 

@@ -1,0 +1,265 @@
+.navigation .navigation-link, .navigation .navigation-title, .navigation .title {
+  display: inline;
+  font-size: 2rem;
+  line-height: 7rem;
+  padding: 0;
+  text-decoration: none;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body .content-wrapper {
+  min-height: 100%;
+  position: relative;
+}
+body .content-wrapper nav.navigation {
+  height: 7rem;
+  background-color: #FF851B;
+}
+body .content-wrapper nav.navigation .side-nav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 100000000;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  padding-top: 5rem;
+  transition: 0.5s;
+  background-color: #FF851B;
+}
+body .content-wrapper nav.navigation .side-nav ul {
+  list-style: none;
+  margin: 0;
+}
+body .content-wrapper nav.navigation .side-nav ul .navigation-item {
+  text-align: center;
+}
+body .content-wrapper nav.navigation .side-nav ul .navigation-item.close-sidenav {
+  font-size: 5rem;
+}
+body .content-wrapper nav.navigation .side-nav ul .navigation-item a {
+  text-decoration: none;
+  color: #FFFFFF;
+  transition: color 1ms;
+}
+body .content-wrapper nav.navigation .side-nav ul .navigation-item a:hover {
+  color: #DDDDDD;
+}
+body .content-wrapper nav.navigation section.container {
+  height: 7rem;
+  max-width: 80rem;
+}
+body .content-wrapper nav.navigation section.container a.navigation-title {
+  line-height: 7rem;
+  font-size: 4.6rem;
+}
+body .content-wrapper nav.navigation section.container a.navigation-title h1 {
+  margin: 0;
+  padding: 0;
+  line-height: 7rem;
+  display: inline;
+  color: #FFFFFF;
+}
+body .content-wrapper nav.navigation section.container ul.navigation-list {
+  list-style: none;
+  margin: 0;
+}
+body .content-wrapper nav.navigation section.container ul.navigation-list .navigation-item {
+  float: left;
+  margin-bottom: 0;
+  margin-left: 2.5rem;
+  position: relative;
+}
+body .content-wrapper nav.navigation section.container ul.navigation-list .navigation-item.sidebar-button {
+  display: none;
+}
+body .content-wrapper nav.navigation section.container ul.navigation-list .navigation-item a {
+  text-decoration: none;
+  display: inline;
+  line-height: 7rem;
+  color: #FFFFFF;
+  transition: color 1ms;
+}
+body .content-wrapper nav.navigation section.container ul.navigation-list .navigation-item a:hover {
+  color: #DDDDDD;
+}
+body .content-wrapper main {
+  width: 100%;
+}
+body .content-wrapper footer {
+  width: 100%;
+  height: 4rem;
+  background-color: #FF851B;
+  color: #FFFFFF;
+  text-align: center;
+  line-height: 4rem;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+@media (max-width: 650px) {
+  nav .nav-bar .navigation-list .navigation-item:not(.sidebar-button) {
+    display: none;
+  }
+  nav .nav-bar .navigation-list .navigation-item.sidebar-button {
+    display: list-item !important;
+  }
+}
+main #eventMap {
+  width: 100%;
+  height: 400px;
+  position: relative;
+}
+main #event-container {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 7px;
+}
+main #event-container .controls {
+  order: 2;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+main #event-container .controls .group {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+main #event-container .controls .group h5 {
+  order: 1;
+  font-family: "Roboto", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  margin: 0 auto;
+  color: #FF851B;
+  font-weight: 700;
+}
+main #event-container .controls .group a {
+  order: 2;
+  margin: 0 auto 3px;
+  width: 200px;
+  border: #FF851B 1px solid;
+}
+main #event-container .controls .group a:not(:last-child) {
+  margin-bottom: 3px;
+}
+main #event-container .controls .group a:not(.selected) {
+  background-color: white;
+  color: #FF851B;
+  transition: background-color 500ms, color 500ms;
+}
+main #event-container .controls .group a:not(.selected):hover {
+  background-color: #ffa04e;
+  color: white;
+}
+main #event-container .controls .group a.selected {
+  background-color: #FF851B;
+  color: white;
+}
+main #event-container .events {
+  order: 1;
+  flex-grow: 2;
+  max-width: 700px;
+  min-width: 360px;
+}
+main #event-container .events .list-card {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  background-color: #e6e6e6;
+  padding: 10px 20px;
+  border-radius: 3px;
+  margin-bottom: 7px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.3s, margin 0.2s;
+}
+main #event-container .events .list-card.error {
+  background-color: #FF4136;
+  color: #FFFFFF;
+}
+main #event-container .events .list-card.error a {
+  color: #FF851B;
+}
+main #event-container .events .list-card:hover {
+  margin-bottom: 17px;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+main #event-container .events .list-card .buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+main #event-container .events .list-card .buttons a, main #event-container .events .list-card .buttons button {
+  margin: 0;
+  width: 150px;
+}
+main #event-container .events .list-card .buttons a:first-child, main #event-container .events .list-card .buttons button:first-child {
+  margin-bottom: 5px;
+}
+main #event-container .events .list-card .content .start {
+  -ms-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: gray;
+  font-size: 17px;
+  line-height: 23px;
+  height: 2em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 10px 20px 0 0;
+}
+main #event-container .events .list-card .content .name {
+  font-size: 20px;
+  line-height: 25px;
+  max-height: 2.5em;
+  font-weight: 600;
+  letter-spacing: 0;
+  padding: 0;
+  height: 45px;
+  margin-bottom: 2px;
+}
+main #event-container .events .list-card .content .distance {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  color: #666A73;
+  font-size: 17px;
+  line-height: 23px;
+  height: 2em;
+}
+
+@media (max-width: 700px) {
+  #event-container {
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  #event-container .controls {
+    order: 1 !important;
+    margin-bottom: 7px;
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    flex-wrap: wrap;
+  }
+  #event-container .events {
+    order: 2 !important;
+  }
+}
+@media only screen and (max-width: 470px) {
+  #event-container .events {
+    min-width: 0 !important;
+  }
+  #event-container .events .list-card .buttons {
+    display: none !important;
+  }
+  #event-container .events .list-card .content {
+    width: 100% !important;
+  }
+}
+
+/*# sourceMappingURL=discover.css.map */

@@ -1,0 +1,175 @@
+.navigation .navigation-link, .navigation .navigation-title, .navigation .title {
+  display: inline;
+  font-size: 2rem;
+  line-height: 7rem;
+  padding: 0;
+  text-decoration: none;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body .content-wrapper {
+  min-height: 100%;
+  position: relative;
+}
+body .content-wrapper nav.navigation {
+  height: 7rem;
+  background-color: #FF851B;
+}
+body .content-wrapper nav.navigation .side-nav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 100000000;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  padding-top: 5rem;
+  transition: 0.5s;
+  background-color: #FF851B;
+}
+body .content-wrapper nav.navigation .side-nav ul {
+  list-style: none;
+  margin: 0;
+}
+body .content-wrapper nav.navigation .side-nav ul .navigation-item {
+  text-align: center;
+}
+body .content-wrapper nav.navigation .side-nav ul .navigation-item.close-sidenav {
+  font-size: 5rem;
+}
+body .content-wrapper nav.navigation .side-nav ul .navigation-item a {
+  text-decoration: none;
+  color: #FFFFFF;
+  transition: color 1ms;
+}
+body .content-wrapper nav.navigation .side-nav ul .navigation-item a:hover {
+  color: #DDDDDD;
+}
+body .content-wrapper nav.navigation section.container {
+  height: 7rem;
+  max-width: 80rem;
+}
+body .content-wrapper nav.navigation section.container a.navigation-title {
+  line-height: 7rem;
+  font-size: 4.6rem;
+}
+body .content-wrapper nav.navigation section.container a.navigation-title h1 {
+  margin: 0;
+  padding: 0;
+  line-height: 7rem;
+  display: inline;
+  color: #FFFFFF;
+}
+body .content-wrapper nav.navigation section.container ul.navigation-list {
+  list-style: none;
+  margin: 0;
+}
+body .content-wrapper nav.navigation section.container ul.navigation-list .navigation-item {
+  float: left;
+  margin-bottom: 0;
+  margin-left: 2.5rem;
+  position: relative;
+}
+body .content-wrapper nav.navigation section.container ul.navigation-list .navigation-item.sidebar-button {
+  display: none;
+}
+body .content-wrapper nav.navigation section.container ul.navigation-list .navigation-item a {
+  text-decoration: none;
+  display: inline;
+  line-height: 7rem;
+  color: #FFFFFF;
+  transition: color 1ms;
+}
+body .content-wrapper nav.navigation section.container ul.navigation-list .navigation-item a:hover {
+  color: #DDDDDD;
+}
+body .content-wrapper main {
+  width: 100%;
+}
+body .content-wrapper footer {
+  width: 100%;
+  height: 4rem;
+  background-color: #FF851B;
+  color: #FFFFFF;
+  text-align: center;
+  line-height: 4rem;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+@media (max-width: 650px) {
+  nav .nav-bar .navigation-list .navigation-item:not(.sidebar-button) {
+    display: none;
+  }
+  nav .nav-bar .navigation-list .navigation-item.sidebar-button {
+    display: list-item !important;
+  }
+}
+body {
+  background: url("../../img/home/background1.jpg") center;
+  background-size: cover;
+}
+body main div.inner {
+  padding: 2rem;
+}
+body main div.inner section.float-left {
+  width: 70rem;
+}
+body main div.inner section.float-left section:not(.img) {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 1.5rem;
+  padding: 5rem;
+  margin-bottom: 3rem;
+}
+body main div.inner section.float-left section.img {
+  border-radius: 1.5rem;
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+body main div.inner aside.form {
+  padding: 5rem;
+  text-align: center;
+  width: 35rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 1.5rem;
+}
+body main div.inner aside.form form input {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+body main div.inner aside.form form div.error {
+  padding: 0.3rem;
+  border-top-right-radius: 0.4rem;
+  border-top-left-radius: 0.4rem;
+  background-color: #FF4136;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+body main div.inner aside.form form div.error + input {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border: 0.3rem solid #FF4136;
+  border-top-style: none;
+}
+body main div.inner .clear {
+  clear: both;
+}
+
+@media (max-width: 1130px) {
+  main div.inner section.float-left {
+    width: 100% !important;
+  }
+  main div.inner section.float-left section {
+    border-radius: 0 !important;
+  }
+  main div.inner aside.form {
+    display: none;
+  }
+}
+
+/*# sourceMappingURL=index.css.map */
