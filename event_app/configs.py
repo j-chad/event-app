@@ -5,24 +5,34 @@ import os
 
 class Config:
     """Base Configuration"""
+
+    # Instance Config
+    MAPBOX_ACCESS_TOKEN = os.environ['MAPBOX_ACCESS_TOKEN']
+    RECAPTCHA_PUBLIC_KEY = os.environ['RECAPTCHA_PUBLIC_KEY']
+    REDIS_URL = os.environ['REDIS_URL']
+    RQ_REDIS_URL = os.environ['REDIS_URL']
+    RATELIMIT_STORAGE_URL = os.environ['REDIS_URL']
+    MAIL_SERVER = os.environ['MAIL_SERVER']
+    MAIL_PORT = os.environ['MAIL_PORT']
+    MAIL_USERNAME = os.environ['MAIL_USERNAME']
+    MAIL_USE_TLS = bool(os.environ['MAIL_USE_TLS'])
+    MAIL_USE_SSL = bool(os.environ['MAIL_USE_SSL'])
+    SQLALCHEMY_DATABASE_URI = os.environ['CLEARDB_DATABASE_URL']
+    WEB_PUSH_PRIVATE_KEY = os.environ['WEB_PUSH_PRIVATE_KEY']
+    WEB_PUSH_PUBLIC_KEY = os.environ['WEB_PUSH_PUBLIC_KEY']
+    RECAPTCHA_PRIVATE_KEY = os.environ['RECAPTCHA_PRIVATE_KEY']
+    MAIL_PASSWORD = os.environ['MAIL_PASSWORD']
+    HASHID_SALT = os.environ['HASHID_SALT']
+    SECRET_KEY = os.environ['SECRET_KEY']
+
     BCRYPT_LOG_ROUNDS = 14
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     DEBUG_TB_TEMPLATE_EDITOR_ENABLED = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAIL_SERVER = "smtp.gmail.com"
-    MAIL_PORT = 465
-    MAIL_USERNAME = 'event.app.notifier@gmail.com'
-    MAIL_USE_TLS = False
-    MAIL_USE_SSL = True
-    REDIS_URL = "redis://localhost:6379/0"
-    RQ_REDIS_URL = REDIS_URL
-    RATELIMIT_STORAGE_URL = REDIS_URL
     VERIFICATION_TOKEN_EXPIRY = 12 * 60 * 60  # 12 Hours
     RECOVERY_TOKEN_EXPIRY = 20 * 60  # 20 Minutes
-    RECAPTCHA_PUBLIC_KEY = "6LeZl1gUAAAAAARV1XA2pNUXSKhvn89crZVrT_FY"
     MINIMUM_PASSWORD_LENGTH = 8
     RATELIMIT_KEY_PREFIX = "RATELIMITER#"
-    MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoiai1jaGFkIiwiYSI6ImNqajIzenFpMTB6ZHczd3Bjam50cmUwa2wifQ.mQ8rOg6dSN3P2EnUweer8g"
     HUMANIZE_USE_UTC = True
     PREFERRED_URL_SCHEME = 'https'
 
