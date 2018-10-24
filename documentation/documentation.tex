@@ -254,7 +254,7 @@ tabsize=2
 	PostgreSQL is also a very popular relational database. It has very similar features to MySQL but is closer to the ANSI SQL standard, i.e. more feature complete. PostgreSQL is a little slower than MySQL and doesn’t perform as well in highly concurrent environments.
 	
 	\subsection{Conclusion}
-	\todo{add relational database description}
+	\missingfigure{add relational database description}
 
 	\section{Non-Relational Database Engine (Key-Value)}
 	My non-relational database will be used to handle tasks and data which are not related but still must be stored. This will include data involving caching, tasks, rate-limiting and verification. I will use a key-value model for my non-relational data.
@@ -266,7 +266,7 @@ tabsize=2
 	Redis is another excellent non-relational database. Unlike Memcached, every operation is atomic meaning that when the application is scaled up and there may be a few hundred changes to the database every second, there shouldn't be any data race issues. This is very important in a highly concurrent application. Redis is every bit as fast as Memcached and supports more features, which is always nice.
 	
 	\subsection{Conclusion}
-	\todo{Non-Relational conclusion}
+	\missingfigure{Non-Relational conclusion}
 
 	\section{Object Relational Mapper}
 	An Object Relational Mapper (ORM) handles an abstraction level between the programming language and the database. This means that I can write python code that the ORM will: transform to SQL, execute the SQL, and transform any non-pythonic objects into python data types. This allows easy and safe development and enables me to use SQLite to test and MySQL in production with minimal changes in code.
@@ -278,7 +278,7 @@ tabsize=2
 	SQLalchemy is a very stable ORM that integrates very nicely into flask using an extension. It is a very widely used ORM and I have the most experience with it. SQLAlchemy is much larger than PeeWee but offers a lot more features while maintaining simple and expressive syntax. There are 9 major contributors and it has a large online following. SQLAlchemy also offers the ability to drop down to raw SQL if needed, although this can open the application up to SQL injection vulnerabilities.
 	
 	\subsection{Conclusion}
-	\todo{ORM Conclusion}
+	\missingfigure{ORM Conclusion}
 
 	\section{Task Queue}
 	A task queue will become important in the later stages of my website when I need to write asynchronous code that doesn't block the current request. This will increase the time it takes for the web app to respond, and allow asynchronous events to be scheduled. \todo{Better explanation of a task queue}
@@ -308,9 +308,7 @@ tabsize=2
 	I initially began this project with the intention of creating my own login management system, however the complex and time consuming nature of this application meant I switched to a prebuilt solution using flask-login and flask-paranoid. Flask login integrates with SQLAlchemy and provides essential session management, where the session is stored as a cookie and verified each request. Flask-paranoid is used as a second layer of security which verifies that the users session doesn't suddenly switch to another computer, which could indicate the users session has been stolen by a malicious user.
 
 	As an extra layer, I also added a verification email, which is sent to the users email. This helps to protect against spam and verifies that the user owns the email.
-
-	\section{Design Research}
-
+	
 	\chapter{Development and Implementation}
 
 	\section{Back-End}
@@ -512,9 +510,10 @@ tabsize=2
 		\includegraphics[width=\linewidth]{static/xmlhttp2support.png}
 	\end{figure}
 
+	\todo{Expand on solution}
 
 	\subsection{Geo Search \& Mapping}
-	For users to be able to see nearby events, we first need to know the location of events. An important consideration in storing the coordinates (latitude \& longitude) is how accurate they need to be. I found that 5 decimal points gives precision of ~1m which is more than enough precision. I wrote the algorithm to calculate the distance as a hybrid method in my ORM, which means it will work in the database and on the server with no changes to the code. In order to display my geographical data I needed a map provider. I initially decided on using bing maps, but after a few hours with no results, I switched to mapbox using leaflet. I was able to quickly get a map displayed using mapbox and leaflet.
+	For users to be able to see nearby events, we first need to know the location of events. An important consideration in storing the coordinates (latitude \& longitude) is how accurate they need to be. I found that 5 decimal points gives precision of ~1m which is more than enough precision. I wrote the algorithm to calculate the distance as a hybrid method in my ORM, which means it will work in the database and on the server with no changes to the code. In order to display my geographical data I needed a map provider. I initially decided on using bing maps, but after a few hours with no results, I switched to mapbox using leaflet. I was able to quickly get a map displayed using mapbox and leaflet. \todo{Write more about problem}
 
 	\subsection{Server to Client Communication}
 	While users of my application will get real-time emails and push notifications, any updates to the data will not be presented to them until the page is refreshed. This is an important feature for my application to have, before the data is truly real-time. HTTP is traditionally a half-duplex protocol, where a client sends a request and received a response. To show real time data, I need to be able to send data to the client from the server whenever there is new data. There have been numerous methods used in an attempt to overcome these limitations. One of the most common of these methods, is simply asking the server constantly for the new data. A variation on this is asking for the data and then the server waits until it receives new data before responding. While some of these techniques work well, they have a large amount of overhead, constantly sending or receiving unnecessary data. There are two relatively new specifications that allow communication between the server and client. The first method I tried was Server Sent Events (SSE). SSE is built upon http and is fairly straightforward: The client connects to an event source, and then the server pushes data to that event source, giving the client the data. This is still technically half-duplex but the server initiates the request, rather than the client. The other specification is Websockets. Websockets are a separate protocol from http and are achieved by using an upgrade header in http. Websockets are fully duplex and very efficient. I used SSE as Websockets were much more difficult to implement safely and were overpowered for my needs.
