@@ -1,9 +1,9 @@
-\documentclass[a4paper,oneside,12pt]{report}
+\documentclass[a4paper,oneside,12pt,draft]{report}
 \usepackage[margin=2.7cm]{geometry}
 \usepackage{titlesec}
 \usepackage[backend=biber]{biblatex}
 \usepackage{url}
-\usepackage{todonotes}
+\usepackage[obeyDraft]{todonotes}
 \usepackage[utf8]{inputenc}
 \usepackage[acronym]{glossaries}
 \usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
@@ -58,6 +58,8 @@ tabsize=2
 \addbibresource{documentation.bib}
 
 \begin{document}
+
+	\listoftodos
 
 	\begin{titlepage} % Suppresses displaying the page number on the title page and the subsequent page counts as page 1
 		\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for horizontal lines, change thickness here
@@ -119,30 +121,31 @@ tabsize=2
 	\chapter{Preface}
 	This project is my submission for the \textbf{New Zealand Technology Scholarship}\footnote{\url{https://nzqa.govt.nz/qualifications-standards/awards/new-zealand-scholarship/scholarship-subjects/scholarship-technology/}}
 
-	It is completely open source as part of my ethos and commitment to privacy \& transparency. The source code is available on github\footnote{\url{https://github.com/j-chad/event-app}}. I have also deployed the application, which is available at \url{https://jchad-event-app.herokuapp.com/}. This online version will only be available October - December due to hosting costs.
+	It is completely open source as part of my ethos and commitment to privacy \& transparency. The source code is available on github\footnote{\url{https://github.com/j-chad/event-app}}.
+	
+	I have also deployed the application, which is available at \url{https://jchad-event-app.herokuapp.com/}. This online version will only be available October - December due to hosting costs. The serving of static files uses the default development server. This is inefficient but I do not have the budget to use a service such as AWS to efficiently serve these files. Thus it feels much slower than it would in a true production environment.
 
 	This document was written in \LaTeX{} and is also freely available on the public repository.
 
 
-
 	\chapter{Introduction}
-	I was approached by my clients, who recently had problems organising a school ball. Their main problem was communication between the large volume of attendees and the organisers. In particular, there were difficulties in efficently notifying and updating all attendees of upcoming events and changes.
+	\todo{Change to past tense}
+	I was approached by my clients, who recently had problems organising a school ball. Their main problem was communication between the large volume of attendees and the organisers. In particular, there were difficulties in efficiently notifying and updating all attendees of upcoming events and changes.
 
-	One of the main concerns for notifying attendees, was that not all attendees used just one platform such as Facebook. This meant some of the attendees were not always recieving important information.
+    One of the main concerns for notifying attendees was that not all attendees used just one platform such as Facebook. This meant some of the attendees were not always receiving important information.
 
-	My clients were mostly school students that had many other obligations, and were voluntaring to organise the ball. They found it difficult to keep everyone updated while still studying and performing other responsibilities.
+    My clients were mostly school students that had many other obligations and were volunteering to organise the ball. They found it difficult to keep everyone updated while still studying and performing other responsibilities.
 
 	\section{Initial Consultation}
-	%They organised the ball through lots of meetings and used a whiteboard to detail the event. Facebook was used to share details to the students attending the event. The main issues were communication and keeping everyone updated and on the same page. Another issue was quickly and efficiently communicating any changes to the event goers. The group used facebook polls to ask ideas but struggled with the fact that participants could edit the list of options. There were also issues with people who didn’t use facebook and weren’t able to be notified in this way.
-	I met with my clients, the Ball Commitee, to discuss how they previously organised the ball, problems they encountered and to discuss their ideas for improvements.
+	I met with my clients, the Ball Committee, to discuss how they previously organised the ball, problems they encountered and to discuss their ideas for improvements.
 
-	The previous ball was organised largely through Facebook. The Ball Committee members were all administrators of the page and published updates to attendees on this platform. Students attending the ball were advised to subscribe to the facebook page. The Commitee found that not all students were on Facebook. This caused a need for the information to be relayed through other mediums such as email or SMS, inducing an effect not dissimilar to chinese whispers as information was not always relayed as intended. In effect this created more work for the Ball Comittee and meant there wasn't a single source of information.
+    The previous ball was organised largely through Facebook. The Ball Committee members were all administrators of the page and published updates to attendees on this platform. Students attending the ball were advised to subscribe to the facebook page. The Committee found that not all students were on Facebook. This caused a need for the information to be relayed through other mediums such as email or SMS, inducing an effect not dissimilar to Chinese whispers as information was not always relayed as intended. In effect, this created more work for the Ball Committee and meant there wasn't a single source of information.
 
-	I asked the Committee if they could instead relay all their information by email rather than facebook. They said most students do not reguarly check their school email address, and it is harder to reply to a large volume of questions using this format. I then asked if the school newsletter would be a possible solution. However not all Teachers read out the information, and students don't tend to seek it out on their own.
+    I asked the Committee if they could instead relay all their information by email rather than Facebook. They said most students do not regularly check their school email address, and it is harder to reply to a large volume of questions using this format. I then asked if the school newsletter would be a possible solution. However not all Teachers read out the information, and students don't tend to seek it out on their own.
 
-	To better understand the issue, I surveyed students who were not on Facebook. Of the 74\% that responded to my survey, I found that a large proportion were worried about the privacy implications following the recent Facebook data scandal. I then asked this group what their preferred social media platform was, of which I got a large range of different apps.
+    To better understand the issue, I surveyed students who were not on Facebook. I found that a large proportion of respondents were worried about the privacy implications following the recent Facebook data scandal. I then asked this group what their preferred social media platform was, of which I got a large range of different apps.
 
-	\section{Specifications}
+	\section{Specifications/Requirements}
 	After the initial consultation and some research, the main specifications of this project are:
 	\begin{itemize}
 		\item Organisers can send out rich content updates that \textbf{all} users can subscribe to.
@@ -154,26 +157,26 @@ tabsize=2
 	\end{itemize}
 	On top of these requirements, the service should also be secure, private and easy to use.
 
-	The Ball Committee have requested that this application be completed by the end of 2018 so it can assist next years Committee.
-
 	\section{Key Stakeholders}
-	My key stakeholders are the Ball Committee and those attending ball. My project is all about effective communication between these two parties so I need to consider their needs and feedback throughout the development process. I haved arranged to meet with various Ball Committee members during development to discuss progress and future features being considered. I have decided to meet with different Committee members individually during this time, to get a better range of ideas.
+	My key stakeholders are the Ball Committee and those attending the school ball. My project is all about effective communication between these two parties so I need to consider their needs and feedback throughout the development process. I have arranged to meet with various Ball Committee members during development to discuss progress and future features being considered. I have decided to meet with different Committee members individually during this time, to get a better range of ideas.
 
-	I will also be consulting fellow students about design and features to ensure that it is easy for them to use. I need to ensure I get a wide range of students in order to recieve feedback that is reflective of the intended audience.
+	I will also be consulting fellow students about design and features to ensure that it is easy for them to use. I need to ensure I get a wide range of students in order to receive feedback that is reflective of the intended audience.
 
 	While the Ball Committee and attendees are my key stakeholders, I am also aware that this project has the potential to cater to a much larger demographic. During the development of this project, I will also consider how it could be used in other events, such as community events and concerts.
 
 	\section{Concept Statement}
 	My stakeholders, who recently organised a school ball, have voiced concerns about the difficulty it takes to organise events with a high number of attendees. A website event management system would help to ease the burden of effective communication to large groups of attendees. While this would be developed with the stakeholders in mind, it would also be beneficial for other large events.
 
-	The main problem I will be solving is a unified way to communicate between organisers and a large amount of attendees. Key to this, is to ensure that \textbf{all} attendees recieve up to date reliable information in a timely and consistent manner.
+    The main problem I will be solving is a unified way to communicate between organisers and a large number of attendees. Key to this is to ensure that \textbf{all} attendees receive up to date reliable information in a timely and consistent manner.
 
 	\section{Existing Solutions}
-	Event management is a fairly common task so there are a multitude of solutions that I must evaluate. This will help me to determine the strengths and weaknesses of each and give me insight on what to implement in my app.
+	Event management is a fairly common task so there exists a multitude of solutions that I must evaluate. This will help me to determine the strengths and weaknesses of each and give me insight on what to implement in my app.
 
 	\subsection{Facebook Events}
+	\missingfigure{Facebook events}
 
 	\subsection{Eventbrite}
+	\todo{Include client feedback}
 	Eventbrite is another very popular event management system, that lets users view nearby events.
 	It supports buying tickets, as well as settings to make the event private or public. The UI is a modern and clean design, and I found it very easy to navigate and create an event.
 
@@ -194,7 +197,6 @@ tabsize=2
 	\subsubsection{Conclusion}
 	The user interface of eventbrite is well designed, with clean colours and well presented information. I like the fact that it supports tickets, but I will not be implementing this due to the cost and security issues that it raises. I will, however, consider their design and flow between pages when developing my application.
 
-
 	\chapter{Research}
 
 	\section{Language}
@@ -209,37 +211,50 @@ tabsize=2
 	I have decided to evaluate the following languages, which I have experience in: Javascript, PHP, Python and C\#.
 
 	\subsection{Javascript}
-	Javascript is a dynamic, duck typed language. It has been the de facto language for front-end programming since the inception of the web. Recently it has also become a popular back-end language with the advent of nodejs. This gives developers the significant advantage of only having to learn and write programs in one language both client-side and server-side.
-
+	Javascript is a dynamic, duck-typed language. It has been the de facto language for front-end programming since the inception of the web. Recently it has also become a popular back-end language with the advent of nodejs. This gives developers the significant advantage of only having to learn and write programs in one language both client-side and server-side.
 
 	Javascript is a relatively new language for programming the back-end, it has historically been used to write code on the front-end. In recent years it has taken off and become popular due to website designers only needing to learn one language in order to build an application. The maturity of this language as a back-end is concerning, as it may not be as heavily vetted as alternatives. There are also other quirks of the language that put me off, such as strange type coercion (1 == “1”) and implicit global variables. I have a lot of experience using this language on the front-end but very little on the back-end.
 
 	\subsection{PHP}
-	PHP is the most widely used language for web development in the world, with over 80\% of websites using it. This language does not have the problem of maturity, having been around for 24 years. The problem with PHP is it’s unpredictable and inconsistent. In PHP: NULL < -1 yet NULL == 0. This is not a one off case. The whole language is riddled with strange design decisions and many ways to do a single thing, each with different naming schemes. On top of all this, the language encourages bad website design and makes you go out of your way to create secure apps.
+	PHP is the most widely used language for web development in the world, with over 80\% of websites using it. This language does not have the problem of maturity, having been around for 24 years. The problem with PHP is it’s unpredictable and inconsistent. In PHP: NULL \(< -1\) yet NULL \(== 0\). This is not a one-off case. The whole language is riddled with strange design decisions and many ways to do a single thing, each with different naming schemes. On top of all this, the language encourages bad website design and makes you go out of your way to create secure apps.
 
 	\subsection{Python}
-	Python is an object oriented language that has been around for almost 28 years. It is a general purpose programming language and has many frameworks that enable web development. The syntax and language are very concise and expressive, making development very quick and easy to debug. Python avoids both the pitfalls of PHP and Javascript and is very flexible. Since python is a interpreted language it is marginally slower than similar languages which are compiled. The fact that it is not specific to web development means that I can use a wide range of tools to accomplish my tasks.
+	Python is an object-oriented language that has been around for almost 28 years. It is a general-purpose programming language and has many frameworks that enable web development. The syntax and language are very concise and expressive, making development very quick and easy to debug. Python avoids both the pitfalls of PHP and Javascript and is very flexible. Since python is an interpreted language it is marginally slower than similar languages which are compiled. The fact that it is not specific to web development means that I can use a wide range of tools to accomplish my tasks.
+	
+	\subsection{C\#}
+	C\# is a strongly typed, compiled language from the C family. It was created by microsoft as an interface for .NET, a common core between many languages. Included in .NET is the ASP.NET library, the server-side web framework. The compiled nature of this language allows heavy optimisations to be made at compile time, leading to speed ups in the application. I have experience in using this language as it is used in my job for a large-scale international web application. While it works well with large applications that require constant maintenance and have a company driving development, it is generally overkill for smaller scale applications. ASP.NET development is much slower (albeit more thorough) than dynamic languages such as the above.
+	
+	\subsection{Conclusion}
+	I have opted to use Python as the primary development language for my application. This is due to the dynamic nature of the language which allows a 
+	fast development pace. As well as the large community and environment that comes with it. Using PyPI (a.k.a the Cheese Shop), I have access to over \(113,000\) packages created by the python community that can help me to develop certain features.
 
 	\section{Web Framework}
-	In order for me to efficiently and securely write a web app, I will need to use a web framework which handles all low level details such asl http and routing logic, I will need to use one of the many web frameworks made for python. A web framework handles most of the logic that is general to all websites and lets me worry about higher level application logic. The two main frameworks in python are \textbf{flask} and \textbf{django}.
+	In order for me to efficiently and securely write a web app, I will need to use a web framework which handles all low-level details such as HTTP and routing logic, I will need to use one of the many web frameworks made for python. A web framework sits between the browser and the language and handles common logic that is general to all websites. This allows me to ignore implementation details and focus on higher level application logic. The two most common frameworks in python are \textbf{flask} and \textbf{Django}. There is a divide in the community about which is better, but the general consensus is that they are both suited for different use cases.
 
 	\subsection{Django}
-	Django is a web framework that takes a "battery included approach". It includes many features out of the box, meaning programmers can spend more time writing code without worrying about implementation details. Although this framework would have many useful features, it would impose an infrastructure that is far too heavy for my purposes.
+	Django is a web framework that takes a "battery included approach". It includes many features out of the box, meaning programmers can spend more time writing code without worrying about implementation details. Although this framework would have many useful features, it would impose an infrastructure that is far too heavy for my purposes. It is 180 MB which is very heavy compared to flask (6.3 MB). This is because of the "include everything" approach Django takes, whether or not those features actually get used.
 
 	\subsection{Flask}
-	Flask is a "microframework" and is the opposite of Django in the fact that it makes less decisions for the programmer. It is very lightweight and leaves almost all of the higher level implementation and infrastructure details to the programmer. This is perfect for my needs as I can pick and choose the features I need.
+	Flask is a "microframework" and is the opposite of Django in the fact that it makes fewer decisions for the programmer. It is very lightweight and leaves almost all of the higher level implementation and infrastructure details to the programmer. This is perfect for my needs as I can pick and choose the features I need. Flask has a wide array of extensions made by the flask community. These range from login-management to asset bundling.
+	
+	\subsection{Conclusion}
+	I chose to use Flask because of its scalability and extensibility. \todo{Expand web framework conclusion}
 
 	\section{Relational Database Engine}
+	\todo{Expand relational database description}
 	The relational database will have an important role as being the primary data store for my application. Therefore it must be efficient and reliable so as to keep my application running smoothly.
 
 	\subsection{SQLite}
-	SQlite is a lightweight database engine that operates using database files. This means it is fast, efficient and extremely easy to set up. However this means it doesn’t provide proper access controls. Another downside is that it only supports 1 write operation at any given time. The slow write operations will be a major drawback when the web app is scaled up and has many users.
+	SQLite is a lightweight database engine that operates using database files. This means it is fast, efficient and extremely easy to set up. However, this means it doesn’t provide proper access controls. Another downside is that it only supports one write operation at any given time. The slow write operations will be a major drawback when the web app is scaled up and has many users.
 
 	\subsection{MySQL}
-	MySQL is a much more full featured relational database. It is one of the faster available database engines available and is also one of the most popular engines. MySQL has a large open source community fixing bugs and providing support, which is always a welcome addition. MySQL is a database server (not embedded), and is designed for larger applications. MySQL is well known for being very secure and performant, both features would add value to my application. MySQL also offers a much more full featured language with support for more constructs.
+	MySQL is a much more full-featured relational database. It is one of the faster available database engines available and is also one of the most popular engines. MySQL has a large open source community fixing bugs and providing support, which is always a welcome addition. MySQL is a database server (not embedded) and is designed for larger applications. MySQL is well known for being very secure and performant, both features would add value to my application. MySQL also offers a much more full-featured language with support for more constructs.
 
 	\subsection{PostgreSQL}
 	PostgreSQL is also a very popular relational database. It has very similar features to MySQL but is closer to the ANSI SQL standard, i.e. more feature complete. PostgreSQL is a little slower than MySQL and doesn’t perform as well in highly concurrent environments.
+	
+	\subsection{Conclusion}
+	\todo{add relational database description}
 
 	\section{Non-Relational Database Engine (Key-Value)}
 	My non-relational database will be used to handle tasks and data which are not related but still must be stored. This will include data involving caching, tasks, rate-limiting and verification. I will use a key-value model for my non-relational data.
@@ -248,19 +263,25 @@ tabsize=2
 	Memcached is a popular key-value store which is extremely efficient and fast. However, it’s operations are not atomic, meaning race conditions can be created. This is a huge problem in my application, as it could have many hundred requests per second which must be handled simultaneously. Since the operations are not atomic, the data is not reliable with a high traffic.
 
 	\subsection{Redis}
-	Redis is another excellent non relational database. Unlike memcached, every operation is atomic meaning that when the application is scaled up and there may be a few hundred changes to the database every second, there shouldn't be any data race issues. This is very important in a higly concurrent application. Redis is every bit as fast as memcached and supports more features, which is always nice.
+	Redis is another excellent non-relational database. Unlike Memcached, every operation is atomic meaning that when the application is scaled up and there may be a few hundred changes to the database every second, there shouldn't be any data race issues. This is very important in a highly concurrent application. Redis is every bit as fast as Memcached and supports more features, which is always nice.
+	
+	\subsection{Conclusion}
+	\todo{Non-Relational conclusion}
 
 	\section{Object Relational Mapper}
-	A Object Relational Mapper (ORM) handles an abstraction level between the programming language and the database. This means that I can write python code that the ORM will: transform to SQL, execute the SQL, and transform any non-pythonic objects into python data types. This allows easy and safe development, and enables me to use SQLite to test and MySQL in production with minimal changes in code.
+	An Object Relational Mapper (ORM) handles an abstraction level between the programming language and the database. This means that I can write python code that the ORM will: transform to SQL, execute the SQL, and transform any non-pythonic objects into python data types. This allows easy and safe development and enables me to use SQLite to test and MySQL in production with minimal changes in code.
 
 	\subsection{PeeWee}
-	Peewee is a lightweight orm with simple syntax. It is quick and suitable for smaller apps, but it lacks more complicated features. Another important consideration is the community size. PeeWee only has one major contributor, meaning patches and features will be released slowly. It also has very few resources online.
+	Peewee is a lightweight ORM with a simple syntax. It is quick and suitable for smaller apps, but it lacks more complicated features. Another important consideration is the community size. PeeWee only has one major contributor, meaning patches and features will be released slowly. It also has very few resources online.
 
 	\subsection{SQLAlchemy}
-	SQLalchemy is a very stable ORM that integrates very nicely into flask using an extension. It is a very widely used ORM and I have the most experience with it. SQLAlchemy is much larger than PeeWee but offers a lot more features while maintaining simple and expressive syntax. There are 9 major contributors and it has a large online following. SQLAlchemy also offers the ability to drop down to raw SQL if needed.
+	SQLalchemy is a very stable ORM that integrates very nicely into flask using an extension. It is a very widely used ORM and I have the most experience with it. SQLAlchemy is much larger than PeeWee but offers a lot more features while maintaining simple and expressive syntax. There are 9 major contributors and it has a large online following. SQLAlchemy also offers the ability to drop down to raw SQL if needed, although this can open the application up to SQL injection vulnerabilities.
+	
+	\subsection{Conclusion}
+	\todo{ORM Conclusion}
 
 	\section{Task Queue}
-	A task queue will become important in the later stages of my website when I need to write asynchronous code that doesn't block the current request. This will increase the time it takes for the web app to respond, and allow asynchronous events to be scheduled.
+	A task queue will become important in the later stages of my website when I need to write asynchronous code that doesn't block the current request. This will increase the time it takes for the web app to respond, and allow asynchronous events to be scheduled. \todo{Better explanation of a task queue}
 
 	\subsection{Celery}
 	Celery is a very large and full featured task queue. Due to the large community support, I started off with this task queue.
@@ -269,7 +290,7 @@ tabsize=2
 
 	\subsection{Redis Queue (RQ2)}
 	I then tried a much more basic task queue which was designed to work with flask. This task queue was much more suited to my needs.
-	I didn't have to worry about passing any app contexts around or use any hacky workarounds.
+	I didn't have to worry about passing any app contexts around or use any hacky workarounds. As in the name, this task queue uses Redis as a message broker to store and retrieve tasks from.
 
 	\section{Security Considerations}
 	While this site doesn’t handle inherently sensitive data, it is my belief that any website should do their absolute best to provide a secure and private service. There are many aspects to consider when ensuring an app is secure, and it is nearly impossible to cover everything. However I will minimise risks and threats by using current security best practices.
@@ -319,6 +340,7 @@ tabsize=2
 	\end{center}
 
 	\subsection{Database Tables}
+	\todo{Get a nicer database graph}
 	\begin{center}
 		\begin{dot2tex}[neato]
 			graph G {
@@ -589,10 +611,24 @@ tabsize=2
 	This design was much more user friendly, in the sense that it gave users more refined choices as well as having better presentation of the data. The page uses flexboxes to scale appropriately on smaller screens, while keeping a consistent experience. It also gives users the ability to subscribe to an event without needing to first go to the event page.
 
 	\subsection{Event View}
-	It is imperative that the event details page will give as much information as possible, while still remaining easy to consume. This page is central to the whole app, and thus must be simple to use.
+	It is imperative that the event details page will give as much information as possible, while still remaining easy to consume. This page is central to the whole app, and thus must be simple to use. My inital design was simple, yet it was not suited to resize to smaller devices.
+	
+	\begin{figure}[H]
+		\caption{Inital Event Page Design}
+		\includegraphics[width=\linewidth]{static/front-end6.png}
+	\end{figure}
+	
+	My redesigned page takes elements from the initial design (such as the header), and uses the card based design I have used throughout the rest of the application. I use the dashboard layout, where there are two columns which contain the information and controls respectively. This design also lent itself to the inclusion of asynchronous http requests, as the grouped cards allow new entries to be included instantly.
+	
+	\begin{figure}[H]
+		\caption{Event Page Redesigned}
+		\includegraphics[width=\linewidth]{static/front-end7.jpg}
+	\end{figure}
 
 
 	\subsection{Create Event}
+	
+	
 
 	\chapter{Evaluation}
 
