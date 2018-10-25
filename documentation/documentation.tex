@@ -3,7 +3,7 @@
 \usepackage{titlesec}
 \usepackage[backend=biber]{biblatex}
 \usepackage{url}
-\usepackage{todonotes}
+\usepackage[disable]{todonotes}
 \usepackage[utf8]{inputenc}
 \usepackage[acronym]{glossaries}
 \usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
@@ -121,40 +121,40 @@ tabsize=2
 	\pagebreak
 
 	\chapter{Preface}
-	This Event Management Software Development project is my submission for the \textbf{New Zealand Technology Scholarship}\footnote{\url{https://nzqa.govt.nz/qualifications-standards/awards/new-zealand-scholarship/scholarship-subjects/scholarship-technology/}}
+	This Event Management Software Development project is my submission for the \textbf{New Zealand Technology Scholarship}\footnote{\url{https://nzqa.govt.nz/qualifications-standards/awards/new-zealand-scholarship/scholarship-subjects/scholarship-technology/}}.
 
-	It is completely open source as part of my ethos and commitment to privacy \& transparency. The source code is available on github\footnote{\url{https://github.com/j-chad/event-app}}.  I have also deployed the application, which is available at \url{https://jchad-event-app.herokuapp.com}. This online version will only be available October - December due to hosting costs.
+	It is entirely open source as part of my ethos and commitment to privacy \& transparency. The source code is available on GitHub\footnote{\url{https://github.com/j-chad/event-app}}.  I have also deployed the application, which is available at \url{https://jchad-event-app.herokuapp.com}. This online version will only be available October - December due to hosting costs.
 
 	This document was written in \LaTeX{} and is also freely available on the public repository.
 	
-	This document describes the journey of gathering requirements, making design / platform / technology decisions, development challenges and considerations, through to releasing and livening the product.
+	This document describes the journey of gathering requirements, making design/platform /technology decisions, development challenges and considerations, through to releasing and livening the product.
 	
 	This document itself is a representation of the project journey, as this document has been evolving from the start.
 	
-	It should be noted, that the requirements / objectives of this project were completed.
+	It should be noted, that the requirements/objectives of this project have been completed.
 
 	\chapter{Introduction}
 	I was approached by my clients, who recently had problems organising a school ball. Their main problem was communication between the large volume of attendees and the organisers. In particular, there were difficulties in efficiently notifying and updating all attendees of upcoming events and changes.
 
-    One of the main concerns for notifying attendees was that not all attendees used just one platform such as Facebook. This meant some of the attendees were not always receiving important information.
+    One of the main concerns for notifying attendees was that not all attendees used just one platform such as Facebook. This fact meant that some of the attendees were not always receiving relevant information.
 
     My clients were mostly school students that had many other obligations and had volunteered to organise the ball. They found it difficult to keep everyone updated while still studying and performing other responsibilities.
 
 	\section{Initial Consultation}
 	I met with my clients, the Ball Committee, to discuss how they previously organised the ball, problems they encountered and to discuss their ideas for improvements.
 
-    The previous ball was organised largely through Facebook. The Ball Committee members were all administrators of the page and published updates to attendees on this platform. Students attending the ball were advised to subscribe to the facebook page. The Committee found that not all students were on Facebook. This caused a need for the information to be relayed through other mediums such as email or SMS, inducing an effect not dissimilar to Chinese whispers as information was not always relayed as intended. In effect, this created more work for the Ball Committee and meant there wasn't a single source of information.
+    The previous ball was organised mainly through Facebook. The Ball Committee members were all administrators of the page and published updates to attendees on this platform. Students attending the ball were advised to subscribe to the facebook page. The Committee found that not all students were on Facebook. This caused a need for the information to be relayed through other mediums such as email or SMS, inducing an effect not dissimilar to Chinese whispers as information would not be relayed as intended. In effect, this created more work for the Ball Committee and meant there wasn't a single source of information.
 
     I asked the Committee if they could instead relay all their information by email rather than Facebook. They said most students do not regularly check their school email address, and it is harder to reply to a large volume of questions using this format. I then asked if the school newsletter would be a possible solution. However not all Teachers read out the information, and students don't tend to seek it out on their own.
 
-    To better understand the issue, I surveyed students who were not on Facebook. I found that a large proportion of respondents were worried about the privacy implications following the recent Facebook data scandal. I then asked this group what their preferred social media platform was, of which I got a large range of different apps.
+    To better understand the issue, I surveyed students who were not on Facebook. I found that a large proportion of respondents were worried about the privacy implications following the recent Facebook data scandal. I then asked this group what their preferred social media platform was, of which I got a broad range of different apps.
 
 	\section{Specifications/Requirements}
 	After the initial consultation and some research, the main specifications of this project are:
 	\begin{itemize}
-		\item Organisers can send out rich content updates that \textbf{all} users can subscribe to.
-		\item Users will be able to easily find events that matter to them
-		\item Notifications and updates will be presented in real time.
+		\item Organisers can send out rich content updates to which \textbf{all} users can subscribe.
+		\item Users shall be able to find events that matter to them efficiently.
+		\item Notifications and updates shall be presented in real time.
 		\item It must be aesthetically pleasing and appealing to the target audience.
 		\item Users will be able to ask questions about the event.
 		\item The app must be accessible by everyone.
@@ -165,21 +165,21 @@ tabsize=2
 	My key stakeholders are the Ball Committee and those attending the school ball. 
 
 	\subsection{Communication with Stakeholders}	
-	To ensure effective communication between these two parties I wantd to gather their needs and feedback throughout the development process. I have met with various Ball Committee members during development stages to discuss progress and future features being considered. I met with members individually as well as collectively to gather a better range of ideas.
+	To ensure effective communication between these two parties I wanted to gather their needs and feedback throughout the development process. I have met with various Ball Committee members during development stages to discuss progress and future features being considered. I met with members individually as well as collectively to gather a better range of ideas.
 	
 	\subsection{Usability Testing with Stakeholders}
-	In terms of usability I also be consulted with a number of fellow students about design and features to ensure that it is easy for them to use. Utilising usability testing principles from Jakob Nielson \todo{Add to bibliography} I worked with a small number of students and found that sufficent to make usability improvements.
+	Regarding usability, I will also consult with a number of fellow students about design and features to ensure that it is easy for them to use. Utilising usability testing principles from Jakob Nielson \todo{Add to bibliography} I worked with a small number of students and found that sufficient to make usability improvements.
 	
 	\subsection{Other Stakeholders}
-	While the Ball Committee and attendees are my key stakeholders, I am also aware that this project has the potential to cater to a much larger demographic. During the design and development of this event management project, I also considered how the application could be used in other events, such as community events and concerts.
+	While the Ball Committee and attendees are my key stakeholders, I am also aware that this project has the potential to cater to a much broader demographic. During the design and development of this event management project, I also considered how the application could be used in other events, such as community events and concerts.
 
 	\section{Concept Statement}
-	The School Ball Committee, that had recently organised a school ball, voiced concerns about the difficulties experienced in organising events with a high number of attendees. It was determined that a website event management system would help to ease the burden of effective communication to large groups of attendees. While this would be developed with the stakeholders in mind, it would also be beneficial for other large events.
+	The School Ball Committee that had recently organised a school ball, voiced concerns about the difficulties experienced in organising events with a high number of attendees. It was determined that a website event management system would help to ease the burden of effective communication to large groups of attendees. While this would be developed with the stakeholders in mind, it would also be beneficial for other significant events.
 
     The main problem to solve was to find a unified way to communicate between organisers and a large number of attendees - ensuring that \textbf{all} attendees receive up to date reliable information in a timely and consistent manner.
 
 	\section{Existing Solutions}
-	Event management is a fairly common task and there are a number of solutions out there. A number of event management solutions were quickly appraised to determine fit including Arlo, Grenadine, Facebook Events, Floktu and Eventbrite. \todo{Check event app names \& suitability}
+	Event management is a fairly common task, and there are many out there. A number of event management solutions were quickly appraised to determine fit including Arlo, Grenadine, Facebook Events, Floktu and Eventbrite. \todo{Check event app names \& suitability}
 	
 	Each of the various solutions had advantages and disadvantages. As I wanted this scholarship application to be based on development capability rather than customisation and implementation\todo{remove implementation? check brief}, I elected to review one solution in depth before designing a custom developed solution. The existing event management solution I looked at in detail was Eventbrite.
 
@@ -193,22 +193,22 @@ tabsize=2
 		\includegraphics[width=\linewidth]{static/eventbrite-home.png}
 	\end{figure}
 
-	The event pages give a high amount of detail, without cluttering the screen. Including a map, and the time of the event. This will be important in my application, as the user needs to be able to quickly see the information.
+	The event pages give a high amount of detail, without cluttering the screen, including a map, and the time of the event. This information will be valuable in my application, as the user needs to be able to see the information quickly.
 
 	\begin{figure}[H]
 		\caption{Eventbrite Event Page}
 		\includegraphics[width=\linewidth]{static/eventbrite-event.png}
 	\end{figure}
 
-	A big problem with this site, is that it doesn't allow for messages to the attendees, or for the attendees to ask questions about the event, which were both part of my specifications. Additionally, the site is also full of ads and trackers, which poses a privacy concern.
+	A big problem with this site is that it doesn't allow for messages to the attendees, or for the attendees to ask questions about the event, which were both part of my specifications. Additionally, the site is also full of ads and trackers, which poses a privacy concern.
 
 	\subsubsection{Conclusion}
-	The user interface of eventbrite is well designed, with clean colours and well presented information. The fact that it supports tickets, is good, but ticket provision is not a requirement of my application and it will raise significant costs and security issues. I will, however, consider their design and flow between pages when developing my application.
+	The user interface of Eventbrite is well designed, with clean colours and well-presented information. The fact that it supports tickets is good, but ticket provision is not a requirement of my application, and it has the potential to raise costs and security issues significantly. I will, however, consider their design and flow between pages when developing my application.
 
 	\chapter{Technical Component Research \& Evaluation}
-	In order to build a custom online Event Management solution from scratch in a timely manner a numbr of technical components can be selected so that they can be worked together to build a working product that achieves the expectations and requirements I have identified.
+	To build a custom online Event Management solution from scratch in a timely manner, a number of technical components can be selected so that they can be worked together to build a working product that achieves the expectations and requirements I have identified.
 	
-	Aside from some security considerations and other interoperability, the main solution elements considered are:
+	Aside from some security considerations and other interoperability, the primary solution elements considered are:
 	\begin{itemize}
 		\item Development Language
 		\item Web Framework
@@ -217,73 +217,72 @@ tabsize=2
 		\item Object Relational Mapper
 		\item Task Queue
 	\end{itemize}
-	Described below is background to the research and design descision considerations for the technical components selected for use in the custom event management solution developed.
+	Described below is a background to the research and design considerations for the technical components selected for use in the custom event management solution developed.
 
 	\section{Language}
-	Each programming language has its own strengths and weaknesses. Since the programming language used for the back end drives the whole application, it is important to choose a language that will suit a web application. For a language to suit this online event management project it must have a few features:
+	Each programming language has its strengths and weaknesses. Since the programming language used for the back-end drives the whole application, it is essential to choose a language that suits a web application. For a language to suit this online event management project it must have a few features:
 
 	\begin{itemize}
 		\item It must be able to be concurrent and able to respond to requests simultaneously due to the large volume of users expected to use this site.
 		\item It must be quick to develop in given the time constraint.
-		\item It must easily and efficiently interface with popular relational databases
+		\item It must efficiently interface with popular relational databases
 	\end{itemize}
 
-	I have decided to evaluate the following languages, which I have experience in: Javascript, PHP, Python and C\#.
+	I have decided to evaluate the following languages, which I have experience in: JavaScript, PHP, Python and C\#.
 
 	\subsection{Javascript}
-	Javascript is a dynamic, duck-typed language. It has been the de facto language for front-end programming since the inception of the web. Recently it has also become a popular back-end language with the advent of nodejs. This gives developers the significant advantage of only having to learn and write programs in one language both client-side and server-side.
+	JavaScript is a dynamic, duck-typed language. It has been the de facto language for front-end programming since the inception of the web. Recently it has also become a popular back-end language with the advent of nodejs. This gives developers the significant advantage of only having to learn and write programs in one language both client-side and server-side.
 
-	Javascript is a relatively new language for programming the back-end, it has historically been used to write code on the front-end. In recent years it has taken off and become popular due to website designers only needing to learn one language in order to build an application. The maturity of this language as a back-end is concerning, as it may not be as heavily vetted as alternatives. There are also other quirks of the language that put me off, such as strange type coercion (1 == “1”) and implicit global variables. I have a lot of experience using this language on the front-end but very little on the back-end.
+	JavaScript is a relatively new language for programming the back-end, it has historically been used to write code on the front-end. In recent years it has taken off and become popular due to website designers only needing to learn one language in order to build an application. The maturity of this language as a back-end is concerning, as it may not be as heavily vetted as alternatives. There are also other quirks of the language that put me off, such as strange type coercion (1 == “1”) and implicit global variables. I have a lot of experience using this language on the front-end but very little on the back-end.
 
 	\subsection{PHP}
-	PHP is the most widely used language for web development in the world, with over 80\% of websites using it. This language does not have the problem of maturity, having been around for 24 years. The problem with PHP is it’s unpredictable and inconsistent. In PHP: NULL \(< -1\) yet NULL \(== 0\). This is not a one-off case. The whole language is riddled with strange design decisions and many ways to do a single thing, each with different naming schemes. On top of all this, the language encourages bad website design and makes you go out of your way to create secure apps.
+	PHP is the most widely used language for web development in the world, with over 80\% of websites using it. This language does not have the problem of maturity, having been around for 24 years. The problem with PHP is it’s unpredictable and inconsistent. In PHP: NULL \(< -1\) yet NULL \(== 0\). This irregular behaviour is not a one-off case. The whole language is riddled with strange design decisions and many ways to do a single thing, each with different naming schemes. On top of all this, the language encourages bad website design and makes you go out of your way to create secure apps.
 
 	\subsection{Python}
-	Python is an object-oriented language that has been around for almost 28 years. It is a general-purpose programming language and has many frameworks t•hat enable web development. The syntax and language are very concise and expressive, making development very quick and easy to debug. Python avoids both the pitfalls of PHP and Javascript and is very flexible. Since python is an interpreted language it is marginally slower than similar languages which are compiled. The fact that it is not specific to web development means that I can use a wide range of tools to accomplish my tasks.
+	Python is an object-oriented language that has been around for almost 28 years. It is a general-purpose programming language and has many frameworks that enable web development. The syntax and language are very concise and expressive, making development very quick and easy to debug. Python avoids both the pitfalls of PHP and JavaScript and is very flexible. Since python is an interpreted language, it is marginally slower than similar compiled languages. The fact that it is not specific to web development means that I can use a wide range of tools to accomplish my tasks.
 	
 	\subsection{C\#}
-	C\# is a strongly typed, compiled language from the C family. It was created by microsoft as an interface for .NET, a common core between many languages. Included in .NET is the ASP.NET library, the server-side web framework. The compiled nature of this language allows heavy optimisations to be made at compile time, leading to speed ups in the application. I have experience in using this language as it is used in my job for a large-scale international web application. While it works well with large applications that require constant maintenance and have a company driving development, it is generally overkill for smaller scale applications. ASP.NET development is much slower (albeit more thorough) than dynamic languages such as the above.
+	C\# is a strongly typed, compiled language from the C family. Microsoft created C\# as an interface for .NET, a common core between multiple languages. Included in .NET is the ASP.NET library, the server-side web framework. The compiled nature of this language allows substantial optimisations to be made at compile time, leading to speedups in the application. I have experience in using this language as it is used in my job for a large-scale international web application. While it works well with larger applications that require constant maintenance and have a company driving development, it is often overkill for smaller scale applications. ASP.NET development is much slower (albeit more thorough) than dynamic languages such as the above.
 	
 	\subsection{Conclusion}
-	I have opted to use Python as the primary development language for my application. This is due to the dynamic nature of the language which allows a 
-	fast development pace. As well as the large community and environment that comes with it. Using PyPI (a.k.a the Cheese Shop), I have access to over \(113,000\) packages created by the python community that can help me to develop certain features. \todo{git philosiphy? commit fast and commit often}
+	I have opted to use Python as the primary development language for my application. This decision is due to the dynamic nature of the language which allows a fast development pace. As well as the large community and environment that comes with it. Using PyPI (a.k.a the Cheese Shop), I have access to over \(113,000\) packages created by the python community that can help me to develop certain features.
 
 	\section{Web Framework}
-	In order to efficiently and securely write a web app, a web framework which handles all low-level details such as HTTP and routing logic is required. This follows the philosophy of not reinventing the wheel. A web framework sits between the browser and the language and handles common logic that is general to all websites. This allows me as the developer to ignore implementation details and focus on higher level application logic. I will need to use one of the many web frameworks made for python. The two most common frameworks in python are \textbf{flask} and \textbf{Django}. There is a divide in the community about which is better, but the general consensus is that they are both suited for different use cases.
+	To efficiently and securely write a web app, a web framework which handles all low-level details such as HTTP and routing logic is required. This follows the philosophy of not reinventing the wheel. A web framework sits between the browser and the language and handles common logic that is general to all websites. This allows me as the developer to ignore implementation details and focus on higher level application logic. I will need to use one of the many web frameworks made for python. The two most common frameworks in python are \textbf{flask} and \textbf{Django}. There is a divide in the community about which is better, but the consensus is that they are both suited for different use cases.
 
 	\subsection{Django}
 	Django is a web framework that takes a "battery included approach". It includes many features out of the box, meaning programmers can spend more time writing code without worrying about implementation details. Although this framework has many useful features, it would impose an infrastructure that is far too heavy for this project's purposes. It is 180 MB which is very heavy compared to flask (6.3 MB). This is because of the "include everything" approach Django takes, whether or not those features actually get used.
 
 	\subsection{Flask}
-	Flask is a "microframework" and is the opposite of Django in the fact that it makes fewer decisions for the programmer. It is very lightweight and leaves almost all of the higher level implementation and infrastructure details to the programmer. This is perfect for this project's needs as features can be picked and chosen as needed. Flask has a wide array of extensions made by the flask community. These range from login-management to asset bundling.
+	Flask is a "micro-framework" and is the opposite of Django in the fact that it makes fewer decisions for the programmer. It is very lightweight and leaves almost all of the higher level implementation and infrastructure details to the programmer. This is perfect for this project's needs as features can be picked and chosen as needed. Flask has a wide array of extensions made by the flask community. These range from login-management to asset bundling.
 	
 	\subsection{Conclusion}
 	I chose to use Flask because of its scalability and extensibility. \todo{Expand web framework conclusion}
 
 	\section{Relational Database Engine}
-	The relational database will have an important role as being the primary data store for my application. Therefore it must be efficient and reliable so as to keep my application running smoothly. I appraised three SQL databases (as described below): SQLite, MySQL and PostgreSQL.
+	The relational database has a critical role as being the primary data store for my application. Therefore it must be efficient and reliable so as to keep my application running smoothly. I appraised three SQL databases (as described below): SQLite, MySQL and PostgreSQL.
 
 	\subsection{SQLite}
-	SQLite is a lightweight database engine that operates using database files. This means it is fast, efficient and extremely easy to set up. However, this means it doesn’t provide proper access controls. Another downside is that it only supports one write operation at any given time. The slow write operations will be a major drawback when the web app is scaled up and has many users.
+	SQLite is a lightweight database engine that operates using database files. This means it is fast, efficient and straightforward to set up. However, this means it doesn’t provide proper access controls. Another downside is that it only supports one write operation at any given time. The slow write operations will be a major drawback when the web app is scaled up and has many users.
 
 	\subsection{MySQL}
-	MySQL is a much more full-featured relational database. It is one of the faster available database engines available and is also one of the most popular engines. MySQL has a large open source community fixing bugs and providing support, which is always a welcome addition. MySQL is a database server (not embedded) and is designed for larger applications. MySQL is well known for being very secure and performant, both features would add value to my application. MySQL also offers a much more full-featured language with support for more constructs.
+	MySQL is a much more full-featured relational database. It is one of the faster available database engines available and is also one of the most popular engines. MySQL has a large open source community fixing bugs and providing support, which is always a welcome addition. MySQL is a database server (not embedded) and is designed for larger applications. MySQL is well known for being very secure and performant; both features would add value to my application. MySQL also offers a much more full-featured language with support for more constructs.
 
 	\subsection{PostgreSQL}
 	PostgreSQL is also a very popular relational database. It has very similar features to MySQL but is closer to the ANSI SQL standard, i.e. more feature complete. \todo{Write more about postgresql}
 	
 	\subsection{Conclusion}
-	Following consideration of the above three databases, MySQL and PostgreSQL are both capable databases that would be suitable for use. It came down to preference due to the similarity. I had previously used MySQL so I was more familiar with its use and selected it for my event management solution.
+	Following consideration of the above three databases, MySQL and PostgreSQL are both capable databases that would be suitable for use. It came down to preference due to the similarity. I had previously used MySQL, so I was more familiar with its use and selected it for my event management solution.
 
 	\section{Non-Relational Database Engine (Key-Value)}
-	A non-relational database will also be used to handle tasks and data which are not related but still must be stored. This includes data involving caching, tasks, rate-limiting and verification. A key-value model for non-relational data has been used. Two non-relational database engines were appraised - Memcached and Redis.
+	A non-relational database is used to handle tasks and data which are not related to other data or a request context, but still must be stored. Such data includes caching, tasks, rate-limiting and verification. I used a key-value model for the non-relational data. Two non-relational database engines were appraised - Memcached and Redis.
 	
 	\begin{framed}
 	Note: of the two engines appraised, Redis was the engine selected and used in the event management project.
 	\end{framed}
 
 	\subsection{Memcached}
-	Memcached is a popular key-value store which is extremely efficient and fast. However, it’s operations are not atomic, meaning race conditions can be created. This is a huge problem in my application, as it could have many hundred requests per second which must be handled simultaneously. Since the operations are not atomic, the data is not reliable with a high traffic.
+	Memcached is an older key-value store which is extremely efficient and fast. However, it’s operations are not atomic, meaning race conditions can be created. Race conditions are a massive problem in my application, as it could have many hundred requests per second which need to be handled simultaneously. Since the operations are not atomic, the data is not reliable with high traffic.
 
 	\subsection{Redis}
 	Redis is another excellent non-relational database. Unlike Memcached, every operation is atomic meaning that when the application is scaled up and there may be a few hundred changes to the database every second, there shouldn't be any data race issues. This is very important in a highly concurrent application. Redis is every bit as fast as Memcached and supports more features, which is always nice.
@@ -291,7 +290,7 @@ tabsize=2
 	\section{Object Relational Mapper}
 	An Object Relational Mapper (ORM) handles an abstraction level between the programming language and the database. Using an ORM is desirable as it allows focus to remain on the logic of the application without worrying about implementation detail or intricacies of database management.
 	
-	Using an ORM means that python code can be writtn so that the ORM will: generate SQL, execute the SQL, and transform any non-pythonic objects into python data types. Utilising an ORM allows easy and safe development and enabled me to use SQLite in a testing/development environment and MySQL in production with minimal changes in code.
+	Using an ORM means that python code can be written so that the ORM will: generate SQL, execute the SQL, and transform any non-pythonic objects into python data types. Utilising an ORM allows safe and straightforward development and enabled me to use SQLite in a testing/development environment and MySQL in production with minimal changes in code.
 	
 	I evaluated two ORMS: PeeWee and SQLAlchemy.
 
@@ -644,11 +643,11 @@ tabsize=2
 		\lstinline|sqlalchemy.exc.TimeoutError: QueuePool limit of size 10 overflow 10 reached|
 	\end{framed}
 	
-	This is due to the nature of both flask and SQLAlchemy. Behind the scenes, SQLAlchemy creates a pool of connections. This is because it is inefficent to create and maintain a new connection whenever a new user connects. With large web apps this could easily lead to holding millions of database connections simultaneously. Instead a specific number of connections are created, these are reused by different users. If there are no connections ready in the pool, a new one will be created. If too many connections are held and a new one is requested, it will eventually timeout, giving the error.
+	This error is due to the nature of both flask and SQLAlchemy. Behind the scenes, SQLAlchemy creates a pool of connections. This is because it is inefficient to create and maintain a new connection whenever a new user connects. With large web apps, this could easily lead to holding millions of database connections simultaneously. Instead, a specific number of connections are created, these are reused by different users. If there are no connections ready in the pool, a new one will be created. If too many connections are held, and a new connection is requested, it will eventually timeout, giving this error.
 
 	Attempting to replicate this behaviour when testing in a production environment was unsuccessful. As it turns out, this is because it is only an issue in a debugging environment. When flask is in debug mode, it keeps a live debugger open which keeps the connections busy. This means they cannot be recycled, and will be held open. This causes an overflow when the pool eventually tries to open more connections than allowed.
 
-	The solution to this, was to raise the connection limit in a development environment. This way it gives the debugger more breathing space to keep connections open..
+	The solution to this, was to raise the connection limit in a development environment. This way it gives the debugger more breathing space to keep connections open.
 
 	\section{Front-End}
 	Designing the front end was more challenging to get right, as the user interface needed to feel friendly, simple and flexible. I started off with drawing up a mock of the home page with my client, so that I could get a feel for the theme.
@@ -717,6 +716,11 @@ tabsize=2
 
 
 	\subsection{Create Event}
+	For the create event page, I just used a simple form. I used custom datetime components to make it more user friendly entering data. The form follows the same philosophy as the regiter and login form, where it will verify client-side and fail without waiting for a network request if possible.
+	\begin{figure}[H]
+		\caption{Event Page Redesigned}
+		\includegraphics[width=\linewidth]{static/front-end8.jpg}
+	\end{figure}
 
 	\chapter{Hosting \& Deployment}
 	To host the application, I chose to use Heroku, from the reccomendations of other developers in the flask community. In Heroku, I elected to get the hobby tier, which included automated SSL certificates from LetsEncrypt. Heroku also allowed me to spin up a free Redis and MySQL database.
@@ -728,17 +732,18 @@ tabsize=2
 	\todo{maybe talk about redis?}
 
 	\chapter{Conclusion}
-	It is my belief that the development process I undertook was thorough and fulfilled all of the requirements.
-	
 	I designed this event management application with the intent of it being able to be used for a wide variety of events, not just school balls.  The main advantage of this application is to provide event communication, both of the event itself and subsequent information. 
+    
+    The open source, secure nature of this application means that it can be used as a private stand-in replacement for commonly used event management solutions. This means users that avoided apps, such as Facebook, due to privacy issues will now be able to use this application as a secure advertisement free alternative. The online nature and simple user interface means a wider demographic will be able to utilise it.
+    
+    By designing parts of the application in a modular way (e.g. Message types and notifications), I have made it easy for further features if required.
+    
+    During the process, I learned a lot about the software development process, including requirements analysis, overcoming design challenges and more. I enjoyed seeing the project evolve from an initial concept to a fully functional application. I am pleased with how it looks and the feedback from users regarding how easy it is to use. I believe it has got the potential to be used widely in the Community.
 	
-	The open source, secure nature of this application means that it can be used as a private stand in replacement for commonly used event management solutions. This means users that avoided apps, such as Facebook, due to privacy issues will now be able to use this application as a secure advertisement free alternative. The online nature and simplistic user interface means a wider demographic will be able to utilise it.
-	
-	By designing parts of the application in a modular way (e.g. Message types and notifications), I have made it easy for further features if required.
-	
-	During the process I was able to extend and gain new knowledge on project management and documentation. As well as more specilaized knowledge on protocols such as SSE and push notifications. I enjoyed seeing the project evolve from an initial concept to a fully functional application which has taken.  I am really pleased with how it looks and the feedback from users regarding how easy it is to use.  I believe it has got potential to be used widely in the Community.
+	I am looking forward to refining my software development skills through further projects and tertiary education.
 	
 	\section{Future}
+	While
 
 	\printbibliography
 
