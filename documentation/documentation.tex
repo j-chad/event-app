@@ -7,6 +7,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage[acronym]{glossaries}
 \usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
+\usepackage{amsmath}
+\usepackage{mathtools}
 \usepackage[pdfusetitle]{hyperref}
 \usepackage{pgfplots}
 \usepackage{graphicx}
@@ -83,7 +85,7 @@ tabsize=2
 
 		\HRule\\[0.4cm]
 
-		{\huge\bfseries Online Event Management Software}\\[0.4cm] % Title of your document
+		{\huge\bfseries Online Event Management\\Software Development Project}\\[0.4cm] % Title of your document
 
 		\HRule\\[1.5cm]
 
@@ -119,22 +121,24 @@ tabsize=2
 	\pagebreak
 
 	\chapter{Preface}
-	This project is my submission for the \textbf{New Zealand Technology Scholarship}\footnote{\url{https://nzqa.govt.nz/qualifications-standards/awards/new-zealand-scholarship/scholarship-subjects/scholarship-technology/}}
+	This Event Management Software Development project is my submission for the \textbf{New Zealand Technology Scholarship}\footnote{\url{https://nzqa.govt.nz/qualifications-standards/awards/new-zealand-scholarship/scholarship-subjects/scholarship-technology/}}
 
-	It is completely open source as part of my ethos and commitment to privacy \& transparency. The source code is available on github\footnote{\url{https://github.com/j-chad/event-app}}.
-	
-	I have also deployed the application, which is available at \url{https://jchad-event-app.herokuapp.com/}. This online version will only be available October - December due to hosting costs. The serving of static files uses the default development server. This is inefficient but I do not have the budget to use a service such as AWS to efficiently serve these files. Thus it feels much slower than it would in a true production environment.
+	It is completely open source as part of my ethos and commitment to privacy \& transparency. The source code is available on github\footnote{\url{https://github.com/j-chad/event-app}}.  I have also deployed the application, which is available at \url{https://jchad-event-app.herokuapp.com}. This online version will only be available October - December due to hosting costs.
 
 	This document was written in \LaTeX{} and is also freely available on the public repository.
-
+	
+	This document describes the journey of gathering requirements, making design / platform / technology decisions, development challenges and considerations, through to releasing and livening the product.
+	
+	This document itself is a representation of the project journey, as this document has been evolving from the start.
+	
+	It should be noted, that the requirements / objectives of this project were completed.
 
 	\chapter{Introduction}
-	\todo{Change to past tense}
 	I was approached by my clients, who recently had problems organising a school ball. Their main problem was communication between the large volume of attendees and the organisers. In particular, there were difficulties in efficiently notifying and updating all attendees of upcoming events and changes.
 
     One of the main concerns for notifying attendees was that not all attendees used just one platform such as Facebook. This meant some of the attendees were not always receiving important information.
 
-    My clients were mostly school students that had many other obligations and were volunteering to organise the ball. They found it difficult to keep everyone updated while still studying and performing other responsibilities.
+    My clients were mostly school students that had many other obligations and had volunteered to organise the ball. They found it difficult to keep everyone updated while still studying and performing other responsibilities.
 
 	\section{Initial Consultation}
 	I met with my clients, the Ball Committee, to discuss how they previously organised the ball, problems they encountered and to discuss their ideas for improvements.
@@ -158,22 +162,26 @@ tabsize=2
 	On top of these requirements, the service should also be secure, private and easy to use.
 
 	\section{Key Stakeholders}
-	My key stakeholders are the Ball Committee and those attending the school ball. My project is all about effective communication between these two parties so I need to consider their needs and feedback throughout the development process. I have arranged to meet with various Ball Committee members during development to discuss progress and future features being considered. I have decided to meet with different Committee members individually during this time, to get a better range of ideas.
+	My key stakeholders are the Ball Committee and those attending the school ball. 
 
-	I will also be consulting fellow students about design and features to ensure that it is easy for them to use. I need to ensure I get a wide range of students in order to receive feedback that is reflective of the intended audience.
-
-	While the Ball Committee and attendees are my key stakeholders, I am also aware that this project has the potential to cater to a much larger demographic. During the development of this project, I will also consider how it could be used in other events, such as community events and concerts.
+	\subsection{Communication with Stakeholders}	
+	To ensure effective communication between these two parties I wantd to gather their needs and feedback throughout the development process. I have met with various Ball Committee members during development stages to discuss progress and future features being considered. I met with members individually as well as collectively to gather a better range of ideas.
+	
+	\subsection{Usability Testing with Stakeholders}
+	In terms of usability I also be consulted with a number of fellow students about design and features to ensure that it is easy for them to use. Utilising usability testing principles from Jakob Nielson \todo{Add to bibliography} I worked with a small number of students and found that sufficent to make usability improvements.
+	
+	\subsection{Other Stakeholders}
+	While the Ball Committee and attendees are my key stakeholders, I am also aware that this project has the potential to cater to a much larger demographic. During the design and development of this event management project, I also considered how the application could be used in other events, such as community events and concerts.
 
 	\section{Concept Statement}
-	My stakeholders, who recently organised a school ball, have voiced concerns about the difficulty it takes to organise events with a high number of attendees. A website event management system would help to ease the burden of effective communication to large groups of attendees. While this would be developed with the stakeholders in mind, it would also be beneficial for other large events.
+	The School Ball Committee, that had recently organised a school ball, voiced concerns about the difficulties experienced in organising events with a high number of attendees. It was determined that a website event management system would help to ease the burden of effective communication to large groups of attendees. While this would be developed with the stakeholders in mind, it would also be beneficial for other large events.
 
-    The main problem I will be solving is a unified way to communicate between organisers and a large number of attendees. Key to this is to ensure that \textbf{all} attendees receive up to date reliable information in a timely and consistent manner.
+    The main problem to solve was to find a unified way to communicate between organisers and a large number of attendees - ensuring that \textbf{all} attendees receive up to date reliable information in a timely and consistent manner.
 
 	\section{Existing Solutions}
-	Event management is a fairly common task so there exists a multitude of solutions that I must evaluate. This will help me to determine the strengths and weaknesses of each and give me insight on what to implement in my app.
-
-	\subsection{Facebook Events}
-	\missingfigure{Facebook events}
+	Event management is a fairly common task and there are a number of solutions out there. A number of event management solutions were quickly appraised to determine fit including Arlo, Grenadine, Facebook Events, Floktu and Eventbrite. \todo{Check event app names \& suitability}
+	
+	Each of the various solutions had advantages and disadvantages. As I wanted this scholarship application to be based on development capability rather than customisation and implementation\todo{remove implementation? check brief}, I elected to review one solution in depth before designing a custom developed solution. The existing event management solution I looked at in detail was Eventbrite.
 
 	\subsection{Eventbrite}
 	\todo{Include client feedback}
@@ -195,17 +203,29 @@ tabsize=2
 	A big problem with this site, is that it doesn't allow for messages to the attendees, or for the attendees to ask questions about the event, which were both part of my specifications. Additionally, the site is also full of ads and trackers, which poses a privacy concern.
 
 	\subsubsection{Conclusion}
-	The user interface of eventbrite is well designed, with clean colours and well presented information. I like the fact that it supports tickets, but I will not be implementing this due to the cost and security issues that it raises. I will, however, consider their design and flow between pages when developing my application.
+	The user interface of eventbrite is well designed, with clean colours and well presented information. The fact that it supports tickets, is good, but ticket provision is not a requirement of my application and it will raise significant costs and security issues. I will, however, consider their design and flow between pages when developing my application.
 
-	\chapter{Research}
+	\chapter{Technical Component Research \& Evaluation}
+	In order to build a custom online Event Management solution from scratch in a timely manner a numbr of technical components can be selected so that they can be worked together to build a working product that achieves the expectations and requirements I have identified.
+	
+	Aside from some security considerations and other interoperability, the main solution elements considered are:
+	\begin{itemize}
+		\item Development Language
+		\item Web Framework
+		\item Relational Database Engine
+		\item Non-Relational Database Engine (Key-Value)
+		\item Object Relational Mapper
+		\item Task Queue
+	\end{itemize}
+	Described below is background to the research and design descision considerations for the technical components selected for use in the custom event management solution developed.
 
 	\section{Language}
-	Each programming language has its own strengths and weaknesses. Since the programming language I use for the back end will drive the whole application, it is important to choose a language that will suit a web application. For a language to suit this project it must have a few features:
+	Each programming language has its own strengths and weaknesses. Since the programming language used for the back end drives the whole application, it is important to choose a language that will suit a web application. For a language to suit this online event management project it must have a few features:
 
 	\begin{itemize}
 		\item It must be able to be concurrent and able to respond to requests simultaneously due to the large volume of users expected to use this site.
 		\item It must be quick to develop in given the time constraint.
-		\item It must easily and efficently interface with popular relational databases
+		\item It must easily and efficiently interface with popular relational databases
 	\end{itemize}
 
 	I have decided to evaluate the following languages, which I have experience in: Javascript, PHP, Python and C\#.
@@ -226,23 +246,22 @@ tabsize=2
 	
 	\subsection{Conclusion}
 	I have opted to use Python as the primary development language for my application. This is due to the dynamic nature of the language which allows a 
-	fast development pace. As well as the large community and environment that comes with it. Using PyPI (a.k.a the Cheese Shop), I have access to over \(113,000\) packages created by the python community that can help me to develop certain features.
+	fast development pace. As well as the large community and environment that comes with it. Using PyPI (a.k.a the Cheese Shop), I have access to over \(113,000\) packages created by the python community that can help me to develop certain features. \todo{git philosiphy? commit fast and commit often}
 
 	\section{Web Framework}
-	In order for me to efficiently and securely write a web app, I will need to use a web framework which handles all low-level details such as HTTP and routing logic, I will need to use one of the many web frameworks made for python. A web framework sits between the browser and the language and handles common logic that is general to all websites. This allows me to ignore implementation details and focus on higher level application logic. The two most common frameworks in python are \textbf{flask} and \textbf{Django}. There is a divide in the community about which is better, but the general consensus is that they are both suited for different use cases.
+	In order to efficiently and securely write a web app, a web framework which handles all low-level details such as HTTP and routing logic is required. This follows the philosophy of not reinventing the wheel. A web framework sits between the browser and the language and handles common logic that is general to all websites. This allows me as the developer to ignore implementation details and focus on higher level application logic. I will need to use one of the many web frameworks made for python. The two most common frameworks in python are \textbf{flask} and \textbf{Django}. There is a divide in the community about which is better, but the general consensus is that they are both suited for different use cases.
 
 	\subsection{Django}
-	Django is a web framework that takes a "battery included approach". It includes many features out of the box, meaning programmers can spend more time writing code without worrying about implementation details. Although this framework would have many useful features, it would impose an infrastructure that is far too heavy for my purposes. It is 180 MB which is very heavy compared to flask (6.3 MB). This is because of the "include everything" approach Django takes, whether or not those features actually get used.
+	Django is a web framework that takes a "battery included approach". It includes many features out of the box, meaning programmers can spend more time writing code without worrying about implementation details. Although this framework has many useful features, it would impose an infrastructure that is far too heavy for this project's purposes. It is 180 MB which is very heavy compared to flask (6.3 MB). This is because of the "include everything" approach Django takes, whether or not those features actually get used.
 
 	\subsection{Flask}
-	Flask is a "microframework" and is the opposite of Django in the fact that it makes fewer decisions for the programmer. It is very lightweight and leaves almost all of the higher level implementation and infrastructure details to the programmer. This is perfect for my needs as I can pick and choose the features I need. Flask has a wide array of extensions made by the flask community. These range from login-management to asset bundling.
+	Flask is a "microframework" and is the opposite of Django in the fact that it makes fewer decisions for the programmer. It is very lightweight and leaves almost all of the higher level implementation and infrastructure details to the programmer. This is perfect for this project's needs as features can be picked and chosen as needed. Flask has a wide array of extensions made by the flask community. These range from login-management to asset bundling.
 	
 	\subsection{Conclusion}
 	I chose to use Flask because of its scalability and extensibility. \todo{Expand web framework conclusion}
 
 	\section{Relational Database Engine}
-	\todo{Expand relational database description}
-	The relational database will have an important role as being the primary data store for my application. Therefore it must be efficient and reliable so as to keep my application running smoothly.
+	The relational database will have an important role as being the primary data store for my application. Therefore it must be efficient and reliable so as to keep my application running smoothly. I appraised three SQL databases (as described below): SQLite, MySQL and PostgreSQL.
 
 	\subsection{SQLite}
 	SQLite is a lightweight database engine that operates using database files. This means it is fast, efficient and extremely easy to set up. However, this means it doesn’t provide proper access controls. Another downside is that it only supports one write operation at any given time. The slow write operations will be a major drawback when the web app is scaled up and has many users.
@@ -251,25 +270,30 @@ tabsize=2
 	MySQL is a much more full-featured relational database. It is one of the faster available database engines available and is also one of the most popular engines. MySQL has a large open source community fixing bugs and providing support, which is always a welcome addition. MySQL is a database server (not embedded) and is designed for larger applications. MySQL is well known for being very secure and performant, both features would add value to my application. MySQL also offers a much more full-featured language with support for more constructs.
 
 	\subsection{PostgreSQL}
-	PostgreSQL is also a very popular relational database. It has very similar features to MySQL but is closer to the ANSI SQL standard, i.e. more feature complete. PostgreSQL is a little slower than MySQL and doesn’t perform as well in highly concurrent environments.
+	PostgreSQL is also a very popular relational database. It has very similar features to MySQL but is closer to the ANSI SQL standard, i.e. more feature complete. \todo{Write more about postgresql}
 	
 	\subsection{Conclusion}
-	\missingfigure{add relational database description}
+	Following consideration of the above three databases, MySQL and PostgreSQL are both capable databases that would be suitable for use. It came down to preference due to the similarity. I had previously used MySQL so I was more familiar with its use and selected it for my event management solution.
 
 	\section{Non-Relational Database Engine (Key-Value)}
-	My non-relational database will be used to handle tasks and data which are not related but still must be stored. This will include data involving caching, tasks, rate-limiting and verification. I will use a key-value model for my non-relational data.
+	A non-relational database will also be used to handle tasks and data which are not related but still must be stored. This includes data involving caching, tasks, rate-limiting and verification. A key-value model for non-relational data has been used. Two non-relational database engines were appraised - Memcached and Redis.
+	
+	\begin{framed}
+	Note: of the two engines appraised, Redis was the engine selected and used in the event management project.
+	\end{framed}
 
 	\subsection{Memcached}
 	Memcached is a popular key-value store which is extremely efficient and fast. However, it’s operations are not atomic, meaning race conditions can be created. This is a huge problem in my application, as it could have many hundred requests per second which must be handled simultaneously. Since the operations are not atomic, the data is not reliable with a high traffic.
 
 	\subsection{Redis}
 	Redis is another excellent non-relational database. Unlike Memcached, every operation is atomic meaning that when the application is scaled up and there may be a few hundred changes to the database every second, there shouldn't be any data race issues. This is very important in a highly concurrent application. Redis is every bit as fast as Memcached and supports more features, which is always nice.
-	
-	\subsection{Conclusion}
-	\missingfigure{Non-Relational conclusion}
 
 	\section{Object Relational Mapper}
-	An Object Relational Mapper (ORM) handles an abstraction level between the programming language and the database. This means that I can write python code that the ORM will: transform to SQL, execute the SQL, and transform any non-pythonic objects into python data types. This allows easy and safe development and enables me to use SQLite to test and MySQL in production with minimal changes in code.
+	An Object Relational Mapper (ORM) handles an abstraction level between the programming language and the database. Using an ORM is desirable as it allows focus to remain on the logic of the application without worrying about implementation detail or intricacies of database management.
+	
+	Using an ORM means that python code can be writtn so that the ORM will: generate SQL, execute the SQL, and transform any non-pythonic objects into python data types. Utilising an ORM allows easy and safe development and enabled me to use SQLite in a testing/development environment and MySQL in production with minimal changes in code.
+	
+	I evaluated two ORMS: PeeWee and SQLAlchemy.
 
 	\subsection{PeeWee}
 	Peewee is a lightweight ORM with a simple syntax. It is quick and suitable for smaller apps, but it lacks more complicated features. Another important consideration is the community size. PeeWee only has one major contributor, meaning patches and features will be released slowly. It also has very few resources online.
@@ -278,10 +302,10 @@ tabsize=2
 	SQLalchemy is a very stable ORM that integrates very nicely into flask using an extension. It is a very widely used ORM and I have the most experience with it. SQLAlchemy is much larger than PeeWee but offers a lot more features while maintaining simple and expressive syntax. There are 9 major contributors and it has a large online following. SQLAlchemy also offers the ability to drop down to raw SQL if needed, although this can open the application up to SQL injection vulnerabilities.
 	
 	\subsection{Conclusion}
-	\missingfigure{ORM Conclusion}
+	I chose to use SQLAlchemy due to its extensive documentation and simple extensible declarative model. Also factoring into this descision is my previous experience with smaller scale applications.
 
 	\section{Task Queue}
-	A task queue will become important in the later stages of my website when I need to write asynchronous code that doesn't block the current request. This will increase the time it takes for the web app to respond, and allow asynchronous events to be scheduled. \todo{Better explanation of a task queue}
+	A task queue will become important in the later stages of development when I need asynchronous code is needed to prevent blocking the current request. Having a task queue in place will let tasks be run independant from the standard request context when the computer has resources to spare. This will decrease the time it takes for the web app to respond and allow asynchronous events to be scheduled.
 
 	\subsection{Celery}
 	Celery is a very large and full featured task queue. Due to the large community support, I started off with this task queue.
@@ -292,29 +316,45 @@ tabsize=2
 	I then tried a much more basic task queue which was designed to work with flask. This task queue was much more suited to my needs.
 	I didn't have to worry about passing any app contexts around or use any hacky workarounds. As in the name, this task queue uses Redis as a message broker to store and retrieve tasks from.
 
+	\subsection{Conclusion}
+	Of the two task queues I considered, I implemented Redis Queue. Even though celery is much more advanced, Redis Queue had all of the features I required and was much simpler to implement.	
+	
 	\section{Security Considerations}
-	While this site doesn’t handle inherently sensitive data, it is my belief that any website should do their absolute best to provide a secure and private service. There are many aspects to consider when ensuring an app is secure, and it is nearly impossible to cover everything. However I will minimise risks and threats by using current security best practices.
+	As a developer, it is my belief that any website should do their absolute best to provide a secure and private service. There are many aspects to consider when ensuring an app is secure, and it is nearly impossible to cover everything. However I will minimise risks and threats by considering the below four security areas:
+	\begin{itemize}
+		\item Secure Password Storage
+		\item SQL Injection
+		\item Cross Site Scripting (XSS)
+		\item Login Management
+		\item SSL
+	\end{itemize}
 
 	\subsection{Safe Password Storage}
-	An important consideration in any application that manages passwords, is the hashing mechanism. I will use Bcrypt to hash the passwords with a random salt (per user) which is generated with the OS CSPRNG. Bcrypt performs in constant time which will mitigate timing attacks. The salt ensures that an attacker must bruteforce each password individually. They cannot find one hash and then test it against the whole database as each persons hash will be different, even if they have the same password.
+	An important consideration in any application that manages passwords, is the hashing mechanism. I will use Bcrypt to hash the passwords with a random salt (per user) which is generated with the OS CSPRNG. Bcrypt performs in constant time which will mitigate timing attacks. The salt ensures that an attacker must bruteforce each password individually. They cannot find one hash and then test it against the whole database as each person's hash will be different, even if they have the same password. Storing passwords in such a way ensures that nobody, not even someone with access to the database, can access the passwords.
 
 	\subsection{SQL Injection}
-	SQL Injection occurs when a SQL query takes malicious user input and executes it. It is a fairly easy threat to deal with, but it still one of the most common. Since I am using an ORM, SQL Injection will be (mostly) managed for me, with all input data being cleaned before a query is performed. Theoretically this should completely mitigate SQL injections as an attack vector. However, SQLAlchemy also allows using raw SQL for some operations. Raw SQL code will not be automatically cleaned by SQLAlchemy and is therefore unsafe unless it doesn’t rely on user input.
+	SQL Injection occurs when a SQL query takes malicious user input and executes it. It is a fairly easy threat to deal with, but it still one of the most common. Since I am using an ORM, SQL Injection will be managed for me, with all input data being cleaned before a query is performed. Theoretically this should completely mitigate SQL injections as an attack vector. However, SQLAlchemy also allows using raw SQL for some operations. Raw SQL code will not be automatically cleaned by SQLAlchemy and is therefore unsafe unless it doesn’t rely on user input. A simple and rather elegant solution to this is to simply \textbf{NEVER} use raw SQL, as everything that can be written in SQL can also be written in SQLAlchemys declaritive API.
 
 	\subsection{Cross Site Scripting (XSS)}
-	XSS is very similar to SQL injection in the fact that it involves executing malicious input. XSS means a user can write malicious code that will be delivered to other users of the site. The template engine installed with flask (jinja2) is by default configured to escape any special symbols into the html equivalent, rendering any malicious inputs useless. However this setting escapes everything which adds unnecessary overhead and slows down the application, because of this speed loss, I decided to manually mark input as unsafe/safe. This is a bit riskier but is safe if handled correctly. I also opted to escape user input before it was entered into the database for items such as message text. This minimises future risk of the malicious data being presented to users.
+	XSS is very similar to SQL injection in the fact that it involves executing malicious input. XSS means a user can write malicious code that will be delivered to other users of the site. The template engine installed with flask (jinja2) is by default configured to escape any special symbols into the html equivalent, rendering any malicious inputs useless. However this setting escapes everything which adds unnecessary overhead and slows down the application, because of this speed loss, I decided to manually mark input as unsafe/safe. This is a bit riskier but is safe if handled correctly. I also opted to escape user input before it was entered into the database for items such as message text, rather than escaping it before rendering. This minimises future risk of the malicious data being presented to users, and saves the resource cost of cleaning the input every time it needs to be rendered.
 
 	\subsection{Login Management}
 	I initially began this project with the intention of creating my own login management system, however the complex and time consuming nature of this application meant I switched to a prebuilt solution using flask-login and flask-paranoid. Flask login integrates with SQLAlchemy and provides essential session management, where the session is stored as a cookie and verified each request. Flask-paranoid is used as a second layer of security which verifies that the users session doesn't suddenly switch to another computer, which could indicate the users session has been stolen by a malicious user.
 
-	As an extra layer, I also added a verification email, which is sent to the users email. This helps to protect against spam and verifies that the user owns the email.
+	As an extra layer, I also added a verification email, which is sent to the users email. This helps to protect against spam and verifies that the user owns the email. Until a users email is verified, no notifications will be sent to their inbox.
+	
+	\subsection{SSL}
+	A SSL certificate has been installed on the host web-server to ensure encrypted communication between users and the host site. This is also important for push notifications, as most browsers will not accept push notifications from an unencrypted connection.
+	
+	In development I used a self signed certificate, whereas when I pushed to a production server, I used LetsEncrypt.
 	
 	\chapter{Development and Implementation}
 
 	\section{Back-End}
+	This section of the document outlines the journey and technical detail of building the backend to achieve the stated project requirements.
 
 	\subsection{Site Map}
-	One of the first descisions I needed to make, is a map of the site. This was revised a few times, but I ended up with a decently simple map.
+	One of the first decisions I needed to make, is a map of how the site would function and flow. The site map was revised a few times and below is the end result.
 
 	\begin{center}
 		\begin{dot2tex}[dot, autosize]
@@ -339,6 +379,7 @@ tabsize=2
 
 	\subsection{Database Tables}
 	\todo{Get a nicer database graph}
+	\todo{write about database designing principles}
 	\begin{center}
 		\begin{dot2tex}[neato]
 			graph G {
@@ -359,6 +400,7 @@ tabsize=2
 	\end{center}
 
 	\subsection{Application Diagram}
+	Below is a simplified diagram of how all the different components of the app interact with each other.
 	\begin{center}
 		\begin{dot2tex}[dot, autosize]
 			digraph G {
@@ -392,13 +434,13 @@ tabsize=2
 	\end{center}
 
 	\subsection{User Primary Key}
-	The user table is one of the most important tables in the database, almost every table relies on it either directly or indirectly. Initially (and for most of its development) I used the users email as it's primary key. I made this decision as users all have separate emails and seems like a natural way to identify users. This works under most cases, however if a user needs to change their email, we need to change the primary key. This leads to essentially creating a new user, losing and invalidating all references to other tables. To solve this issue I simply changed the primary key and all related foreign keys to use a simple integer. I then used a unique constraint on email to ensure it is still unique.
+	The user table is a key table in the database, almost every table relies on it either directly or indirectly. Initially (and for most of its development) I used the users email as the primary key. Having users all have separate emails seems like a natural way to identify users, however if a user needs to change their email, we need to change the primary key. This leads to essentially creating a new user, losing and invalidating all references to other tables. To solve this issue I simply changed the primary key and all related foreign keys to use a simple integer. I then used a unique constraint on email to ensure it is still unique.
 
 	\subsection{Storing Messages}
-	My application would be pretty pointless if it didn’t have a way to store and retrieve messages. Since I need to be able to use multiple types of messages, each with different data (e.g. text, location, file). This is a problem as I can’t store different types of data for each type of message. I solved this by specifying the type using a ENUM and the data is contained within a json field. This way, I can easily create new types of messages.
+	The application needed a way to store and retrieve messages. Multiple types of messages are supported, each with different data (e.g. text, location, file). This became a problem as I can’t store different types of data for each type of message. I solved this by specifying the type using a ENUM and containing the data within a json field. This way, I can easily create new types of messages by adding to the enum and specifying fields expected in the JSON. This approach keeps the solution flexible and allows for future expansion.
 
 	\subsection{Determining Unread Messages}
-	An important piece of data needed for the dashboard screen, is what messages the user hasn’t read. A simple solution to this problem would be to include a boolean on each message that indicates whether it has been displayed to the user. However, I found querying by this way slow and inefficient. I found a better solution would be to instead store a timestamp of when the user last loaded a specific event. I can then simply query any messages broadcast after this timestamp. If I index the message timestamps as a binary tree, I can then achieve an average lookup speed of \(O(\log n)\), which is a significant improvement on \(O(n)\).
+	An important piece of data needed for the dashboard screen, is what messages the user hasn’t read. A simple solution to this problem was to include a boolean on each message that indicates whether it has been displayed to the user. However, I found querying by this way slow and inefficient. I found a better solution was to instead store a timestamp of when the user last loaded a specific event, or the page was updated in any way. This way any messages broadcast after this timestamp could be queried. Message timestamps can be indexed as a binary tree. With binary tree indexes an average lookup speed of \(O(\log n)\) can be achieved, which is a significant improvement on the previous speed of \(O(n)\) (as shown in the below graph).
 
 	\begin{center}
 		\begin{tikzpicture}
@@ -439,7 +481,19 @@ tabsize=2
 	\end{itemize}
 
 	\subsection{Push Notifications}
-	Push notifications were by far, one of the trickier features to implement. It starts off with a service worker, which must be registered in the global scope. In development, I simply set a url “/service-worker” to return the file, but in production this will be served by the web server (e.g. nginx). The user is then prompted to allow notifications. Once my app has been given permission, it will be handed some cryptographic keys and an endpoint. These are then registered in my database through an asynchronous call. I initially set the user as the primary key, however, this quickly caused errors as each endpoint is specific to a device. This meant that users would only be able to have one device receiving push notifications. I then changed the primary key to a new id column. This lead to new problems where an endpoint would be registered twice if a user subscribed, unsubscribed, and subscribed again. This caused each user to receive multiple push notifications for each event. I then attempted to solve this with a composite primary key of the endpoint and user id. This did not cause problems but on later review of the code I removed the primary key on the user id. The primary key on the user was unnecessary as each user is assigned a unique endpoint by their browser.
+	Push notifications were one of the trickier features to implement.
+	
+	\begin{enumerate}
+		\item Push starts off with a service worker, which must be registered in the global scope. (I simply set a url “/service-worker” to return the file, but in production this will be served by the web server). The user is then prompted to allow notifications.
+		\item Once the event management app has been given permission, it gets handed some cryptographic keys and an endpoint.
+		\item The cryptographic keys and endpoint are then registered in my database through an asynchronous call.
+	\end{enumerate}
+	
+	I initially set the user as the primary key, however, this quickly caused errors as each endpoint is specific to a device. This meant that users would only be able to have one device receiving push notifications. 
+	
+	I then changed the primary key to a new id column, however that lead to new problems where an endpoint would be registered twice if a user subscribed, unsubscribed, and subscribed again, resulting in users receiving multiple push notifications for each event. 
+	
+	To solve this a composite primary key of the endpoint and user id was used. This did not cause problems but on later review of the code I removed the primary key on the user id. The primary key on the user was unnecessary as each user is assigned a unique endpoint by their browser.
 
 	\begin{center}
 		\begin{figure}[H]
@@ -472,10 +526,14 @@ tabsize=2
 		\end{figure}
 	\end{center}
 
-	When a notification needs to be sent, a call is made to each endpoint with relevant data. I used pywebpush to achieve this. If a 410 gone or 404 not found are returned, I assume that the endpoint is expired or invalid and delete it from my database.
+	When a notification needs to be sent, a call is made to each endpoint with relevant data. I used pywebpush to achieve this. If a 410 \textit{gone} or 404 \textit{not found} are returned, I assume that the endpoint is expired or invalid and delete it from my database.
+	
+	Following a number of complecities, trial and troubleshooting, push notifications were successfully integrated into the application.
 
 	\subsection{Concealing Object IDs}
 	While developing the application, I realised that some of my urls weren’t as secret as they should be. The primary key for events is an integer type and is set to auto increment. This means that (most) event’s primary keys will simply be the previous event’s primary key + 1. The way that I exposed the events to users was \textbf{myapp.com/event/\textit{\textless id\textgreater}}. This gives any malicious users a straightforward way to iterate over every listed event. To fix this I used a module named hashid, which provides a reversible obfuscated base64 id. Hashids also take a salt which means its not just a straight reversal. Hashids are in no way secure, but they provide a useful url obfuscation technique.
+	
+	I implemented this behaviour using encapsulation, which means the behaviour can be changed with minimal code. This allows me to later scale up the security by providing a cryptographically secure hash as the ID.
 
 	\subsection{GET Idempotency}
 	Another issue I discovered during my development, is the method I use to access endpoints. When I added email verification to my app, I also added the ability to resend an email in case it doesn’t reach the inbox. However this method (and the logout method)  was accessed using a GET request. The issue with a GET request is that it is defined as a safe and idempotent method in the HTTP specifications. This means that it shouldn’t modify any system state, only retrieve information. Browsers will often cache and refetch endpoints retrieved with GET causing the code to run unintentionally. This could cause the user to retrieve multiple emails or be logged out without pressing anything. To fix this, I added a hidden form that is submitted when the user clicks on the logout button.
@@ -513,7 +571,22 @@ tabsize=2
 	\todo{Expand on solution}
 
 	\subsection{Geo Search \& Mapping}
-	For users to be able to see nearby events, we first need to know the location of events. An important consideration in storing the coordinates (latitude \& longitude) is how accurate they need to be. I found that 5 decimal points gives precision of ~1m which is more than enough precision. I wrote the algorithm to calculate the distance as a hybrid method in my ORM, which means it will work in the database and on the server with no changes to the code. In order to display my geographical data I needed a map provider. I initially decided on using bing maps, but after a few hours with no results, I switched to mapbox using leaflet. I was able to quickly get a map displayed using mapbox and leaflet. \todo{Write more about problem}
+	For users to be able to see nearby events, we first need to know the location of events. An important consideration in storing the coordinates (latitude \& longitude) is how accurate they need to be. I found that 5 decimal points gives precision of ~1m which is more than enough precision. I wrote the algorithm to calculate the distance as a hybrid method in my ORM, which means it will work in the database and on the server with no changes to the code.
+	
+	Given the variables \(x_{search}\) and \(x_{event}\) are the lattitude in radians, and \(y_{search}\) and \(y_{event}\) are the longitude in radians, we can define the distance between an event and given \textit{search} coordinates in \si{\kilo\metre} as:
+	
+	\begin{equation}	
+		\arccos
+		\begin{pmatrix*}[r]
+			&&\cos(x_{event}) \\
+			&\times &\cos(x_{search})\\
+			&\times &\cos(y_{event} - y_{search})\\
+			&+      &\sin(x_{event})\\
+			&\times &\sin(x_{search})
+		\end{pmatrix*} \times 6371
+	\end{equation}
+	
+	This equation gives us the great circle distance between the two coordinates. This is the shortest distance measured along the curve of a sphere. Although the earth is not completely spherical (it is elongated slightly at the equator), this equation is accurate enough for the purpose of this application.
 
 	\subsection{Server to Client Communication}
 	While users of my application will get real-time emails and push notifications, any updates to the data will not be presented to them until the page is refreshed. This is an important feature for my application to have, before the data is truly real-time. HTTP is traditionally a half-duplex protocol, where a client sends a request and received a response. To show real time data, I need to be able to send data to the client from the server whenever there is new data. There have been numerous methods used in an attempt to overcome these limitations. One of the most common of these methods, is simply asking the server constantly for the new data. A variation on this is asking for the data and then the server waits until it receives new data before responding. While some of these techniques work well, they have a large amount of overhead, constantly sending or receiving unnecessary data. There are two relatively new specifications that allow communication between the server and client. The first method I tried was Server Sent Events (SSE). SSE is built upon http and is fairly straightforward: The client connects to an event source, and then the server pushes data to that event source, giving the client the data. This is still technically half-duplex but the server initiates the request, rather than the client. The other specification is Websockets. Websockets are a separate protocol from http and are achieved by using an upgrade header in http. Websockets are fully duplex and very efficient. I used SSE as Websockets were much more difficult to implement safely and were overpowered for my needs.
