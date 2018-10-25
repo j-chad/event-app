@@ -11,6 +11,7 @@
 \usepackage{mathtools}
 \usepackage[pdfusetitle]{hyperref}
 \usepackage{pgfplots}
+\usepackage{fancyhdr}
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{framed}
@@ -27,6 +28,12 @@
 \definecolor{comment}{HTML}{408080}
 \definecolor{strings}{HTML}{BA2121}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
+
+\fancypagestyle{firststyle}
+{
+   \fancyhf[R]{NSN: 126293994}
+   \fancyfoot{}
+}
 
 \lstdefinestyle{mystyle}{
 commentstyle=\color{comment},
@@ -64,6 +71,7 @@ tabsize=2
 	\listoftodos
 
 	\begin{titlepage} % Suppresses displaying the page number on the title page and the subsequent page counts as page 1
+		\thispagestyle{firststyle}
 		\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for horizontal lines, change thickness here
 
 		\center % Centre everything on the page
