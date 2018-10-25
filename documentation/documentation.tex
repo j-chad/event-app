@@ -1,9 +1,9 @@
-\documentclass[a4paper,oneside,12pt,draft]{report}
+\documentclass[a4paper,oneside,12pt]{report}
 \usepackage[margin=2.7cm]{geometry}
 \usepackage{titlesec}
 \usepackage[backend=biber]{biblatex}
 \usepackage{url}
-\usepackage[obeyDraft]{todonotes}
+\usepackage{todonotes}
 \usepackage[utf8]{inputenc}
 \usepackage[acronym]{glossaries}
 \usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
@@ -239,7 +239,7 @@ tabsize=2
 	PHP is the most widely used language for web development in the world, with over 80\% of websites using it. This language does not have the problem of maturity, having been around for 24 years. The problem with PHP is it’s unpredictable and inconsistent. In PHP: NULL \(< -1\) yet NULL \(== 0\). This is not a one-off case. The whole language is riddled with strange design decisions and many ways to do a single thing, each with different naming schemes. On top of all this, the language encourages bad website design and makes you go out of your way to create secure apps.
 
 	\subsection{Python}
-	Python is an object-oriented language that has been around for almost 28 years. It is a general-purpose programming language and has many frameworks that enable web development. The syntax and language are very concise and expressive, making development very quick and easy to debug. Python avoids both the pitfalls of PHP and Javascript and is very flexible. Since python is an interpreted language it is marginally slower than similar languages which are compiled. The fact that it is not specific to web development means that I can use a wide range of tools to accomplish my tasks.
+	Python is an object-oriented language that has been around for almost 28 years. It is a general-purpose programming language and has many frameworks t•hat enable web development. The syntax and language are very concise and expressive, making development very quick and easy to debug. Python avoids both the pitfalls of PHP and Javascript and is very flexible. Since python is an interpreted language it is marginally slower than similar languages which are compiled. The fact that it is not specific to web development means that I can use a wide range of tools to accomplish my tasks.
 	
 	\subsection{C\#}
 	C\# is a strongly typed, compiled language from the C family. It was created by microsoft as an interface for .NET, a common core between many languages. Included in .NET is the ASP.NET library, the server-side web framework. The compiled nature of this language allows heavy optimisations to be made at compile time, leading to speed ups in the application. I have experience in using this language as it is used in my job for a large-scale international web application. While it works well with large applications that require constant maintenance and have a company driving development, it is generally overkill for smaller scale applications. ASP.NET development is much slower (albeit more thorough) than dynamic languages such as the above.
@@ -573,10 +573,10 @@ tabsize=2
 	\subsection{Geo Search \& Mapping}
 	For users to be able to see nearby events, we first need to know the location of events. An important consideration in storing the coordinates (latitude \& longitude) is how accurate they need to be. I found that 5 decimal points gives precision of ~1m which is more than enough precision. I wrote the algorithm to calculate the distance as a hybrid method in my ORM, which means it will work in the database and on the server with no changes to the code.
 	
-	Given the variables \(x_{search}\) and \(x_{event}\) are the lattitude in radians, and \(y_{search}\) and \(y_{event}\) are the longitude in radians, we can define the distance between an event and given \textit{search} coordinates in \si{\kilo\metre} as:
+	Given the variables \(x_{search}\) and \(x_{event}\) are the lattitude in radians, and \(y_{search}\) and \(y_{event}\) are the longitude in radians, we can define the distance between an \textit{event} and given \textit{search} coordinates in \si{\kilo\metre} as:
 	
-	\begin{equation}	
-		\arccos
+	\begin{equation*}	
+		\cos^{-1}
 		\begin{pmatrix*}[r]
 			&&\cos(x_{event}) \\
 			&\times &\cos(x_{search})\\
@@ -584,68 +584,86 @@ tabsize=2
 			&+      &\sin(x_{event})\\
 			&\times &\sin(x_{search})
 		\end{pmatrix*} \times 6371
-	\end{equation}
+	\end{equation*}
 	
-	This equation gives us the great circle distance between the two coordinates. This is the shortest distance measured along the curve of a sphere. Although the earth is not completely spherical (it is elongated slightly at the equator), this equation is accurate enough for the purpose of this application.
+	This equation gives us the great circle distance between the two coordinates. This is the shortest distance measured along the curve of a sphere. Although the earth is not completely spherical (it is elongated slightly at the equator), this equation is accurate enough for the purpose of this application. We can then use this equation to find nearby events.
 
 	\subsection{Server to Client Communication}
-	While users of my application will get real-time emails and push notifications, any updates to the data will not be presented to them until the page is refreshed. This is an important feature for my application to have, before the data is truly real-time. HTTP is traditionally a half-duplex protocol, where a client sends a request and received a response. To show real time data, I need to be able to send data to the client from the server whenever there is new data. There have been numerous methods used in an attempt to overcome these limitations. One of the most common of these methods, is simply asking the server constantly for the new data. A variation on this is asking for the data and then the server waits until it receives new data before responding. While some of these techniques work well, they have a large amount of overhead, constantly sending or receiving unnecessary data. There are two relatively new specifications that allow communication between the server and client. The first method I tried was Server Sent Events (SSE). SSE is built upon http and is fairly straightforward: The client connects to an event source, and then the server pushes data to that event source, giving the client the data. This is still technically half-duplex but the server initiates the request, rather than the client. The other specification is Websockets. Websockets are a separate protocol from http and are achieved by using an upgrade header in http. Websockets are fully duplex and very efficient. I used SSE as Websockets were much more difficult to implement safely and were overpowered for my needs.
+	While users of my application will get real-time emails and push notifications, any updates to the data will not be presented to them until the page is refreshed. Automatic updates without user input is an important feature for my application to have, before the data is truly real-time. 
+	
+	HTTP is traditionally a half-duplex protocol, where a client sends a request and received a response. To show real time data, I need to be able to send data to the client from the server whenever there is new data. 
+	
+	There have been numerous methods used to overcome these client-side refresh limitations. One of the most common methods, is simply asking the server constantly for the new data. A variation is to ask for the data but let the server wait until it receives new data before responding. 
+	
+	While some of these techniques work well, they have a large amount of overhead, constantly sending or receiving unnecessary data. There are two relatively new specifications that allow communication between the server and client. 
+
+	\begin{itemize}
+		\item The first method I tried was Server Sent Events (SSE). SSE is built upon http and is fairly straightforward: The client connects to an event source, and then the server pushes data to that event source, giving the client the data. This is still technically half-duplex but the server initiates the request, rather than the client.
+		\item The other specification is Websockets. Websockets are a separate protocol from http and are achieved by using an upgrade header in http. Websockets are fully duplex and very efficient.
+		\item I used SSE as Websockets were much more difficult to implement safely and I did not require client \(\rightarrow\) server communication.
+	\end{itemize}
 
 	When implementing SSE I needed an identifier for each channel a user would subscribe to. A quick solution was to use the base64url encoded version of the users email, however this can leak the users email, even if served over https. I switched this to a sha256 hash, to better secure the information.
+	
+	In practice, I found that the hosting service provider (heroku) issued a timeout if no data was provided from the server within 55 seconds. To get around the issue of time-out by the hosting
 
 	\subsection{Image Processing}
-	When a user uploads an image, I want to make sure that the Image is the most compressed, both to save space and bandwidth.
-	A simple and effective first step is to limit the maximum size of the image. However if this is set too low, then the user might not be able to upload their images, and too high and it won't be effective. To fully optimise my bandwith and space I need to ensure that the images are compressed. To compress the image, I used JPEG compression set at 75\% quality and set the optimise flag, which does an extra pass through the image. This provided a much smaller file size with little decrease in visual fidelity. Too ensure that this doesn't caused a large delay in the request, I decided to measure the time it took to process the image. To measure this, I used the following code, with a large (\SI{1}{\mega\byte}) PNG image:
+	When a user uploads an image, the image is compressed to save space and bandwidth. A simple and effective first step is to limit the maximum size of the image. However if the maximum image size is set too low, then the user might not be able to upload their images, and if it is set too too high then it won't be effective. To compress the image, I used JPEG compression set at 75\% quality and set the optimise flag, which does an extra pass through the image. This provided a much smaller file size with little decrease in visual fidelity. 
+	
+	To ensure that this doesn't caused a large delay in the request, I decided to measure the time it took to process the image. To measure this, I used the following code, with a large (\SI{1}{\mega\byte}) PNG image:
 
 	\lstset{language=python}
 	\begin{lstlisting}
 		import time
 
 		def process(f_handle):
-		img = Image.open(f_handle)
-		img.thumbnail((800, img_handle.height),Image.ANTIALIAS)
-		img.save('test.jpg', optimize=True, quality=75)
+			img = Image.open(f_handle)
+			img.thumbnail((800, img_handle.height),Image.ANTIALIAS)
+			img.save('test.jpg', optimize=True, quality=75)
 
 		start = time.clock()
 		with open('test.png') as f_handle:
-		process(f_handle)
+			process(f_handle)
 		print(time.clock() - start)
 	\end{lstlisting}
 
-	After running this code many times, I found that it takes around \SI{50}{\milli\second} to fully process the image. This is an acceptable timeframe, and will be percieved as instantaneous. As it doesn't take up much time or resources, I was able to process the image directly in the request context.
+	After running this code many times, I found that it takes around \SI{50}{\milli\second} to fully process the image. This is an acceptable timeframe, and will be perceived as instantaneous\todo{Provide reference}. As it doesn't take up much time or resources, I was able to process the image directly in the request context. 
 
 	\subsection{Generating Random Events}
-	In order to test my website, I needed a number of events. For most of the developmental period I did this by hand, with 2 or 3 hardcoded events. This was fine but eventually I needed to scale up the ammount of events so it was more reflective of its intended use. To do this I wrote a simple factory which creates events in the database using random data. I then refactored the \textit{populate} command to create as many events as neccesary. This worked well but gave me very random names that were just random words glued together. To create more meaningful names I decided to use a simple Markov chain.
+	In order to test my website, I needed a number of events. For most of the developmental period I did this by hand, with 2 or 3 hardcoded events. This was fine but eventually I needed to scale up the amount of events so it was more reflective of its intended use. To do this I wrote a simple factory which creates events in the database using random data. I then refactored the \textit{populate} command to create as many events as necessary. This worked well but gave me very random names that were just random words glued together. To create more meaningful names I decided to use a simple Markov chain.
 
-	A Markov chain is essentially a list of states with a probability of moving to another state. This gives a cheap way to mimic artificial intelligence. It is often used for the predictive text function in phone keyboards. In this usecase, it tells us if we have the letter \textbf{A} then the most probable next letter based on our data. We then randomly select a letter using the weights given by the chain. The process then repeats using the new letter. It can be made to work better by changing the number of letters used for the state.
+	A Markov chain is essentially a list of states with a probability of moving to another state. This gives a cheap way to mimic artificial intelligence. It is often used for the predictive text function in phone keyboards. In this use-case, it tells us if we have the letter \textbf{A} then the most probable next letter based on our data. We then randomly select a letter using the weights given by the chain. The process then repeats using the new letter. It can be made to work better by changing the number of letters used for the state.
 
-	To get the data needed to find probablities, I used selenium to scrape over 1000 event names (almost 45000 characters). I then generated a markov chain (of order 1) and saved the state to a json file. This gave m
+	To get the data needed to find probabilities, I used selenium to scrape over 1000 event names (almost 45000 characters). I then generated a markov chain (of order 1) and saved the state to a json file. The resultant names were (generally) suitably convincing.
 
 	\subsection{SQLAlchemy Queue Pool Overflow}
-	While this isn't so much an error or a problem in my design, I thought it needed mentioning. One of the most common errors that was raised during the development of my app was:
+	While the \textit{SQLAlchemy Queue Pool} error isn't so much a problem in my design, It caused minor annoyances during the development stage. When I actually looked into this behaviour, It gave me some insight on how flask works behind the scenes. 
+	
+	One of the most common errors that was raised during the development of my app was:
 	\begin{framed}
 		\lstinline|sqlalchemy.exc.TimeoutError: QueuePool limit of size 10 overflow 10 reached|
 	\end{framed}
-	This is due to the nature of both flask and SQLAlchemy. Behind the scenes, SQLAlchemy creates a pool of connections. This is because it is inefficent to create and maintain a new connection whenever a new user connects. With large web apps this could easily lead to holding millions of database connections simultaneously. Instead a specific number of connections are created, these are reused by different users. If there are no connections ready in the pool, a new one will be created. If too many connections are held and a new one is requested, it will eventually timeout, giving this error.
+	
+	This is due to the nature of both flask and SQLAlchemy. Behind the scenes, SQLAlchemy creates a pool of connections. This is because it is inefficent to create and maintain a new connection whenever a new user connects. With large web apps this could easily lead to holding millions of database connections simultaneously. Instead a specific number of connections are created, these are reused by different users. If there are no connections ready in the pool, a new one will be created. If too many connections are held and a new one is requested, it will eventually timeout, giving the error.
 
-	Attempting to replicate this behaviour when testing in a production environment was unsuccessful. As it turns out, this is because it is an issue only in a debugging environment. When flask is in debug mode, it keeps a live debugger open which keeps the connections busy. This means they cannot be recycled, and will be held open. This causes an overflow when the pool eventually tries to open more connections than allowed.
+	Attempting to replicate this behaviour when testing in a production environment was unsuccessful. As it turns out, this is because it is only an issue in a debugging environment. When flask is in debug mode, it keeps a live debugger open which keeps the connections busy. This means they cannot be recycled, and will be held open. This causes an overflow when the pool eventually tries to open more connections than allowed.
 
-	The only real solution to this, is to raise the connection limit. This helps but merely delays the inevitable.
+	The solution to this, was to raise the connection limit in a development environment. This way it gives the debugger more breathing space to keep connections open..
 
 	\section{Front-End}
-	Designing the front end was a lot more challenging to get right, as the user interface needed to feel friendly and simple, yet be able to be flexible. I started off with drawing up a mock of the home page eith my client, so that I could get a feel for the theme.
+	Designing the front end was more challenging to get right, as the user interface needed to feel friendly, simple and flexible. I started off with drawing up a mock of the home page with my client, so that I could get a feel for the theme.
 
 	\begin{figure}[H]
 		\caption{The Initial Design}
 		\includegraphics[width=\linewidth]{static/front-end1.png}
 	\end{figure}
 
-	We decided on an orange theme, with large simple blocks of content. This made it easy to understand the content quickly, and gave a modern feel. I decided to use milligram as a minimal css template, as it was small and didn't get in the way, while still noticeably improving the overall look and feel.
+	We decided on an orange theme, with large simple blocks of content. This made it easy to understand the content quickly, and gave a modern and fresh feel. I decided to use milligram as a minimal css template, as it was small and didn't get in the way, while still noticeably improving the overall look and feel.
 
-	It is also important that all of the pages work well with mobile, as it is a requirement that the website works the same on all devices and screen sizes. To ensure this, I implemented responsive design techniques that allowed the content to fit within the screen. For example,
+	It is also important that all of the pages work well with mobile, as it is a requirement that the website works the same on all devices and screen sizes. To ensure this, I implemented responsive design techniques that allowed the content to fit within the screen.
 
 	\subsection{Index Page}
-	After my redesign of the index page, I mostly stuck with the initial design. I brightened the orange, changed the image, and made it feel a bit more modern.
+	After the redesign of the index page, I mostly stuck with the initial design. I brightened the orange, changed the image, and made it feel a bit more modern.
 
 	\begin{figure}[H]
 		\caption{Revamped Index Page}
@@ -666,14 +684,14 @@ tabsize=2
 	For the dashboard, I opted for a card based approach. The left hand side of the screen gives information about subscribed events and owned events, as well as containing helpful statistics and buttons. The right hand side contains \textit{insights}, which are generated based on various contexts. For example, figure \ref{fig:dashboard} shows 2 \textit{warning} insights and 1 \textit{tip} insight. Updates to events will also be shown here. This design is highly customisable for the user, as well as being very flexible.
 
 	\subsection{Discover}
-	I Initially designed this page with a category based design, where there would be seperate categorys that would have a list of events. This was inspired by the google play store design.
+	I initially designed this page with a category based design, where there would be separate categories that would have a list of events. This was inspired by the google play store design.
 	
 	\begin{figure}[H]
 		\caption{Intital Discover Page Design}
 		\includegraphics[width=\linewidth]{static/front-end5.png}
 	\end{figure}
 	
-	Upon consulting my clients, I was told that it was hard to use and confusing. The design also didn't scale down to a smaller device well. It was also difficult for the user to look for an event that matches criteria, as they would have no control over the categories that appear. After a redesign, the feedback I recieved was much more positive.
+	Upon consulting my clients, I was told that it was hard to use and confusing. The design also didn't scale down to a smaller device well. It was also difficult for the user to look for an event that matches criteria, as they would have no control over the categories that appear. After a redesign, the feedback I received was much more positive.
 
 	\begin{figure}[H]
 		\caption{Discover Page Redesigned}
@@ -699,12 +717,28 @@ tabsize=2
 
 
 	\subsection{Create Event}
-	
-	
 
-	\chapter{Evaluation}
+	\chapter{Hosting \& Deployment}
+	To host the application, I chose to use Heroku, from the reccomendations of other developers in the flask community. In Heroku, I elected to get the hobby tier, which included automated SSL certificates from LetsEncrypt. Heroku also allowed me to spin up a free Redis and MySQL database.
+	
+	When generating the tables in my database, the MySQL server kept returning syntax errors, stating that the \textit{Specified key was too long}. After researching the error message, I discovered that on older MySQL servers (\(\leq 5.6\)) the maximum key length for a prefix index (e.g. VARCHAR) was 767 bytes. In later versions this was increased to 3072 bytes. To fix this, I simply changed the database to a newer version. Rebuilding the tables on the new database worked perfectly.
+	
+	When testing in the hosted production environment, I noticed that the database would fail often, with the error: \textit{too many connections}. I discovered that the free plan of the database I was using had a maximum of 10 connections. I attempted to fix this by lowering the connection pool, but this just delayed the errors. I fixed this by renting a virtual machine on digitalocean servers, and configuring it with my own MySQL server. This gave me a cheap, cost-effective server with no imposed limits. After this, it was purely a matter of allowing connections from the heroku IP and configuring the new database URI.
+	
+	\todo{maybe talk about redis?}
 
 	\chapter{Conclusion}
+	It is my belief that the development process I undertook was thorough and fulfilled all of the requirements.
+	
+	I designed this event management application with the intent of it being able to be used for a wide variety of events, not just school balls.  The main advantage of this application is to provide event communication, both of the event itself and subsequent information. 
+	
+	The open source, secure nature of this application means that it can be used as a private stand in replacement for commonly used event management solutions. This means users that avoided apps, such as Facebook, due to privacy issues will now be able to use this application as a secure advertisement free alternative. The online nature and simplistic user interface means a wider demographic will be able to utilise it.
+	
+	By designing parts of the application in a modular way (e.g. Message types and notifications), I have made it easy for further features if required.
+	
+	During the process I was able to extend and gain new knowledge on project management and documentation. As well as more specilaized knowledge on protocols such as SSE and push notifications. I enjoyed seeing the project evolve from an initial concept to a fully functional application which has taken.  I am really pleased with how it looks and the feedback from users regarding how easy it is to use.  I believe it has got potential to be used widely in the Community.
+	
+	\section{Future}
 
 	\printbibliography
 
